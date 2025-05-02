@@ -1,43 +1,55 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTransactionStore } from '../stores/transactionStore';
-import { useGoalsStore } from '../stores/goalsStore';
-import { PlusCircle, Download, ChevronRight, DollarSign, Wallet, PiggyBank, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import TransactionForm from '../components/forms/TransactionForm';
-import BottomNavigation from '../components/layout/BottomNavigation';
+import { DollarSign, Wallet, PiggyBank, ChevronRight, PlusCircle } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/home/TopGoals';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import classNames from 'classnames';
-import { useSupabase } from '../lib/supabase/SupabaseProvider';
+import TransactionModal from '../components/modals/TransactionModal';
+import PeriodButton from '../components/common/PeriodButton';
+import { useTransactionStore } from '../stores/transactionStore';
+import { startOfDay, endOfDay, subDays } from 'date-fns';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
-const CHART_COLORS = {
-  income: '#4F46E5',    // Primary blue
-  fixed: '#10B981',     // Green
-  variable: '#7C3AED',  // Purple
-  extra: '#F59E0B',     // Orange
-  additional: '#EC4899', // Pink
-};
+
+
+
+
+
+
+interface CategoryTotals {
+  income: number;
+  fixed: number;
+  variable: number;
+  extra: number;
+  additional: number;
+  investments: number;
+}
+
+interface FinancialSummary {
+  totalIncome: number;
+  totalSpent: number;
+  categoryTotals: CategoryTotals;
+}
 
 type Period = 'day' | 'week' | 'month' | 'year';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
 
 export default function Dashboard() {
-  const { supabase } = useSupabase();
   const { transactions, fetchTransactions } = useTransactionStore();
-  const { goals, fetchGoals } = useGoalsStore();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
+  const [selectedMonth, setSelectedMonth] = useState('May');
   const [selectedYear, setSelectedYear] = useState('2025');
-  
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const years = ['2023', '2024', '2025', '2026'];
+
   useEffect(() => {
-    fetchTransactions(supabase);
-    fetchGoals(supabase);
-  }, [fetchTransactions, fetchGoals, supabase]);
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   // Filter transactions by selected period
   const filteredTransactions = transactions.filter(transaction => {
@@ -59,82 +71,56 @@ export default function Dashboard() {
   });
 
   // Calculate financial summary
-  const financialSummary = filteredTransactions.reduce((summary, transaction) => {
+  const financialSummary = filteredTransactions.reduce<FinancialSummary>((summary, transaction) => {
     if (transaction.type === 'income') {
       summary.totalIncome += transaction.amount;
+      summary.categoryTotals.income += transaction.amount;
     } else {
       summary.totalSpent += transaction.amount;
-      summary.categoryTotals[transaction.category] = (summary.categoryTotals[transaction.category] || 0) + transaction.amount;
+      const category = transaction.category.toLowerCase();
+      if (category in summary.categoryTotals) {
+        summary.categoryTotals[category as keyof CategoryTotals] += transaction.amount;
+      }
     }
     return summary;
   }, {
     totalIncome: 0,
     totalSpent: 0,
-    categoryTotals: {},
+    categoryTotals: {
+      income: 0,
+      fixed: 0,
+      variable: 0,
+      extra: 0,
+      additional: 0,
+      investments: 0
+    }
   });
 
-  const balance = financialSummary.totalIncome - financialSummary.totalSpent;
+  const chartData = Object.entries(financialSummary.categoryTotals)
+    .filter(([category, amount]) => category !== 'income' && amount > 0)
+    .map(([category, amount]) => ({
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+      value: amount
+    }));
 
-  // Calculate Formula3 data
+  const COLORS = ['#A855F7', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#EC4899'];
+
   const formula3Data = {
     fixed: {
-      current: financialSummary.categoryTotals.fixed || 0,
+      current: financialSummary.categoryTotals.fixed,
       target: financialSummary.totalIncome * 0.5,
-      percentage: ((financialSummary.categoryTotals.fixed || 0) / (financialSummary.totalIncome * 0.5)) * 100
+      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.fixed / financialSummary.totalIncome) * 100 : 0
     },
     variable: {
-      current: financialSummary.categoryTotals.variable || 0,
+      current: financialSummary.categoryTotals.variable,
       target: financialSummary.totalIncome * 0.3,
-      percentage: ((financialSummary.categoryTotals.variable || 0) / (financialSummary.totalIncome * 0.3)) * 100
+      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.variable / financialSummary.totalIncome) * 100 : 0
     },
     investments: {
-      current: financialSummary.categoryTotals.investments || 0,
+      current: financialSummary.categoryTotals.investments,
       target: financialSummary.totalIncome * 0.2,
-      percentage: ((financialSummary.categoryTotals.investments || 0) / (financialSummary.totalIncome * 0.2)) * 100
+      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.investments / financialSummary.totalIncome) * 100 : 0
     }
-  };
-
-  // Prepare data for pie chart
-  const chartData = [
-    { name: 'Income', value: financialSummary.totalIncome, color: CHART_COLORS.income },
-    { name: 'Fixed', value: financialSummary.categoryTotals.fixed || 0, color: CHART_COLORS.fixed },
-    { name: 'Variable', value: financialSummary.categoryTotals.variable || 0, color: CHART_COLORS.variable },
-    { name: 'Extra', value: financialSummary.categoryTotals.extra || 0, color: CHART_COLORS.extra },
-    { name: 'Additional', value: financialSummary.categoryTotals.additional || 0, color: CHART_COLORS.additional },
-  ];
-
-  // Get recent transactions
-  const recentTransactions = [...filteredTransactions]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 4);
-
-  // Get recent variable expenses
-  const recentVariables = transactions
-    .filter(t => t.category === 'Variable')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 4);
-
-  const exportToCSV = () => {
-    const headers = ['Date', 'Description', 'Amount', 'Type', 'Category'];
-    const csvContent = [
-      headers.join(','),
-      ...filteredTransactions.map(t => [
-        format(new Date(t.date), 'yyyy-MM-dd'),
-        `"${t.origin.replace(/"/g, '""')}"`,
-        t.amount,
-        t.type,
-        t.category
-      ].join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `statement_${selectedPeriod}_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   return (
@@ -146,38 +132,29 @@ export default function Dashboard() {
       />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Period Selection */}
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex gap-3 items-center flex-wrap">
+        <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
+          <div className="flex gap-2 mb-4">
             {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-              <button
+              <PeriodButton
                 key={period}
                 onClick={() => setSelectedPeriod(period)}
-                className={classNames(
-                  'px-4 py-1 rounded-full text-sm font-medium border',
-                  selectedPeriod === period
-                    ? 'bg-purple-600 text-white border-purple-600'
-                    : 'text-gray-700 border-gray-300 hover:border-purple-300'
-                )}
+                isActive={selectedPeriod === period}
               >
                 {period.charAt(0).toUpperCase() + period.slice(1)}
-              </button>
+              </PeriodButton>
             ))}
           </div>
 
           {selectedPeriod === 'month' && (
             <div className="flex flex-wrap gap-2">
               {months.map(month => (
-                <button
+                <PeriodButton
                   key={month}
                   onClick={() => setSelectedMonth(month)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedMonth === month ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
+                  isActive={selectedMonth === month}
                 >
                   {month}
-                </button>
+                </PeriodButton>
               ))}
             </div>
           )}
@@ -185,16 +162,13 @@ export default function Dashboard() {
           {selectedPeriod === 'year' && (
             <div className="flex flex-wrap gap-2">
               {years.map(year => (
-                <button
+                <PeriodButton
                   key={year}
                   onClick={() => setSelectedYear(year)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedYear === year ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
+                  isActive={selectedYear === year}
                 >
                   {year}
-                </button>
+                </PeriodButton>
               ))}
             </div>
           )}
@@ -209,17 +183,9 @@ export default function Dashboard() {
               <PlusCircle className="h-5 w-5 mr-2" />
               Add New
             </button>
-            <button 
-              className="btn btn-outline flex-1 sm:flex-none"
-              onClick={exportToCSV}
-            >
-              <Download className="h-5 w-5 mr-2" />
-              Export CSV
-            </button>
           </div>
         </div>
-        
-        {/* Budget Summary Cards */}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-blue-50 rounded-xl p-6 shadow-card">
             <div className="flex items-center justify-between mb-2">
@@ -244,22 +210,54 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-purple-900">Balance</h3>
               <PiggyBank className="h-6 w-6 text-purple-500" />
             </div>
-            <p className="text-2xl font-bold text-purple-700">${balance.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-purple-700">${(financialSummary.totalIncome - financialSummary.totalSpent).toLocaleString()}</p>
             <p className="text-sm text-purple-600 mt-1">Available balance</p>
           </div>
         </div>
 
-        {/* Formula3 */}
         <div className="mb-8">
           <Formula3 data={formula3Data} />
         </div>
 
-        {/* Top Goals */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Expense Distribution</h2>
+          <div className="bg-white rounded-xl p-6 shadow-card">
+            {chartData.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.map((_entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+                    />
+                    <Legend
+                      formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p>No expenses recorded yet</p>
+            )}
+          </div>
+        </div>
+
         <div className="mb-8">
           <TopGoals />
         </div>
 
-        {/* Recent Statement */}
         <div className="bg-white rounded-xl shadow-card overflow-hidden mb-8">
           <div className="flex items-center justify-between p-6 border-b border-gray-100">
             <h2 className="text-xl font-bold">Recent Statement</h2>
@@ -268,37 +266,18 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="divide-y divide-gray-100">
-            {recentTransactions.map(transaction => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    transaction.type === 'income' ? 'bg-success-100 text-success-600' : 'bg-error-100 text-error-600'
-                  }`}>
-                    {transaction.type === 'income' ? (
-                      <ArrowUpCircle className="h-5 w-5" />
-                    ) : (
-                      <ArrowDownCircle className="h-5 w-5" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{transaction.origin}</p>
-                    <p className="text-sm text-gray-500">{format(new Date(transaction.date), 'MMM d, yyyy')}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`font-medium ${
-                    transaction.type === 'income' ? 'text-success-600' : 'text-error-600'
-                  }`}>
-                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 capitalize">{transaction.category}</p>
-                </div>
-              </div>
-            ))}
+            <div className="p-8 text-center text-gray-500">
+              <p>No transactions recorded</p>
+              <Link 
+                to="/transactions" 
+                className="mt-2 inline-block text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Add your first transaction →
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Recent Variables */}
         <div className="bg-white rounded-xl shadow-card overflow-hidden mb-8">
           <div className="flex items-center justify-between p-6 border-b border-gray-100">
             <h2 className="text-xl font-bold">Recent Variables</h2>
@@ -307,37 +286,15 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="divide-y divide-gray-100">
-            {recentVariables.length > 0 ? (
-              recentVariables.map(variable => (
-                <div key={variable.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                      <ArrowDownCircle className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{variable.origin}</p>
-                      <p className="text-sm text-gray-500">{format(new Date(variable.date), 'MMM d, yyyy')}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-purple-600">
-                      -${variable.amount.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-gray-500">Variable</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-8 text-center text-gray-500">
-                <p>No variable expenses recorded</p>
-                <Link 
-                  to="/variables" 
-                  className="mt-2 inline-block text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Add your first variable expense →
-                </Link>
-              </div>
-            )}
+            <div className="p-8 text-center text-gray-500">
+              <p>No variable expenses recorded</p>
+              <Link 
+                to="/variables" 
+                className="mt-2 inline-block text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Add your first variable expense →
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -377,11 +334,8 @@ export default function Dashboard() {
         {showTransactionForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 max-w-md w-full animate-slide-up">
-              <h2 className="text-xl font-bold mb-4">Add New Entry</h2>
-              <TransactionForm 
-                onSuccess={() => setShowTransactionForm(false)}
-              />
-              <button 
+              <h2 className="text-xl font-bold mb-4">Add New Transaction</h2>
+              <button
                 className="mt-4 w-full py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 onClick={() => setShowTransactionForm(false)}
               >
@@ -390,8 +344,17 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-        <BottomNavigation />
+        {showTransactionForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full animate-slide-up">
+              <h2 className="text-xl font-bold mb-4">Add New Transaction</h2>
+              <TransactionModal 
+                isOpen={showTransactionForm}
+                onClose={() => setShowTransactionForm(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

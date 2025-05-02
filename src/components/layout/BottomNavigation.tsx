@@ -1,5 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, TrendingUp, User, Calculator } from 'lucide-react';
+import { Home, BarChart2, User, Calculator } from 'lucide-react';
 
 interface BottomNavigationProps {
   onAddClick?: () => void;
@@ -29,14 +29,14 @@ export default function BottomNavigation({ onAddClick }: BottomNavigationProps) 
           <div className="flex-1 flex justify-start space-x-8">
             <Link 
               to="/" 
-              className={`flex flex-col items-center ${isActive('/') ? 'text-primary-600' : 'text-gray-400 hover:text-primary-600'}`}
+              className={`flex flex-col items-center ${isActive('/') ? 'text-[#5B3FFB]' : 'text-gray-400 hover:text-[#5B3FFB]'}`}
             >
               <Home className="h-6 w-6" />
               <span className="text-xs mt-1">Home</span>
             </Link>
             <Link 
               to="/dashboard" 
-              className={`flex flex-col items-center ${isActive('/dashboard') ? 'text-primary-600' : 'text-gray-400 hover:text-primary-600'}`}
+              className={`flex flex-col items-center ${isActive('/dashboard') ? 'text-[#5B3FFB]' : 'text-gray-400 hover:text-[#5B3FFB]'}`}
             >
               <BarChart2 className="h-6 w-6" />
               <span className="text-xs mt-1">Dashboard</span>
@@ -49,7 +49,9 @@ export default function BottomNavigation({ onAddClick }: BottomNavigationProps) 
               onClick={handleAddClick}
               className="flex flex-col items-center"
             >
-              <div className="w-14 h-14 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-lg hover:bg-primary-700 transition-colors">
+              <div 
+                className="w-14 h-14 rounded-full bg-gradient-to-r from-[#A855F7] to-[#9333EA] flex items-center justify-center text-white shadow-lg hover:opacity-90 transition-opacity"
+              >
                 <span className="text-2xl">+</span>
               </div>
             </button>
@@ -59,14 +61,14 @@ export default function BottomNavigation({ onAddClick }: BottomNavigationProps) 
           <div className="flex-1 flex justify-end space-x-8">
             <Link 
               to="/simulator" 
-              className={`flex flex-col items-center ${isActive('/simulator') ? 'text-primary-600' : 'text-gray-400 hover:text-primary-600'}`}
+              className={`flex flex-col items-center ${isActive('/simulator') ? 'text-[#5B3FFB]' : 'text-gray-400 hover:text-[#5B3FFB]'}`}
             >
               <Calculator className="h-6 w-6" />
               <span className="text-xs mt-1">Simulator</span>
             </Link>
             <Link 
               to="/profile" 
-              className={`flex flex-col items-center ${isActive('/profile') ? 'text-primary-600' : 'text-gray-400 hover:text-primary-600'}`}
+              className={`flex flex-col items-center ${isActive('/profile') ? 'text-[#5B3FFB]' : 'text-gray-400 hover:text-[#5B3FFB]'}`}
             >
               <User className="h-6 w-6" />
               <span className="text-xs mt-1">Profile</span>

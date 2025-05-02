@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import BottomNavigation from './components/layout/BottomNavigation';
 import { InvestmentsPage } from './pages/InvestmentsPage';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -40,8 +41,20 @@ function App() {
     return <Navigate to="/" replace />;
   }
 
+  // Lista de rotas onde não queremos mostrar o BottomNavigation
+  const noBottomNavRoutes = [
+    '/login',
+    '/register',
+    '/request-password-reset',
+    '/reset-password',
+    '/onboarding'
+  ];
+
+  const shouldShowBottomNav = !noBottomNavRoutes.includes(location.pathname);
+
   return (
-    <Routes>
+    <div className="pb-24"> {/* Adiciona padding para o BottomNavigation */}
+      <Routes>
       {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -71,6 +84,8 @@ function App() {
       {/* 404 Route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+      {shouldShowBottomNav && <BottomNavigation />}
+    </div>
   );
 }
 

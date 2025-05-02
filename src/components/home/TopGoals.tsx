@@ -10,8 +10,8 @@ export default function TopGoals() {
     // Sort by progress percentage and take top 2
     return [...goals]
       .sort((a, b) => {
-        const progressA = (a.currentAmount / a.targetAmount) * 100;
-        const progressB = (b.currentAmount / b.targetAmount) * 100;
+        const progressA = (a.current_amount / a.target_amount) * 100;
+        const progressB = (b.current_amount / b.target_amount) * 100;
         return progressB - progressA;
       })
       .slice(0, 2);
@@ -50,21 +50,21 @@ export default function TopGoals() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">
-                        ${goal.currentAmount.toLocaleString()}
+                        ${goal.current_amount.toLocaleString()}
                       </span>
                       <span className="text-gray-600">
-                        ${goal.targetAmount.toLocaleString()}
+                        ${goal.target_amount.toLocaleString()}
                       </span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div 
                         className="h-full rounded-full transition-all duration-300 bg-[#5B3FFB]"
-                        style={{ width: `${Math.min((goal.currentAmount / goal.targetAmount) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((goal.current_amount / goal.target_amount) * 100, 100)}%` }}
                       />
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-medium text-[#5B3FFB]">
-                        {((goal.currentAmount / goal.targetAmount) * 100).toFixed(0)}% Complete
+                        {((goal.current_amount / goal.target_amount) * 100).toFixed(0)}% Complete
                       </span>
                     </div>
                   </div>
