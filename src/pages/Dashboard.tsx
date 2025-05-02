@@ -7,6 +7,7 @@ import TopGoals from '../components/home/TopGoals';
 import TransactionModal from '../components/modals/TransactionModal';
 import PeriodButton from '../components/common/PeriodButton';
 import { useTransactionStore } from '../stores/transactionStore';
+import { useIncomeStore } from '../stores/incomeStore';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
@@ -17,12 +18,16 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 
 
 interface CategoryTotals {
-  income: number;
-  fixed: number;
-  variable: number;
-  extra: number;
-  additional: number;
-  investments: number;
+  Income: number;
+  Investimento: number;
+  Fixed: number;
+  Variable: number;
+  Extra: number;
+  Additional: number;
+  Tax: number;
+  Invoices: number;
+  Contribution: number;
+  Goal: number;
 }
 
 interface FinancialSummary {
@@ -35,6 +40,7 @@ type Period = 'day' | 'week' | 'month' | 'year';
 
 export default function Dashboard() {
   const { transactions, fetchTransactions } = useTransactionStore();
+  const { totalIncome, fetchTotalIncome } = useIncomeStore();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
   const [selectedMonth, setSelectedMonth] = useState('May');
@@ -49,7 +55,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchTransactions();
-  }, [fetchTransactions]);
+    fetchTotalIncome();
+  }, [fetchTransactions, fetchTotalIncome]);
 
   // Filter transactions by selected period
   const filteredTransactions = transactions.filter(transaction => {
@@ -72,54 +79,56 @@ export default function Dashboard() {
 
   // Calculate financial summary
   const financialSummary = filteredTransactions.reduce<FinancialSummary>((summary, transaction) => {
-    if (transaction.type === 'income') {
-      summary.totalIncome += transaction.amount;
-      summary.categoryTotals.income += transaction.amount;
-    } else {
-      summary.totalSpent += transaction.amount;
-      const category = transaction.category.toLowerCase();
-      if (category in summary.categoryTotals) {
-        summary.categoryTotals[category as keyof CategoryTotals] += transaction.amount;
+    const category = transaction.category;
+    if (category in summary.categoryTotals) {
+      summary.categoryTotals[category] += transaction.amount;
+      if (transaction.type === 'expense') {
+        summary.totalSpent += transaction.amount;
       }
     }
     return summary;
   }, {
-    totalIncome: 0,
+    totalIncome: totalIncome,
     totalSpent: 0,
     categoryTotals: {
-      income: 0,
-      fixed: 0,
-      variable: 0,
-      extra: 0,
-      additional: 0,
-      investments: 0
+      Income: 0,
+      Investimento: 0,
+      Fixed: 0,
+      Variable: 0,
+      Extra: 0,
+      Additional: 0,
+      Tax: 0,
+      Invoices: 0,
+      Contribution: 0,
+      Goal: 0
     }
   });
 
-  const chartData = Object.entries(financialSummary.categoryTotals)
-    .filter(([category, amount]) => category !== 'income' && amount > 0)
-    .map(([category, amount]) => ({
-      name: category.charAt(0).toUpperCase() + category.slice(1),
-      value: amount
-    }));
-
   const COLORS = ['#A855F7', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#EC4899'];
+
+  const chartData = Object.entries(financialSummary.categoryTotals)
+    .filter(([category, amount]) => category !== 'Income' && amount > 0)
+    .map(([category, amount], index) => ({
+      name: category,
+      value: amount,
+      color: COLORS[index % COLORS.length]
+    }));
 
   const formula3Data = {
     fixed: {
-      current: financialSummary.categoryTotals.fixed,
+      current: financialSummary.categoryTotals.Fixed,
       target: financialSummary.totalIncome * 0.5,
-      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.fixed / financialSummary.totalIncome) * 100 : 0
+      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.Fixed / financialSummary.totalIncome) * 100 : 0
     },
     variable: {
-      current: financialSummary.categoryTotals.variable,
+      current: financialSummary.categoryTotals.Variable,
       target: financialSummary.totalIncome * 0.3,
-      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.variable / financialSummary.totalIncome) * 100 : 0
+      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.Variable / financialSummary.totalIncome) * 100 : 0
     },
     investments: {
-      current: financialSummary.categoryTotals.investments,
+      current: financialSummary.categoryTotals.Investimento,
       target: financialSummary.totalIncome * 0.2,
-      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.investments / financialSummary.totalIncome) * 100 : 0
+      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.Investimento / financialSummary.totalIncome) * 100 : 0
     }
   };
 

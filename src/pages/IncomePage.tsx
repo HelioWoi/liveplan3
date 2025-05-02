@@ -1,20 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, MoreVertical, Minus, Plus, Check } from 'lucide-react';
-import { formatCurrency } from '../utils/formatters';
+import { ArrowLeft, MoreVertical, Minus, Plus, Check, DollarSign } from 'lucide-react';
 import classNames from 'classnames';
+import { format } from 'date-fns';
 
 const AMOUNT_PRESETS = [1000, 5000, 10000, 25000, 50000, 75000, 100000];
 
 export default function IncomePage() {
   const navigate = useNavigate();
-  const { addTransaction } = useTransactionStore();
+  const { transactions, addTransaction, fetchTransactions } = useTransactionStore();
   const [amount, setAmount] = useState<string>('150.00');
   const [manualAmount, setManualAmount] = useState<string>('');
   const [origin, setOrigin] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadTransactions = async () => {
+      try {
+        await fetchTransactions();
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTransactions();
+  }, [fetchTransactions]);
 
   const handleAmountChange = (value: number) => {
     const currentAmount = parseFloat(amount);
@@ -55,7 +70,7 @@ export default function IncomePage() {
         category: 'Income',
         type: 'income',
         date: new Date().toISOString(),
-        userId: 'current-user',
+        user_id: 'current-user',
       });
 
       setShowError(false);
@@ -82,7 +97,50 @@ export default function IncomePage() {
       </div>
 
       {/* Main Content */}
-      <div className="px-4">
+      <div className="px-4 space-y-6">
+        {/* Lista de Transações */}
+        <div className="bg-white rounded-3xl p-6 text-gray-900">
+          <h2 className="text-xl font-bold mb-4">Income History</h2>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
+              <p className="mt-2 text-gray-600">Loading transactions...</p>
+            </div>
+          ) : transactions.filter(t => t.category === 'Income').length > 0 ? (
+            <div className="space-y-4">
+              {transactions
+                .filter(t => t.category === 'Income')
+                .map(transaction => (
+                  <div 
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-[#EAE6FE] flex items-center justify-center flex-shrink-0">
+                        <DollarSign className="h-5 w-5 text-[#5B3FFB]" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">{transaction.origin}</h3>
+                        <p className="text-sm text-gray-500">
+                          {format(new Date(transaction.date), 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-lg font-semibold text-green-600">
+                      +${transaction.amount.toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No income transactions found</p>
+            </div>
+          )}
+        </div>
+
+        {/* Formulário de Nova Transação */}
         <div className="bg-white rounded-3xl p-8 text-gray-900">
           {/* Origin Input */}
           <div className="mb-8">

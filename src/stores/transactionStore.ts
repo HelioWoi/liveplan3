@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { formatISO } from 'date-fns';
-import { Transaction, TaxType, isIncomeCategory } from '../types/transaction';
+import { Transaction, TaxType } from '../types/transaction';
+import { supabase } from '../lib/supabase/supabaseClient';
 
 interface TaxEntry {
   id: string;
@@ -38,11 +38,25 @@ export const useTransactionStore = create<TransactionState>((set) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      set({ transactions: [], isLoading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch transactions', isLoading: false });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      
+      set({ transactions: data || [], isLoading: false });
+    } catch (error: any) {
+      console.error('Error fetching transactions:', error);
+      set({ error: error.message || 'Failed to fetch transactions', isLoading: false });
     }
   },
 
@@ -50,20 +64,31 @@ export const useTransactionStore = create<TransactionState>((set) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert([{ ...transaction, user_id: user.id }])
+        .select()
+        .single();
+
+      if (error) throw error;
       
-      const newTransaction = {
-        ...transaction,
-        id: Date.now().toString(),
-      };
-      
-      set(state => ({
-        transactions: [...state.transactions, newTransaction],
-        isLoading: false,
-      }));
-    } catch (error) {
-      set({ error: 'Failed to add transaction', isLoading: false });
+      if (data) {
+        set(state => ({
+          transactions: [data, ...state.transactions],
+          isLoading: false
+        }));
+      }
+    } catch (error: any) {
+      console.error('Error adding transaction:', error);
+      set({ error: error.message || 'Failed to add transaction', isLoading: false });
+      throw error;
     }
   },
 
@@ -71,8 +96,12 @@ export const useTransactionStore = create<TransactionState>((set) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { error } = await supabase
+        .from('transactions')
+        .update(transaction)
+        .eq('id', id);
+
+      if (error) throw error;
       
       set(state => ({
         transactions: state.transactions.map(t => 
@@ -80,8 +109,9 @@ export const useTransactionStore = create<TransactionState>((set) => ({
         ),
         isLoading: false,
       }));
-    } catch (error) {
-      set({ error: 'Failed to update transaction', isLoading: false });
+    } catch (error: any) {
+      console.error('Error updating transaction:', error);
+      set({ error: error.message || 'Failed to update transaction', isLoading: false });
     }
   },
 
@@ -89,15 +119,20 @@ export const useTransactionStore = create<TransactionState>((set) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
       
       set(state => ({
         transactions: state.transactions.filter(t => t.id !== id),
         isLoading: false,
       }));
-    } catch (error) {
-      set({ error: 'Failed to delete transaction', isLoading: false });
+    } catch (error: any) {
+      console.error('Error deleting transaction:', error);
+      set({ error: error.message || 'Failed to delete transaction', isLoading: false });
     }
   },
 
