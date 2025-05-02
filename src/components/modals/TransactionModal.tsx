@@ -53,6 +53,10 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
     
     // Handle special category redirects
     switch (newCategory) {
+      case 'Investimento':
+        onClose();
+        navigate('/investments');
+        break;
       case 'Invoices':
         onClose();
         navigate('/invoices');
@@ -73,6 +77,11 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
     
     try {
       // Handle special categories
+      if (formData.category === 'Investimento') {
+        navigate('/investments');
+        return;
+      }
+
       if (formData.category === 'Invoices') {
         navigate('/invoices');
         return;
@@ -89,7 +98,7 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
         category: formData.category,
         type: isIncomeCategory(formData.category) ? 'income' : 'expense',
         date: formData.date,
-        userId: user.id,
+        user_id: user.id,
       });
       
       setFormData({

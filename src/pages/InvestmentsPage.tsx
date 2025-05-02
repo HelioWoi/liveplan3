@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Calendar, ChevronRight, ArrowUpCircle, ArrowDownCircle, PlusCircle, Download, TrendingUp, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Bell, Calendar, ArrowUpCircle, PlusCircle, TrendingUp, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
@@ -54,7 +54,7 @@ export function InvestmentsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
   const [selectedMonth, setSelectedMonth] = useState('April');
   const [selectedYear, setSelectedYear] = useState('2025');
-  const [showAddModal, setShowAddModal] = useState(false);
+
   const [showBrokersModal, setShowBrokersModal] = useState(false);
   const [quotes, setQuotes] = useState<StockQuote[]>([]);
   const [marketNews, setMarketNews] = useState<any[]>([]);
@@ -164,39 +164,6 @@ export function InvestmentsPage() {
           </div>
         </div>
 
-        {/* Market News */}
-        <div className="bg-white rounded-xl p-6 shadow-card">
-          <h2 className="text-xl font-bold mb-6">Market News</h2>
-          <div className="space-y-4">
-            {marketNews.map((news, index) => (
-              <a
-                key={index}
-                href={news.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block hover:bg-gray-50 rounded-lg p-4 transition-colors"
-              >
-                <div className="flex items-start gap-4">
-                  {news.image && (
-                    <img
-                      src={news.image}
-                      alt={news.headline}
-                      className="w-24 h-24 object-cover rounded-lg"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-1">{news.headline}</h3>
-                    <p className="text-sm text-gray-500">{news.summary}</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {format(new Date(news.datetime * 1000), 'MMM d, yyyy')}
-                    </p>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-
         {/* Period Selection */}
         <div className="flex flex-col gap-4">
           <div className="flex gap-3 items-center flex-wrap">
@@ -296,7 +263,7 @@ export function InvestmentsPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Recent Investments</h2>
               <button
-                onClick={() => setShowAddModal(true)}
+                onClick={() => navigate('/add-investment')}
                 className="btn btn-primary"
               >
                 <PlusCircle className="h-5 w-5 mr-2" />
@@ -306,11 +273,44 @@ export function InvestmentsPage() {
           </div>
 
           <div className="divide-y divide-gray-100">
+
+        {/* Market News */}
+        <div className="bg-white rounded-xl p-6 shadow-card mt-6">
+          <h2 className="text-xl font-bold mb-6">Market News</h2>
+          <div className="space-y-4">
+            {marketNews.map((news, index) => (
+              <a
+                key={index}
+                href={news.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:bg-gray-50 rounded-lg p-4 transition-colors"
+              >
+                <div className="flex items-start gap-4">
+                  {news.image && (
+                    <img
+                      src={news.image}
+                      alt={news.headline}
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-1">{news.headline}</h3>
+                    <p className="text-sm text-gray-500">{news.summary}</p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {format(new Date(news.datetime * 1000), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
             {investments.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <p>No investments recorded</p>
                 <button
-                  onClick={() => setShowAddModal(true)}
+                  onClick={() => navigate('/add-investment')}
                   className="btn btn-primary mt-4"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />

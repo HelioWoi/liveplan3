@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Calendar, ChevronRight, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Transaction, TransactionCategory } from '../types/transaction';
+import { ArrowLeft, Bell, Calendar, ArrowDownCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
@@ -19,6 +20,53 @@ export default function ExpensesPage() {
   const [selectedMonth, setSelectedMonth] = useState('April');
   const [selectedYear, setSelectedYear] = useState('2025');
 
+  const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investimento'];
+  const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6'];
+
+  const filterExpensesByPeriod = (transactions: Transaction[], period: Period, selectedMonth: string, selectedYear: string) => {
+    const now = new Date();
+    return transactions.filter(t => {
+      const date = new Date(t.date);
+      const isExpense = expenseCategories.includes(t.category);
+      
+      if (!isExpense) return false;
+
+      switch (period) {
+        case 'day':
+          return date.toDateString() === now.toDateString();
+        case 'week':
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          return date >= weekStart && date <= now;
+        case 'month':
+          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear() === parseInt(selectedYear);
+        case 'year':
+          return date.getFullYear() === parseInt(selectedYear);
+        default:
+          return false;
+      }
+    });
+  };
+
+  const calculateTotal = (transactions: Transaction[]) => {
+    return transactions.reduce((sum, t) => sum + t.amount, 0);
+  };
+
+  const filteredExpenses = useMemo(() => {
+    return filterExpensesByPeriod(transactions, selectedPeriod, selectedMonth, selectedYear);
+  }, [transactions, selectedPeriod, selectedMonth, selectedYear]);
+
+  const expensesByCategory = useMemo(() => {
+    const groupedExpenses = filteredExpenses.reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + t.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(groupedExpenses).map(([name, value]) => ({
+      name,
+      value
+    }));
+  }, [filteredExpenses]);
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
@@ -109,7 +157,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Weekly</h2>
                 <p className="text-2xl font-bold text-primary-600 mt-1">
-                  {formatCurrency(0)}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'week', selectedMonth, selectedYear)))}
                 </p>
               </div>
             </div>
@@ -124,7 +172,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Monthly</h2>
                 <p className="text-2xl font-bold text-secondary-600 mt-1">
-                  {formatCurrency(0)}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'month', selectedMonth, selectedYear)))}
                 </p>
               </div>
             </div>
@@ -139,7 +187,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Annual</h2>
                 <p className="text-2xl font-bold text-accent-600 mt-1">
-                  {formatCurrency(0)}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'year', selectedMonth, selectedYear)))}
                 </p>
               </div>
             </div>
@@ -153,7 +201,7 @@ export default function ExpensesPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={[]}
+                  data={expensesByCategory}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -161,6 +209,9 @@ export default function ExpensesPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
+                  {expensesByCategory.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
                 </Pie>
                 <Tooltip 
                   formatter={(value) => formatCurrency(Number(value))}
@@ -187,7 +238,7 @@ export default function ExpensesPage() {
                 No transactions found
               </div>
             ) : (
-              transactions.map(transaction => (
+              filteredExpenses.map(transaction => (
                 <div key={transaction.id} className="p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
