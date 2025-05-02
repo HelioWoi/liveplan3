@@ -21,13 +21,44 @@ export default function Home() {
   
   // Calculate totals
   const totalIncome = transactions
-    .filter(t => t.type === 'income')
+    .filter(t => t.category === 'Income')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalExpenses = transactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
-  
+    
+  // Calculate formula3 data
+  const formula3Data = {
+    fixed: {
+      current: transactions
+        .filter(t => t.category === 'Fixed')
+        .reduce((sum, t) => sum + t.amount, 0),
+      target: totalIncome * 0.5,
+      percentage: totalIncome ? (transactions
+        .filter(t => t.category === 'Fixed')
+        .reduce((sum, t) => sum + t.amount, 0) / totalIncome) * 100 : 0
+    },
+    variable: {
+      current: transactions
+        .filter(t => t.category === 'Variable')
+        .reduce((sum, t) => sum + t.amount, 0),
+      target: totalIncome * 0.3,
+      percentage: totalIncome ? (transactions
+        .filter(t => t.category === 'Variable')
+        .reduce((sum, t) => sum + t.amount, 0) / totalIncome) * 100 : 0
+    },
+    investments: {
+      current: transactions
+        .filter(t => t.category === 'Investimento')
+        .reduce((sum, t) => sum + t.amount, 0),
+      target: totalIncome * 0.2,
+      percentage: totalIncome ? (transactions
+        .filter(t => t.category === 'Investimento')
+        .reduce((sum, t) => sum + t.amount, 0) / totalIncome) * 100 : 0
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Modern Header */}
@@ -123,17 +154,17 @@ export default function Home() {
           </div>
         </div>
 
-        <WeeklyBudget />
-        <TopGoals />
-        <UpcomingBills />
-        <Formula3 data={{
-          fixed: { current: 0, target: 0, percentage: 0 },
-          variable: { current: 0, target: 0, percentage: 0 },
-          investments: { current: 0, target: 0, percentage: 0 }
-        }} />
-      </div>
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 gap-6">
+            <WeeklyBudget />
+            <Formula3 data={formula3Data} />
+            <TopGoals />
+            <UpcomingBills />
+          </div>
+        </div>
 
-      <BottomNavigation />
+        <BottomNavigation />
+      </div>
     </div>
   );
 }
