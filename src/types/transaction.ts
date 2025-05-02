@@ -33,14 +33,15 @@ export interface Transaction {
   amount: number;
   category: TransactionCategory;
   date: string;
-  userId: string;
+  user_id: string;
+  type: 'income' | 'expense';
 }
 
 export const isIncomeCategory = (category: TransactionCategory): boolean => {
   return ['Income', 'Investimento', 'Invoices'].includes(category);
 };
 
-const getCategoryForFormula = (category: TransactionCategory) => {
+export const getCategoryForFormula = (category: TransactionCategory) => {
   switch (category) {
     case 'Income':
       return 'income';
@@ -65,7 +66,7 @@ const getCategoryForFormula = (category: TransactionCategory) => {
   }
 };
 
-const getCategoryColor = (category: TransactionCategory) => {
+export const getCategoryColor = (category: TransactionCategory) => {
   switch (category) {
     case 'Income':
       return 'bg-success-100 text-success-800';

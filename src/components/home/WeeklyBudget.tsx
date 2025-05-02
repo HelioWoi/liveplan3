@@ -4,6 +4,7 @@ import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { PlusCircle, X, Calendar, Download } from 'lucide-react';
+import PeriodButton from '../common/PeriodButton';
 import { formatCurrency } from '../../utils/formatters';
 
 const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
@@ -168,20 +169,15 @@ export default function WeeklyBudget() {
       </div>
 
       {/* Period Selection */}
-      <div className="flex gap-3 mb-6 items-center flex-wrap">
+      <div className="flex gap-2 mb-6 items-center flex-wrap">
         {['Day', 'Week', 'Month', 'Year'].map(p => (
-          <button
+          <PeriodButton
             key={p}
             onClick={() => setPeriod(p)}
-            className={cn(
-              'px-4 py-1 rounded-full text-sm font-medium border',
-              selectedPeriod === p
-                ? 'bg-purple-600 text-white border-purple-600'
-                : 'text-gray-700 border-gray-300 hover:border-purple-300'
-            )}
+            isActive={selectedPeriod === p}
           >
             {p}
-          </button>
+          </PeriodButton>
         ))}
       </div>
 
@@ -189,16 +185,13 @@ export default function WeeklyBudget() {
       {selectedPeriod === 'Month' && (
         <div className="flex flex-wrap gap-2 mb-6">
           {months.map(month => (
-            <button
+            <PeriodButton
               key={month}
               onClick={() => setSelectedMonth(month)}
-              className={cn(
-                'px-3 py-1 rounded-md text-sm border',
-                selectedMonth === month ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-              )}
+              isActive={selectedMonth === month}
             >
               {month}
-            </button>
+            </PeriodButton>
           ))}
         </div>
       )}

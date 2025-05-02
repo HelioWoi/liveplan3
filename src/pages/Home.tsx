@@ -1,19 +1,23 @@
-import { useEffect, useState } from 'react';
+
+import { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { Bell, HomeIcon, Clock, BarChart2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import WeeklyBudget from '../components/home/WeeklyBudget';
 import Formula3 from '../components/home/Formula3';
-import TopGoals from '../components/home/TopGoals';
+import TopGoals from '../components/TopGoals';
 import UpcomingBills from '../components/home/UpcomingBills';
 import { useTransactionStore } from '../stores/transactionStore';
 import { formatCurrency } from '../utils/formatters';
-import classNames from 'classnames';
+import PeriodSelector from '../components/common/PeriodSelector';
+
 
 export default function Home() {
   const { user } = useAuthStore();
   const { transactions } = useTransactionStore();
+  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
   
   // Calculate totals
   const totalIncome = transactions
@@ -98,6 +102,12 @@ export default function Home() {
       </div>
 
       <div className="px-4 space-y-6 mt-6">
+        <PeriodSelector
+          selectedPeriod={selectedPeriod}
+          selectedMonth={selectedMonth}
+          onPeriodChange={setSelectedPeriod}
+          onMonthChange={setSelectedMonth}
+        />
         {/* Total Income/Expenses Section */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -114,13 +124,13 @@ export default function Home() {
         </div>
 
         <WeeklyBudget />
+        <TopGoals />
         <UpcomingBills />
         <Formula3 data={{
           fixed: { current: 0, target: 0, percentage: 0 },
           variable: { current: 0, target: 0, percentage: 0 },
           investments: { current: 0, target: 0, percentage: 0 }
         }} />
-        <TopGoals />
       </div>
 
       <BottomNavigation />

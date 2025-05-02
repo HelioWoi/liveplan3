@@ -1,28 +1,30 @@
 import { create } from 'zustand';
-import { formatISO } from 'date-fns';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase/supabaseClient';
+
 
 export interface Goal {
   id: string;
   title: string;
   description: string;
-  targetAmount: number;
-  currentAmount: number;
-  targetDate: string;
-  userId: string;
-  createdAt: string;
+  target_amount: number;
+  current_amount: number;
+  target_date: string;
+  user_id: string;
+  created_at: string;
 }
 
-interface GoalsState {
+export interface GoalsState {
   goals: Goal[];
   isLoading: boolean;
   error: string | null;
-  addGoal: (goal: Omit<Goal, 'id' | 'createdAt'>) => Promise<void>;
+  fetchGoals: () => Promise<void>;
+  addGoal: (goal: Omit<Goal, 'id' | 'created_at'>) => Promise<void>;
   updateGoal: (id: string, goal: Partial<Goal>) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
-  fetchGoals: () => Promise<void>;
   contributeToGoal: (id: string, amount: number) => Promise<void>;
 }
+
+
 
 export const useGoalsStore = create<GoalsState>((set, get) => ({
   goals: [],
@@ -33,32 +35,66 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      set({ goals: [], isLoading: false });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }) as { data: Goal[]; error: any };
+
+      if (error) throw error;
+      
+      set({ goals: data || [], isLoading: false });
     } catch (error: any) {
       console.error('Error fetching goals:', error);
       set({ error: error.message || 'Failed to fetch goals', isLoading: false });
     }
   },
 
-  addGoal: async (goal) => {
+  addGoal: async (goal: Omit<Goal, 'id' | 'created_at'>) => {
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const newGoal = {
-        ...goal,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
+      const goalData = {
+        title: goal.title,
+        description: goal.description,
+        target_amount: goal.target_amount,
+        target_date: goal.target_date,
+        user_id: goal.user_id,
+        current_amount: 0
       };
+
+      const { data, error } = await supabase
+        .from('goals')
+        .insert([goalData])
+        .select()
+        .single() as { data: any; error: any };
+
+      if (error) throw error;
       
-      set(state => ({
-        goals: [newGoal, ...state.goals],
-        isLoading: false
-      }));
+      if (data) {
+        const formattedGoal: Goal = {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          target_amount: data.target_amount,
+          current_amount: data.current_amount,
+          target_date: data.target_date,
+          user_id: data.user_id,
+          created_at: data.created_at
+        };
+
+        set((state: GoalsState) => ({
+          goals: [formattedGoal, ...state.goals],
+          isLoading: false
+        }));
+      }
     } catch (error: any) {
       console.error('Error adding goal:', error);
       set({ error: error.message || 'Failed to add goal', isLoading: false });
@@ -66,20 +102,33 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     }
   },
 
-  updateGoal: async (id, goal) => {
+  updateGoal: async (id: string, goal: Partial<Goal>) => {
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const updateData = {
+        ...(goal.title && { title: goal.title }),
+        ...(goal.description && { description: goal.description }),
+        ...(goal.target_amount && { target_amount: goal.target_amount }),
+        ...(goal.current_amount && { current_amount: goal.current_amount }),
+        ...(goal.target_date && { target_date: goal.target_date })
+      };
+
+      const { error } = await supabase
+        .from('goals')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
       
-      set(state => ({
-        goals: state.goals.map(g => g.id === id ? { ...g, ...goal } : g),
+      set((state: GoalsState) => ({
+        goals: state.goals.map((g: Goal) => g.id === id ? { ...g, ...goal } : g),
         isLoading: false
       }));
     } catch (error: any) {
       console.error('Error updating goal:', error);
       set({ error: error.message || 'Failed to update goal', isLoading: false });
+      throw error;
     }
   },
 
@@ -87,32 +136,52 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id) as { error: any };
+
+      if (error) throw error;
       
-      set(state => ({
+      set((state: GoalsState) => ({
         goals: state.goals.filter(g => g.id !== id),
         isLoading: false
       }));
     } catch (error: any) {
       console.error('Error deleting goal:', error);
       set({ error: error.message || 'Failed to delete goal', isLoading: false });
+      throw error;
     }
   },
 
-  contributeToGoal: async (id, amount) => {
+  contributeToGoal: async (id: string, amount: number) => {
     set({ isLoading: true, error: null });
     
     try {
       const goal = get().goals.find(g => g.id === id);
       if (!goal) throw new Error('Goal not found');
 
-      const newAmount = goal.currentAmount + amount;
+      const newAmount = goal.current_amount + amount;
       
-      await get().updateGoal(id, { currentAmount: newAmount });
+      const { error } = await supabase
+        .from('goals')
+        .update({ current_amount: newAmount })
+        .eq('id', id) as { error: any };
+
+      if (error) throw error;
+      
+      set((state: GoalsState) => ({
+        goals: state.goals.map((g: Goal) => 
+          g.id === id 
+            ? { ...g, current_amount: newAmount }
+            : g
+        ),
+        isLoading: false
+      }));
     } catch (error: any) {
       console.error('Error contributing to goal:', error);
       set({ error: error.message || 'Failed to contribute to goal', isLoading: false });
+      throw error;
     }
   },
 }));

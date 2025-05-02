@@ -1,57 +1,53 @@
 import { useEffect, useState } from 'react';
 import { useGoalsStore, Goal } from '../stores/goalsStore';
 import { formatDistance } from 'date-fns';
-import { Edit, PlusCircle, Target, Trash2 } from 'lucide-react';
+import { PlusCircle, Target } from 'lucide-react';
 import GoalForm from '../components/forms/GoalForm';
 import BottomNavigation from '../components/layout/BottomNavigation';
-import { supabase } from '@/supabaseClient';
+import GoalDetailsModal from '../components/goals/GoalDetailsModal';
+import DeleteGoalConfirmation from '../components/goals/DeleteGoalConfirmation';
 
 export default function Goals() {
-  const { deleteGoal, contributeToGoal } = useGoalsStore();
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { goals, deleteGoal, contributeToGoal, fetchGoals } = useGoalsStore();
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [contributingTo, setContributingTo] = useState<Goal | null>(null);
   const [contributionAmount, setContributionAmount] = useState<number>(0);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   useEffect(() => {
-    const fetchGoals = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
+    const loadGoals = async () => {
+      try {
+        await fetchGoals();
+      } catch (error) {
         console.error('Failed to fetch goals:', error);
-      } else {
-        setGoals(data);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    fetchGoals();
-  }, []);
+    loadGoals();
+  }, [fetchGoals]);
 
   const sortedGoals = [...goals]
     .sort((a, b) => {
-      const progressA = a.currentAmount / a.targetAmount;
-      const progressB = b.currentAmount / b.targetAmount;
+      const progressA = a.current_amount / a.target_amount;
+      const progressB = b.current_amount / b.target_amount;
       return progressB - progressA;
     });
 
-  const handleDeleteGoal = async (id: string) => {
-    setIsDeleting(id);
+  const handleDeleteGoal = async () => {
+    if (!goalToDelete) return;
+
+    setIsDeleting(goalToDelete.id);
     try {
-      await deleteGoal(id);
-      setGoals(prev => prev.filter(goal => goal.id !== id));
+      await deleteGoal(goalToDelete.id);
+      setShowDeleteConfirmation(false);
+      setGoalToDelete(null);
     } catch (error) {
       console.error('Failed to delete goal', error);
     } finally {
@@ -63,13 +59,6 @@ export default function Goals() {
     if (!contributingTo || contributionAmount <= 0) return;
     try {
       await contributeToGoal(contributingTo.id, contributionAmount);
-      setGoals(prev =>
-        prev.map(goal =>
-          goal.id === contributingTo.id
-            ? { ...goal, currentAmount: goal.currentAmount + contributionAmount }
-            : goal
-        )
-      );
       setContributingTo(null);
       setContributionAmount(0);
     } catch (error) {
@@ -102,12 +91,18 @@ export default function Goals() {
           </div>
         ) : (
           sortedGoals.map(goal => {
-            const percentage = (goal.currentAmount / goal.targetAmount) * 100;
-            const timeRemaining = formatDistance(new Date(goal.targetDate), new Date(), { addSuffix: true });
-            const isCompleted = goal.currentAmount >= goal.targetAmount;
+            const percentage = (goal.current_amount / goal.target_amount) * 100;
+            const timeRemaining = formatDistance(new Date(goal.target_date), new Date(), { addSuffix: true });
+            const isCompleted = goal.current_amount >= goal.target_amount;
 
             return (
-              <div key={goal.id} className={`card hover:shadow-xl transition-shadow ${isCompleted ? 'bg-success-50 border border-success-100' : ''}`}>
+              <div
+                key={goal.id}
+                className={`card hover:shadow-xl transition-shadow cursor-pointer ${isCompleted ? 'bg-success-50 border border-success-100' : ''}`}
+                onClick={() => {
+                  setSelectedGoal(goal);
+                  setIsModalOpen(true);
+                }}>
                 <div className="flex justify-between mb-2">
                   <div className="flex items-center">
                     <Target className={`h-5 w-5 mr-2 ${isCompleted ? 'text-success-600' : 'text-primary-600'}`} />
@@ -121,8 +116,8 @@ export default function Goals() {
                 </div>
                 <p className="text-gray-600 mb-4 text-sm">{goal.description}</p>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>${goal.currentAmount.toFixed(2)}</span>
-                  <span>${goal.targetAmount.toFixed(2)}</span>
+                  <span>${goal.current_amount.toFixed(2)}</span>
+                  <span>${goal.target_amount.toFixed(2)}</span>
                 </div>
                 <div className="progress-bar mb-2">
                   <div 
@@ -143,8 +138,16 @@ export default function Goals() {
                       Contribute
                     </button>
                   )}
-                  <button className="btn btn-outline flex-1" disabled={isDeleting === goal.id} onClick={() => handleDeleteGoal(goal.id)}>
-                    {isDeleting === goal.id ? 'Deleting...' : 'Delete'}
+                  <button
+                    className="btn btn-warning btn-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGoalToDelete(goal);
+                      setShowDeleteConfirmation(true);
+                    }}
+                    disabled={isDeleting === goal.id}
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -171,7 +174,7 @@ export default function Goals() {
             <h2 className="text-xl font-bold mb-4">Contribute to {contributingTo.title}</h2>
             <div className="mb-4">
               <p className="text-sm text-gray-600 mb-4">
-                Current progress: ${contributingTo.currentAmount.toFixed(2)} of ${contributingTo.targetAmount.toFixed(2)}
+                Current progress: ${contributingTo.current_amount.toFixed(2)} of ${contributingTo.target_amount.toFixed(2)}
               </p>
               <label htmlFor="amount" className="label">
                 Contribution Amount
@@ -200,6 +203,24 @@ export default function Goals() {
         </div>
       )}
 
+      <GoalDetailsModal
+        goal={selectedGoal}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedGoal(null);
+        }}
+      />
+      <DeleteGoalConfirmation
+        isOpen={showDeleteConfirmation}
+        onClose={() => {
+          setShowDeleteConfirmation(false);
+          setGoalToDelete(null);
+        }}
+        onConfirm={handleDeleteGoal}
+        goalTitle={goalToDelete?.title || ''}
+        isDeleting={!!isDeleting}
+      />
       <BottomNavigation />
     </div>
   );

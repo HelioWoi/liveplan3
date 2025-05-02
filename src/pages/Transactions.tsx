@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useTransactionStore } from '../stores/transactionStore';
 import { format } from 'date-fns';
-import { ArrowDownCircle, ArrowUpCircle, Download, FilterX, PlusCircle, Search, Trash2 } from 'lucide-react';
+import { Download, FilterX, PlusCircle, Search, Trash2 } from 'lucide-react';
 import TransactionModal from '../components/modals/TransactionModal';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import PageHeader from '../components/layout/PageHeader';
+import PeriodButton from '../components/common/PeriodButton';
 import { TransactionCategory, isIncomeCategory } from '../types/transaction';
 import { formatCurrency } from '../utils/formatters';
 
@@ -14,6 +15,9 @@ export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<TransactionCategory | 'all'>('all');
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedMonth, setSelectedMonth] = useState<string>('April');
+  const [showMonths, setShowMonths] = useState(false);
   
   useEffect(() => {
     fetchTransactions();
@@ -115,8 +119,42 @@ export default function Transactions() {
           </div>
         </div>
         
-        {/* Filters */}
+        {/* Period Selection */}
         <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
+          <div className="flex flex-wrap gap-2 mb-4">
+            {['Day', 'Week', 'Month', 'Year'].map(period => (
+              <PeriodButton
+                key={period}
+                onClick={() => {
+                  setSelectedPeriod(period as 'Day' | 'Week' | 'Month' | 'Year');
+                  if (period === 'Month') {
+                    setShowMonths(true);
+                  } else {
+                    setShowMonths(false);
+                  }
+                }}
+                isActive={selectedPeriod === period}
+              >
+                {period}
+              </PeriodButton>
+            ))}
+          </div>
+
+          {showMonths && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(month => (
+                <PeriodButton
+                  key={month}
+                  onClick={() => setSelectedMonth(month)}
+                  isActive={selectedMonth === month}
+                >
+                  {month}
+                </PeriodButton>
+              ))}
+            </div>
+          )}
+
+          {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <div className="relative">

@@ -48,6 +48,15 @@
     @apply rounded-xl bg-white p-6 shadow-card transition-shadow hover:shadow-lg;
   }
   
+  .progress-bar {
+    @apply h-2 w-full rounded-full bg-gray-200;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500;
+    width: var(--progress-width);
+  }
+
   .form-group {
     @apply mb-4;
   }

@@ -11,9 +11,9 @@ interface GoalFormProps {
 interface FormValues {
   title: string;
   description: string;
-  targetAmount: number;
-  currentAmount: number;
-  targetDate: string;
+  target_amount: number;
+  current_amount: number;
+  target_date: string;
 }
 
 export default function GoalForm({ onSuccess }: GoalFormProps) {
@@ -29,9 +29,9 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
     defaultValues: {
       title: '',
       description: '',
-      targetAmount: 0,
-      currentAmount: 0,
-      targetDate: oneYearFromNow.toISOString().split('T')[0],
+      target_amount: 0,
+      current_amount: 0,
+      target_date: oneYearFromNow.toISOString().split('T')[0],
     }
   });
   
@@ -43,10 +43,10 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
     try {
       await addGoal({
         ...data,
-        targetAmount: Number(data.targetAmount),
-        currentAmount: Number(data.currentAmount),
-        targetDate: formatISO(new Date(data.targetDate)),
-        userId: user.id,
+        target_amount: Number(data.target_amount),
+        current_amount: Number(data.current_amount),
+        target_date: formatISO(new Date(data.target_date)),
+        user_id: user.id,
       });
       
       reset();
@@ -91,61 +91,61 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="form-group">
-          <label htmlFor="targetAmount" className="label">
+          <label htmlFor="target_amount" className="label">
             Target Amount
           </label>
           <input 
-            id="targetAmount" 
+            id="target_amount" 
             type="number" 
             step="0.01" 
             min="0" 
             className="input" 
             placeholder="0.00"
-            {...register('targetAmount', { 
+            {...register('target_amount', { 
               required: 'Target amount is required',
               min: { value: 0.01, message: 'Amount must be greater than 0' },
               valueAsNumber: true,
             })}
           />
-          {errors.targetAmount && (
-            <p className="mt-1 text-sm text-error-600">{errors.targetAmount.message}</p>
+          {errors.target_amount && (
+            <p className="mt-1 text-sm text-error-600">{errors.target_amount.message}</p>
           )}
         </div>
         
         <div className="form-group">
-          <label htmlFor="currentAmount" className="label">
+          <label htmlFor="current_amount" className="label">
             Current Amount
           </label>
           <input 
-            id="currentAmount" 
+            id="current_amount" 
             type="number" 
             step="0.01" 
             min="0" 
             className="input" 
             placeholder="0.00"
-            {...register('currentAmount', { 
+            {...register('current_amount', { 
               min: { value: 0, message: 'Amount cannot be negative' },
               valueAsNumber: true,
             })}
           />
-          {errors.currentAmount && (
-            <p className="mt-1 text-sm text-error-600">{errors.currentAmount.message}</p>
+          {errors.current_amount && (
+            <p className="mt-1 text-sm text-error-600">{errors.current_amount.message}</p>
           )}
         </div>
       </div>
       
       <div className="form-group">
-        <label htmlFor="targetDate" className="label">
+        <label htmlFor="target_date" className="label">
           Target Date
         </label>
         <input 
-          id="targetDate" 
+          id="target_date" 
           type="date" 
           className="input" 
-          {...register('targetDate', { required: 'Target date is required' })}
+          {...register('target_date', { required: 'Target date is required' })}
         />
-        {errors.targetDate && (
-          <p className="mt-1 text-sm text-error-600">{errors.targetDate.message}</p>
+        {errors.target_date && (
+          <p className="mt-1 text-sm text-error-600">{errors.target_date.message}</p>
         )}
       </div>
       

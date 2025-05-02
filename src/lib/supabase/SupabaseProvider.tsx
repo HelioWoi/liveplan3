@@ -3,7 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { useAuthStore } from '../../stores/authStore';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY;
 
 // Enhanced validation of Supabase credentials
 if (!supabaseUrl || !supabaseAnonKey) {
