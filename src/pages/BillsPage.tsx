@@ -1,42 +1,42 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Calendar, ChevronRight, ArrowUpCircle, ArrowDownCircle, X, Download } from 'lucide-react';
+import { ArrowLeft, Bell, Calendar, ArrowUpCircle, ArrowDownCircle, X, Download } from 'lucide-react';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
+import { TransactionCategory } from '../types/transaction';
 
 type Period = 'day' | 'week' | 'month' | 'year';
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const years = ['2022', '2023', '2024', '2025'];
 
 const CATEGORIES = [
-  { value: 'utilities', label: 'Utilities' },
-  { value: 'rent', label: 'Rent/Mortgage' },
-  { value: 'insurance', label: 'Insurance' },
-  { value: 'entertainment', label: 'Entertainment' },
-  { value: 'health', label: 'Health & Fitness' },
-  { value: 'other', label: 'Other' }
+  { value: 'Fixed', label: 'Fixed' },
+  { value: 'Variable', label: 'Variable' },
+  { value: 'Extra', label: 'Extra' },
+  { value: 'Additional', label: 'Additional' },
+  { value: 'Tax', label: 'Tax' },
+  { value: 'Invoices', label: 'Invoices' },
+  { value: 'Contribution', label: 'Contribution' },
+  { value: 'Goal', label: 'Goal' }
 ];
 
 export default function BillsPage() {
   const navigate = useNavigate();
-  const { transactions } = useTransactionStore();
+  const { transactions, addTransaction } = useTransactionStore();
   const [selectedPeriod, setPeriod] = useState<Period>('month');
   const [selectedMonth, setSelectedMonth] = useState('April');
   const [selectedYear, setSelectedYear] = useState('2025');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showNewClientModal, setShowNewClientModal] = useState(false);
+
 
   // New bill form state
   const [newBill, setNewBill] = useState({
     name: '',
     amount: '',
     dueDate: '',
-    frequency: 'monthly' as const,
-    category: '',
-    notes: '',
-    paymentMethod: ''
+    category: ''
   });
 
   const upcomingBills = transactions.filter(t => 
@@ -69,20 +69,32 @@ export default function BillsPage() {
     }
   };
 
-  const handleAddBill = () => {
-    if (!newBill.name || !newBill.amount || !newBill.category) return;
+  const handleAddBill = async () => {
+    if (!newBill.name || !newBill.amount || !newBill.category || !newBill.dueDate) {
+      // TODO: Mostrar mensagem de erro
+      return;
+    }
 
-    // Add bill logic here
-    setShowAddModal(false);
-    setNewBill({
-      name: '',
-      amount: '',
-      dueDate: '',
-      frequency: 'monthly',
-      category: '',
-      notes: '',
-      paymentMethod: ''
-    });
+    try {
+      await addTransaction({
+        origin: newBill.name,
+        amount: parseFloat(newBill.amount),
+        category: newBill.category as TransactionCategory,
+        date: newBill.dueDate,
+        type: 'expense'
+      });
+
+      setShowAddModal(false);
+      setNewBill({
+        name: '',
+        amount: '',
+        dueDate: '',
+        category: ''
+      });
+    } catch (error) {
+      console.error('Error adding bill:', error);
+      // TODO: Mostrar mensagem de erro
+    }
   };
 
   const exportToCSV = () => {
@@ -360,18 +372,7 @@ export default function BillsPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="label">Frequency</label>
-                  <select
-                    className="input"
-                    value={newBill.frequency}
-                    onChange={e => setNewBill(prev => ({ ...prev, frequency: e.target.value as 'monthly' }))}
-                  >
-                    <option value="one-time">One-time</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                  </select>
-                </div>
+
 
                 <div>
                   <label className="label">Category</label>
@@ -386,32 +387,6 @@ export default function BillsPage() {
                         {cat.label}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="label">Notes (Optional)</label>
-                  <textarea
-                    className="input"
-                    rows={3}
-                    value={newBill.notes}
-                    onChange={e => setNewBill(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Add any additional details..."
-                  />
-                </div>
-
-                <div>
-                  <label className="label">Payment Method (Optional)</label>
-                  <select
-                    className="input"
-                    value={newBill.paymentMethod}
-                    onChange={e => setNewBill(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                  >
-                    <option value="">Select payment method</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
-                    <option value="Cash">Cash</option>
                   </select>
                 </div>
 
