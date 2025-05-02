@@ -27,6 +27,8 @@ export type TaxType = 'Withheld' | 'BAS' | 'PAYG' | 'Other';
 
 export const TAX_TYPES: TaxType[] = ['Withheld', 'BAS', 'PAYG', 'Other'];
 
+export type TransactionType = 'income' | 'expense';
+
 export interface Transaction {
   id: string;
   origin: string;
@@ -34,7 +36,8 @@ export interface Transaction {
   category: TransactionCategory;
   date: string;
   user_id: string;
-  type: 'income' | 'expense';
+  type: TransactionType;
+  notes?: string;
 }
 
 export const isIncomeCategory = (category: TransactionCategory): boolean => {

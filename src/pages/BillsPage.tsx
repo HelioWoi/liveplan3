@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Calendar, ArrowUpCircle, ArrowDownCircle, X, Download } from 'lucide-react';
+import { ArrowLeft, Bell, Calendar, ArrowUpCircle, ArrowDownCircle, X, Download, CheckCircle2, AlertCircle } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
-import { TransactionCategory } from '../types/transaction';
+import BillDetailsModal from '../components/bills/BillDetailsModal';
+import BillQuickView from '../components/bills/BillQuickView';
+import { Transaction, TransactionCategory } from '../types/transaction';
 
 type Period = 'day' | 'week' | 'month' | 'year';
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -24,12 +27,15 @@ const CATEGORIES = [
 
 export default function BillsPage() {
   const navigate = useNavigate();
-  const { transactions, addTransaction } = useTransactionStore();
+  const { transactions, addTransaction, updateTransaction } = useTransactionStore();
   const [selectedPeriod, setPeriod] = useState<Period>('month');
   const [selectedMonth, setSelectedMonth] = useState('April');
   const [selectedYear, setSelectedYear] = useState('2025');
   const [showAddModal, setShowAddModal] = useState(false);
-
+  const [billToMarkAsPaid, setBillToMarkAsPaid] = useState<Transaction | null>(null);
+  const [selectedBill, setSelectedBill] = useState<Transaction | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [hoveredBill, setHoveredBill] = useState<Transaction | null>(null);
 
   // New bill form state
   const [newBill, setNewBill] = useState({
@@ -41,12 +47,12 @@ export default function BillsPage() {
 
   const upcomingBills = transactions.filter(t => 
     t.category === 'Fixed' && 
-    new Date(t.date) > new Date()
+    !t.origin.startsWith('PAID:')
   ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const paidBills = transactions.filter(t => 
     t.category === 'Fixed' && 
-    new Date(t.date) <= new Date()
+    t.origin.startsWith('PAID:')
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const getDueDateStatus = (dueDate: string) => {
@@ -81,7 +87,8 @@ export default function BillsPage() {
         amount: parseFloat(newBill.amount),
         category: newBill.category as TransactionCategory,
         date: newBill.dueDate,
-        type: 'expense'
+        type: 'expense',
+        user_id: ''
       });
 
       setShowAddModal(false);
@@ -94,6 +101,23 @@ export default function BillsPage() {
     } catch (error) {
       console.error('Error adding bill:', error);
       // TODO: Mostrar mensagem de erro
+    }
+  };
+
+  const handleMarkAsPaid = async (bill: Transaction) => {
+    setBillToMarkAsPaid(bill);
+  };
+
+  const confirmMarkAsPaid = async () => {
+    if (!billToMarkAsPaid) return;
+    
+    try {
+      await updateTransaction(billToMarkAsPaid.id, {
+        origin: `PAID: ${billToMarkAsPaid.origin} (${new Date().toLocaleDateString()})`
+      });
+      setBillToMarkAsPaid(null);
+    } catch (error) {
+      console.error('Error marking bill as paid:', error);
     }
   };
 
@@ -258,12 +282,143 @@ export default function BillsPage() {
               <div className="w-12 h-12 rounded-full bg-warning-100 flex items-center justify-center">
                 <ArrowDownCircle className="h-6 w-6 text-warning-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Average Monthly</p>
-                <p className="text-2xl font-bold text-warning-600">
-                  {formatCurrency((upcomingBills.reduce((sum, bill) => sum + bill.amount, 0) + 
-                   paidBills.reduce((sum, bill) => sum + bill.amount, 0)) / 2)}
-                </p>
+              <div className="px-4 py-6 space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Bills</h1>
+                    <p className="text-sm text-gray-500">Manage your bills and recurring expenses</p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => exportToCSV()}
+                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <Download className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                    >
+                      Add Bill
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Upcoming Bills - 2 columns */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                      <h2 className="text-lg font-semibold mb-4">Upcoming Bills</h2>
+                      {upcomingBills.length === 0 ? (
+                        <p className="text-gray-500 text-center py-4">No upcoming bills</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {upcomingBills.map((bill) => (
+                            <div
+                              key={bill.id}
+                              className="relative flex items-center justify-between py-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 px-4 -mx-4 transition-colors"
+                              onClick={() => {
+                                setSelectedBill(bill);
+                                setIsDetailsModalOpen(true);
+                              }}
+                              onMouseEnter={() => setHoveredBill(bill)}
+                              onMouseLeave={() => setHoveredBill(null)}
+                            >
+                              {hoveredBill?.id === bill.id && <BillQuickView bill={bill} />}
+                              <div className="flex-1">
+                                <h3 className="font-medium">{bill.origin}</h3>
+                                <p className="text-sm text-gray-500">
+                                  Due {new Date(bill.date).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <p className="text-lg font-bold">{formatCurrency(bill.amount)}</p>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Evita que o clique no botão abra o modal
+                                    handleMarkAsPaid(bill);
+                                  }}
+                                  className="p-2 text-gray-500 hover:text-primary-600 transition-colors"
+                                >
+                                  <CheckCircle2 className="h-5 w-5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* All Paid Bills */}
+                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                      <h2 className="text-lg font-semibold mb-4">Bills History</h2>
+                      {paidBills.length === 0 ? (
+                        <p className="text-gray-500 text-center py-4">No paid bills</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {paidBills.map((bill) => {
+                            const originalName = bill.origin.replace('PAID: ', '').split(' (')[0];
+                            const paidDate = bill.origin.split('(')[1]?.replace(')', '');
+                            
+                            return (
+                              <div 
+                                key={bill.id} 
+                                className="relative flex items-center justify-between py-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 px-4 -mx-4 transition-colors"
+                                onClick={() => {
+                                  setSelectedBill(bill);
+                                  setIsDetailsModalOpen(true);
+                                }}
+                                onMouseEnter={() => setHoveredBill(bill)}
+                                onMouseLeave={() => setHoveredBill(null)}
+                              >
+                                {hoveredBill?.id === bill.id && <BillQuickView bill={bill} />}
+                                <div className="flex-1">
+                                  <h3 className="font-medium">{originalName}</h3>
+                                  <p className="text-sm text-gray-500">
+                                    Paid {paidDate}
+                                  </p>
+                                </div>
+                                <p className="text-lg font-bold">{formatCurrency(bill.amount)}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Recent Paid Bills - 1 column */}
+                  <div className="bg-white rounded-xl p-4 shadow-sm h-fit">
+                    <h2 className="text-lg font-semibold mb-4">Recently Paid</h2>
+                    {paidBills.length === 0 ? (
+                      <p className="text-gray-500 text-center py-4">No recent payments</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {paidBills.slice(0, 5).map((bill) => {
+                          const originalName = bill.origin.replace('PAID: ', '').split(' (')[0];
+                          const paidDate = bill.origin.split('(')[1]?.replace(')', '');
+                          
+                          return (
+                            <div
+                              key={bill.id}
+                              className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
+                            >
+                              <div className="flex items-center gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                <div>
+                                  <p className="font-medium">{originalName}</p>
+                                  <p className="text-sm text-gray-500">{paidDate}</p>
+                                </div>
+                              </div>
+                              <p className="font-medium">{formatCurrency(bill.amount)}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -299,6 +454,7 @@ export default function BillsPage() {
                     <div className="text-right">
                       <p className="text-lg font-bold">{formatCurrency(bill.amount)}</p>
                       <button
+                        onClick={() => handleMarkAsPaid(bill)}
                         className="text-sm text-primary-600 hover:text-primary-700"
                       >
                         Mark as Paid
@@ -406,6 +562,52 @@ export default function BillsPage() {
             </div>
           </div>
         )}
+
+        {/* Confirmation Dialog */}
+        <Dialog.Root open={billToMarkAsPaid !== null} onOpenChange={() => setBillToMarkAsPaid(null)}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/50 animate-fade-in" />
+            <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl p-6 w-[90%] max-w-md shadow-xl animate-slide-up">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="p-3 rounded-full bg-primary-50">
+                  <AlertCircle className="w-6 h-6 text-primary-600" />
+                </div>
+                <div>
+                  <Dialog.Title className="text-lg font-semibold mb-2">
+                    Mark Bill as Paid?
+                  </Dialog.Title>
+                  <Dialog.Description className="text-gray-500">
+                    Are you sure you want to mark this bill as paid? This action cannot be undone.
+                  </Dialog.Description>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button 
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800"
+                  onClick={() => setBillToMarkAsPaid(null)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700"
+                  onClick={confirmMarkAsPaid}
+                >
+                  Confirm
+                </button>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+
+        <BillDetailsModal
+          bill={selectedBill}
+          isOpen={isDetailsModalOpen}
+          onClose={() => {
+            setIsDetailsModalOpen(false);
+            setSelectedBill(null);
+          }}
+        />
 
         <BottomNavigation />
       </div>

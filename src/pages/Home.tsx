@@ -8,6 +8,7 @@ import WeeklyBudget from '../components/home/WeeklyBudget';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/TopGoals';
 import UpcomingBills from '../components/home/UpcomingBills';
+
 import { useTransactionStore } from '../stores/transactionStore';
 import { formatCurrency } from '../utils/formatters';
 import PeriodSelector from '../components/common/PeriodSelector';
