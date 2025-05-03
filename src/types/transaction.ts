@@ -37,7 +37,7 @@ export interface Transaction {
   date: string;
   user_id: string;
   type: TransactionType;
-  notes?: string;
+  description?: string;
 }
 
 export const isIncomeCategory = (category: TransactionCategory): boolean => {

@@ -53,6 +53,10 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
     
     // Handle special category redirects
     switch (newCategory) {
+      case 'Income':
+        onClose();
+        navigate('/income');
+        break;
       case 'Investimento':
         onClose();
         navigate('/investments');
@@ -77,6 +81,11 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
     
     try {
       // Handle special categories
+      if (formData.category === 'Income') {
+        navigate('/income');
+        return;
+      }
+
       if (formData.category === 'Investimento') {
         navigate('/investments');
         return;

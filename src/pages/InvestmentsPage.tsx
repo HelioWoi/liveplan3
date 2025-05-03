@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import InvestmentRegistrationModal from '../components/modals/InvestmentRegistrationModal';
+import InvestmentDetailsModal from '../components/modals/InvestmentDetailsModal';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Calendar, ArrowUpCircle, PlusCircle, TrendingUp, ExternalLink } from 'lucide-react';
+import { Transaction } from '../types/transaction';
+import { ArrowLeft, PlusCircle, TrendingUp, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 
 import BottomNavigation from '../components/layout/BottomNavigation';
@@ -20,10 +23,30 @@ async function fetchQuote(symbol: string) {
 }
 
 async function fetchMarketNews() {
+  // Buscar notícias específicas de finanças e mercado
   const response = await fetch(
-    `${FINNHUB_BASE_URL}/news?category=general&token=${API_KEY}`
+    `${FINNHUB_BASE_URL}/news?category=business&minId=10&token=${API_KEY}`
   );
-  return response.json();
+  const data = await response.json();
+  
+  // Filtrar e formatar as notícias
+  return data
+    .filter((item: any) => 
+      item.category === 'business' && 
+      item.headline && 
+      item.summary && 
+      item.url
+    )
+    .map((item: any) => ({
+      id: item.id,
+      headline: item.headline,
+      summary: item.summary.slice(0, 120) + '...',  // Limitar tamanho do resumo
+      url: item.url,
+      source: item.source,
+      datetime: new Date(item.datetime * 1000)
+    }))
+    .sort((a: any, b: any) => b.datetime.getTime() - a.datetime.getTime())  // Ordenar por data
+    .slice(0, 3);  // Pegar as 3 mais recentes
 }
 
 type Period = 'day' | 'week' | 'month' | 'year';
@@ -49,15 +72,25 @@ interface StockQuote {
 }
 
 export function InvestmentsPage() {
+  const [activeInvestments, setActiveInvestments] = useState(0);
   const navigate = useNavigate();
-  const { transactions } = useTransactionStore();
+  const { transactions, deleteTransaction } = useTransactionStore();
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
   const [selectedMonth, setSelectedMonth] = useState('April');
   const [selectedYear, setSelectedYear] = useState('2025');
 
   const [showBrokersModal, setShowBrokersModal] = useState(false);
+  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [selectedInvestment, setSelectedInvestment] = useState<Transaction | null>(null);
   const [quotes, setQuotes] = useState<StockQuote[]>([]);
-  const [marketNews, setMarketNews] = useState<any[]>([]);
+  const [news, setNews] = useState<Array<{
+    id: string;
+    headline: string;
+    summary: string;
+    url: string;
+    source: string;
+    datetime: Date;
+  }>>([]);
 
   // Filter investment transactions
   const investments = transactions.filter(t => t.category === 'Investimento');
@@ -65,39 +98,76 @@ export function InvestmentsPage() {
   // Calculate total invested
   const totalInvested = investments.reduce((sum, t) => sum + t.amount, 0);
 
+  // Calculate active investments
+  useEffect(() => {
+    const active = investments.filter(inv => {
+      const details = inv.description?.split('\n').reduce((acc, line) => {
+        const match = line.match(/- (.*?): (.*)/);
+        if (match) {
+          acc[match[1].toLowerCase()] = match[2];
+        }
+        return acc;
+      }, {} as Record<string, string>) || {};
+      return details.status !== 'closed';
+    }).length;
+    setActiveInvestments(active);
+  }, [investments]);
+
+  // Fetch market news
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const newsData = await fetchMarketNews();
+        setNews(newsData);
+      } catch (error) {
+        console.error('Error fetching market news:', error);
+        setNews([]);
+      }
+    };
+
+    fetchNews();
+    
+    // Atualizar notícias a cada 5 minutos
+    const interval = setInterval(fetchNews, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     // Fetch stock quotes
     const fetchQuotes = async () => {
       try {
         const quotesData = await Promise.all(
           WATCHLIST_SYMBOLS.map(async (symbol) => {
-            const quote = await fetchQuote(symbol);
-            return {
-              symbol,
-              price: quote.c,
-              change: quote.d,
-              percentChange: quote.dp
-            };
+            try {
+              const quote = await fetchQuote(symbol);
+              if (!quote || typeof quote.c !== 'number') {
+                throw new Error('Invalid quote data');
+              }
+              return {
+                symbol,
+                price: quote.c,
+                change: quote.d || 0,
+                percentChange: quote.dp || 0
+              };
+            } catch (err) {
+              console.error(`Error fetching quote for ${symbol}:`, err);
+              return {
+                symbol,
+                price: 0,
+                change: 0,
+                percentChange: 0
+              };
+            }
           })
         );
-        setQuotes(quotesData);
+        setQuotes(quotesData.filter(q => q.price > 0));
       } catch (error) {
         console.error('Error fetching quotes:', error);
-      }
-    };
-
-    // Fetch market news
-    const fetchNews = async () => {
-      try {
-        const news = await fetchMarketNews();
-        setMarketNews(news.slice(0, 5));
-      } catch (error) {
-        console.error('Error fetching news:', error);
+        setQuotes([]);
       }
     };
 
     fetchQuotes();
-    fetchNews();
 
     // Refresh quotes every minute
     const interval = setInterval(fetchQuotes, 60000);
@@ -120,9 +190,11 @@ export function InvestmentsPage() {
                 <ArrowLeft className="h-6 w-6" />
               </button>
               <h1 className="text-2xl font-bold">Investment Portfolio</h1>
-              <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
-                <Bell className="h-6 w-6" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <button
+                onClick={() => setShowInvestmentModal(true)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <PlusCircle className="h-6 w-6" />
               </button>
             </div>
           </div>
@@ -136,7 +208,7 @@ export function InvestmentsPage() {
             <h2 className="text-xl font-bold">Market Watch</h2>
             <button
               onClick={() => setShowBrokersModal(true)}
-              className="btn btn-primary"
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <ExternalLink className="h-5 w-5 mr-2" />
               Open Trading Account
@@ -150,7 +222,7 @@ export function InvestmentsPage() {
                   <h3 className="text-lg font-bold">{quote.symbol}</h3>
                   <span className={classNames(
                     "text-sm font-medium px-2 py-1 rounded-full",
-                    quote.change >= 0 ? "bg-success-100 text-success-800" : "bg-error-100 text-error-800"
+                    quote.change >= 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                   )}>
                     {quote.change >= 0 ? '+' : ''}{quote.percentChange.toFixed(2)}%
                   </span>
@@ -218,127 +290,147 @@ export function InvestmentsPage() {
           )}
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
-                <ArrowUpCircle className="h-6 w-6 text-primary-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Invested</p>
-                <p className="text-2xl font-bold text-primary-600">{formatCurrency(totalInvested)}</p>
-              </div>
+        {/* Recent Investments */}
+        <div className="bg-white rounded-2xl p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold">Recent Investments</h2>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              >
+                {months.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-success-100 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-success-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Returns</p>
-                <p className="text-2xl font-bold text-success-600">+12.5%</p>
-              </div>
+          {investments.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No investments found</p>
             </div>
+          ) : (
+            <div className="space-y-2">
+              {investments.map((investment: Transaction) => (
+                <div
+                  key={investment.id}
+                  className="flex items-center justify-between py-4 hover:bg-gray-50 active:bg-gray-100 cursor-pointer px-4 -mx-4 rounded-lg transition-all duration-200 hover:shadow-sm"
+                  onClick={() => setSelectedInvestment(investment)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{investment.origin}</p>
+                      <p className="text-gray-500">
+                        {format(new Date(investment.date), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">
+                      {formatCurrency(investment.amount)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Registered Investment */}
+        <div className="bg-white rounded-2xl p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold">Registered Investment</h2>
+            <button
+              onClick={() => setShowInvestmentModal(true)}
+              className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+            >
+              <PlusCircle className="h-6 w-6" />
+            </button>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-accent-100 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-accent-600" />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-gray-500">Total Invested</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalInvested)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Monthly Income</p>
-                <p className="text-2xl font-bold text-accent-600">{formatCurrency(totalInvested * 0.01)}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-gray-500 mb-1">Investments</p>
+                <p className="text-2xl font-bold">{investments.length}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-gray-500 mb-1">Active</p>
+                <p className="text-2xl font-bold">{activeInvestments}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Recent Investments */}
-        <div className="bg-white rounded-xl shadow-card overflow-hidden">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">Recent Investments</h2>
+        {/* Market News */}
+        <div className="bg-white rounded-xl p-6 shadow-card mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">Market News</h2>
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => navigate('/add-investment')}
-                className="btn btn-primary"
+                onClick={() => setShowBrokersModal(true)}
+                className="inline-flex items-center px-4 py-2 text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
               >
-                <PlusCircle className="h-5 w-5 mr-2" />
-                Add Investment
+                <ExternalLink className="h-5 w-5 mr-2" />
+                Open Broker
               </button>
             </div>
           </div>
 
-          <div className="divide-y divide-gray-100">
-
-        {/* Market News */}
-        <div className="bg-white rounded-xl p-6 shadow-card mt-6">
-          <h2 className="text-xl font-bold mb-6">Market News</h2>
-          <div className="space-y-4">
-            {marketNews.map((news, index) => (
+          <div className="grid gap-4">
+            {news.map((item) => (
               <a
-                key={index}
-                href={news.url}
+                key={item.id}
+                href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block hover:bg-gray-50 rounded-lg p-4 transition-colors"
+                className="group block bg-gray-50 hover:bg-gray-100 p-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <div className="flex items-start gap-4">
-                  {news.image && (
-                    <img
-                      src={news.image}
-                      alt={news.headline}
-                      className="w-24 h-24 object-cover rounded-lg"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-1">{news.headline}</h3>
-                    <p className="text-sm text-gray-500">{news.summary}</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {format(new Date(news.datetime * 1000), 'MMM d, yyyy')}
-                    </p>
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-medium mb-2">{item.headline}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{item.summary}</p>
+                    <div className="flex items-center text-xs text-gray-400">
+                      <span>{item.source}</span>
+                      <span className="mx-2">•</span>
+                      <span>{format(item.datetime, 'MMM d, h:mm a')}</span>
+                    </div>
                   </div>
+                  <ExternalLink className="h-4 w-4 text-purple-600 flex-shrink-0 mt-1 transform transition-transform group-hover:translate-x-0.5 group-hover:scale-110" />
+                  <span className="sr-only">Open news in new tab</span>
                 </div>
               </a>
             ))}
-          </div>
-        </div>
-            {investments.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <p>No investments recorded</p>
-                <button
-                  onClick={() => navigate('/add-investment')}
-                  className="btn btn-primary mt-4"
-                >
-                  <PlusCircle className="h-5 w-5 mr-2" />
-                  Make Your First Investment
-                </button>
-              </div>
-            ) : (
-              investments.map(investment => (
-                <div key={investment.id} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                        <ArrowUpCircle className="h-5 w-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{investment.origin}</p>
-                        <p className="text-sm text-gray-500">
-                          {format(new Date(investment.date), 'MMM d, yyyy')}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="font-medium text-primary-600">
-                      {formatCurrency(investment.amount)}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
 
@@ -367,7 +459,7 @@ export function InvestmentsPage() {
                   >
                     <h3 className="text-lg font-bold mb-2">{broker.name}</h3>
                     <p className="text-gray-600 mb-4">{broker.description}</p>
-                    <div className="flex items-center text-primary-600">
+                    <div className="flex items-center text-purple-600">
                       <span className="font-medium">Open Account</span>
                       <ExternalLink className="h-4 w-4 ml-2" />
                     </div>
@@ -384,6 +476,22 @@ export function InvestmentsPage() {
       </div>
 
       <BottomNavigation />
+
+      {/* Investment Registration Modal */}
+      <InvestmentRegistrationModal
+        isOpen={showInvestmentModal}
+        onClose={() => setShowInvestmentModal(false)}
+      />
+
+      {/* Investment Details Modal */}
+      {selectedInvestment && (
+        <InvestmentDetailsModal
+          isOpen={true}
+          onClose={() => setSelectedInvestment(null)}
+          onDelete={deleteTransaction}
+          investment={selectedInvestment}
+        />
+      )}
     </div>
   );
 }

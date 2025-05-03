@@ -1,23 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useTransactionStore } from '../stores/transactionStore';
 import { format } from 'date-fns';
-import { Download, FilterX, PlusCircle, Search, Trash2 } from 'lucide-react';
+import { Download, FilterX, PlusCircle, Search, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import TransactionModal from '../components/modals/TransactionModal';
 import BottomNavigation from '../components/layout/BottomNavigation';
-import PageHeader from '../components/layout/PageHeader';
+
 import PeriodButton from '../components/common/PeriodButton';
 import { TransactionCategory, isIncomeCategory } from '../types/transaction';
 import { formatCurrency } from '../utils/formatters';
 
 export default function Transactions() {
-  const { transactions, fetchTransactions, deleteTransaction } = useTransactionStore();
+  const { transactions, fetchTransactions } = useTransactionStore();
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<TransactionCategory | 'all'>('all');
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<string>('April');
   const [showMonths, setShowMonths] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   useEffect(() => {
     fetchTransactions();
@@ -35,17 +36,7 @@ export default function Transactions() {
   const sortedTransactions = [...filteredTransactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   
-  const handleDeleteTransaction = async (id: string) => {
-    setIsDeleting(id);
-    
-    try {
-      await deleteTransaction(id);
-    } catch (error) {
-      console.error('Failed to delete transaction', error);
-    } finally {
-      setIsDeleting(null);
-    }
-  };
+
   
   const exportToCSV = () => {
     // Create CSV content
@@ -77,51 +68,51 @@ export default function Transactions() {
   };
   
   const getCategoryBadgeClass = (category: string) => {
-    const baseClass = 'text-xs font-medium px-2 py-1 rounded';
+    const baseClass = 'text-xs font-medium px-3 py-1.5 rounded-full';
     switch (category) {
       case 'Fixed':
-        return `${baseClass} bg-secondary-100 text-secondary-800`;
+        return `${baseClass} bg-[#EAE6FE] text-[#5B3FFB]`;
       case 'Variable':
-        return `${baseClass} bg-accent-100 text-accent-800`;
+        return `${baseClass} bg-[#EAE6FE] text-[#5B3FFB]`;
       case 'Income':
+        return `${baseClass} bg-[#E6FAF5] text-[#00B087]`;
       case 'Investimento':
-        return `${baseClass} bg-success-100 text-success-800`;
+        return `${baseClass} bg-[#E6FAF5] text-[#00B087]`;
       default:
         return `${baseClass} bg-gray-100 text-gray-800`;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <PageHeader 
-        title="Transactions" 
-        showBackButton={false}
-        showMoreOptions={true}
-      />
+    <div className="min-h-screen bg-[#120B39] pb-24">
+      <div className="px-4 pt-12 pb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Transactions</h1>
+        <button className="text-white">
+          <MoreVertical className="h-6 w-6" />
+        </button>
+      </div>
       
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-          <div className="flex gap-2">
-            <button 
-              className="btn btn-primary flex-1 sm:flex-none"
-              onClick={() => setShowModal(true)}
-            >
-              <PlusCircle className="h-5 w-5 mr-2" />
-              Add New
-            </button>
-            <button 
-              className="btn btn-outline flex-1 sm:flex-none"
-              onClick={exportToCSV}
-            >
-              <Download className="h-5 w-5 mr-2" />
-              Export CSV
-            </button>
-          </div>
+      <div className="px-4 space-y-6">
+        <div className="flex gap-4">
+          <button 
+            className="flex-1 bg-[#5B3FFB] text-white rounded-xl py-4 font-medium flex items-center justify-center"
+            onClick={() => setShowModal(true)}
+          >
+            <PlusCircle className="h-5 w-5 mr-2" />
+            Add New
+          </button>
+          <button 
+            className="flex-1 bg-white text-gray-900 rounded-xl py-4 font-medium flex items-center justify-center"
+            onClick={exportToCSV}
+          >
+            <Download className="h-5 w-5 mr-2" />
+            Export CSV
+          </button>
         </div>
         
         {/* Period Selection */}
-        <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
-          <div className="flex flex-wrap gap-2 mb-4">
+        <div className="bg-white rounded-3xl p-4">
+          <div className="flex gap-2">
             {['Day', 'Week', 'Month', 'Year'].map(period => (
               <PeriodButton
                 key={period}
@@ -141,7 +132,7 @@ export default function Transactions() {
           </div>
 
           {showMonths && (
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex overflow-x-auto gap-2 mt-4 pb-2">
               {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(month => (
                 <PeriodButton
                   key={month}
@@ -155,36 +146,32 @@ export default function Transactions() {
           )}
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <input
-                  type="text"
-                  className="input pl-10"
-                  placeholder="Search transactions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              </div>
+          <div className="mt-4 space-y-4">
+            <div className="relative">
+              <input
+                type="text"
+                className="w-full bg-gray-50 rounded-2xl py-3 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#5B3FFB] focus:ring-opacity-50"
+                placeholder="Search transactions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             </div>
             
-            <div>
-              <select
-                className="input"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value as TransactionCategory | 'all')}
-              >
-                <option value="all">All Categories</option>
-                <option value="Income">Income</option>
-                <option value="Investimento">Investment</option>
-                <option value="Fixed">Fixed</option>
-                <option value="Variable">Variable</option>
-                <option value="Extra">Extra</option>
-                <option value="Additional">Additional</option>
-                <option value="Tax">Tax</option>
-              </select>
-            </div>
+            <select
+              className="w-full bg-gray-50 rounded-2xl py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#5B3FFB] focus:ring-opacity-50"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value as TransactionCategory | 'all')}
+            >
+              <option value="all">All Categories</option>
+              <option value="Income">Income</option>
+              <option value="Investimento">Investment</option>
+              <option value="Fixed">Fixed</option>
+              <option value="Variable">Variable</option>
+              <option value="Extra">Extra</option>
+              <option value="Additional">Additional</option>
+              <option value="Tax">Tax</option>
+            </select>
           </div>
           
           {(searchTerm || categoryFilter !== 'all') && (
@@ -193,7 +180,7 @@ export default function Transactions() {
                 Showing {sortedTransactions.length} of {transactions.length} transactions
               </p>
               <button
-                className="text-sm text-primary-600 hover:text-primary-800 flex items-center"
+                className="text-sm text-[#5B3FFB] hover:text-[#4935E8] flex items-center transition-colors"
                 onClick={clearFilters}
               >
                 <FilterX className="h-4 w-4 mr-1" />
@@ -204,61 +191,71 @@ export default function Transactions() {
         </div>
         
         {/* Transactions List */}
-        <div className="bg-white rounded-xl overflow-hidden shadow-card">
+        <div className="bg-white rounded-3xl overflow-hidden">
           {sortedTransactions.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Origin</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {sortedTransactions.map(transaction => (
-                    <tr key={transaction.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <div>
+              <div className="grid grid-cols-3 px-6 py-4 text-sm font-medium text-gray-500 uppercase">
+                <div>Date</div>
+                <div>Origin</div>
+                <div className="flex justify-between pr-4">
+                  <div>Category</div>
+                  <div>Amount</div>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100">
+                  {sortedTransactions
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map(transaction => (
+                    <div key={transaction.id} className="grid grid-cols-3 px-6 py-4 hover:bg-gray-50">
+                      <div className="text-gray-900">
                         {format(new Date(transaction.date), 'MMM d, yyyy')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      </div>
+                      <div className="text-gray-900">
                         {transaction.origin || ''}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      </div>
+                      <div className="flex items-center justify-between">
                         <span className={getCategoryBadgeClass(transaction.category)}>
                           {transaction.category}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
-                        <span className={isIncomeCategory(transaction.category) ? 'text-success-600' : 'text-error-600'}>
-                          {isIncomeCategory(transaction.category) ? '+' : '-'}{formatCurrency(transaction.amount)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleDeleteTransaction(transaction.id)}
-                          disabled={isDeleting === transaction.id}
-                          className="text-error-600 hover:text-error-800"
-                        >
-                          {isDeleting === transaction.id ? (
-                            'Deleting...'
-                          ) : (
-                            <Trash2 className="h-5 w-5" />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
+                        {transaction.amount && (
+                          <span className={isIncomeCategory(transaction.category) ? 'text-success-600 font-medium' : 'text-error-600 font-medium'}>
+                            {isIncomeCategory(transaction.category) ? '+' : '-'}{formatCurrency(transaction.amount)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+              </div>
+              {/* Pagination */}
+              {sortedTransactions.length > itemsPerPage && (
+                <div className="flex items-center justify-between p-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-700">
+                    Page {currentPage} of {Math.ceil(sortedTransactions.length / itemsPerPage)}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(sortedTransactions.length / itemsPerPage), prev + 1))}
+                    disabled={currentPage === Math.ceil(sortedTransactions.length / itemsPerPage)}
+                    className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="py-12 text-center">
               <p className="text-gray-500 mb-4">No transactions found</p>
               <button 
-                className="btn btn-primary"
+                className="bg-[#5B3FFB] text-white rounded-xl py-4 px-6 font-medium flex items-center justify-center mx-auto hover:bg-[#4935E8] transition-colors"
                 onClick={() => setShowModal(true)}
               >
                 <PlusCircle className="h-5 w-5 mr-2" />

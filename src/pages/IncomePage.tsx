@@ -81,7 +81,7 @@ export default function IncomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#120B39] text-white">
+    <div className="min-h-screen bg-[#120B39] text-white pb-32">
       {/* Header */}
       <div className="px-4 pt-12 pb-6 flex items-center justify-between">
         <button
@@ -97,7 +97,7 @@ export default function IncomePage() {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 space-y-6">
+      <div className="px-4 space-y-6 mb-24">
         {/* Lista de Transações */}
         <div className="bg-white rounded-3xl p-6 text-gray-900">
           <h2 className="text-xl font-bold mb-4">Income History</h2>
@@ -110,6 +110,8 @@ export default function IncomePage() {
             <div className="space-y-4">
               {transactions
                 .filter(t => t.category === 'Income')
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .slice(0, 2)
                 .map(transaction => (
                   <div 
                     key={transaction.id}
@@ -242,16 +244,16 @@ export default function IncomePage() {
       </div>
 
       {/* Bottom Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#120B39]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#120B39] space-y-3 z-10">
         <button
           onClick={handleProceed}
-          className="w-full bg-white text-[#120B39] rounded-full py-4 font-bold text-lg mb-3"
+          className="w-full bg-white text-[#120B39] rounded-full py-4 font-bold text-lg hover:bg-gray-100 transition-colors"
         >
           Proceed
         </button>
         <button
           onClick={() => navigate(-1)}
-          className="w-full text-white/80 font-medium"
+          className="w-full border border-white/20 text-white rounded-full py-4 font-medium hover:bg-white/10 transition-colors"
         >
           Cancel
         </button>

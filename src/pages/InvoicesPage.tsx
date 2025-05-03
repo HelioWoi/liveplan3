@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
 import { format } from 'date-fns';
 import { Download, Filter, PlusCircle, FileText, Calendar, DollarSign, TrendingUp, X, HelpCircle } from 'lucide-react';
-import classNames from 'classnames';
+
 import PageHeader from '../components/layout/PageHeader';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
@@ -20,7 +20,7 @@ interface NewInvoice {
 export default function InvoicesPage() {
   const navigate = useNavigate();
   const { transactions } = useTransactionStore();
-  const [selectedPeriod, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+
   const [selectedYear, setSelectedYear] = useState('2025');
   const [selectedMonth, setSelectedMonth] = useState('April');
   const [showFilters, setShowFilters] = useState(false);
@@ -78,10 +78,6 @@ export default function InvoicesPage() {
 
   const handleNewClient = () => {
     setShowNewClientModal(true);
-  };
-
-  const handleAddInvoice = () => {
-    setShowNewInvoiceModal(true);
   };
 
   return (
@@ -490,7 +486,7 @@ export default function InvoicesPage() {
           </div>
         )}
 
-        <BottomNavigation onAddClick={handleAddInvoice} />
+        <BottomNavigation onAddClick={() => setShowNewInvoiceModal(true)} />
       </div>
     </div>
   );

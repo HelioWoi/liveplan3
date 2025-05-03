@@ -10,10 +10,13 @@ export default function BottomNavigation({ onAddClick }: BottomNavigationProps) 
   const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
-  const isInvoicesPage = location.pathname === '/invoices';
+
+  const currentPage = location.pathname;
+  const isTransactionsPage = currentPage === '/transactions';
+  const isInvoicesPage = currentPage === '/invoices';
 
   const handleAddClick = () => {
-    if (isInvoicesPage && onAddClick) {
+    if ((isTransactionsPage || isInvoicesPage) && onAddClick) {
       onAddClick();
       return;
     }
