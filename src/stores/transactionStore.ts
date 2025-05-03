@@ -207,33 +207,61 @@ export const useTransactionStore = create<TransactionState>((set) => ({
   clearTransactions: async () => {
     set({ isLoading: true, error: null });
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      set(state => ({
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      set({
         transactions: [],
         isLoading: false,
-      }));
-    } catch (error) {
-      set({ error: 'Failed to clear transactions', isLoading: false });
+      });
+    } catch (error: any) {
+      console.error('Error clearing transactions:', error);
+      set({ error: error.message || 'Failed to clear transactions', isLoading: false });
     }
   },
 
   bulkAddTransactions: async (transactions) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call with minimal delay
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const newTransactions = transactions.map(transaction => ({
-        ...transaction,
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      }));
-      
-      set(state => ({
-        transactions: newTransactions,
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Adicionar todas as transações ao Supabase
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert(
+          transactions.map(transaction => ({
+            ...transaction,
+            user_id: user.id
+          }))
+        )
+        .select();
+
+      if (error) throw error;
+
+      set({
+        transactions: data || [],
         isLoading: false,
-      }));
-    } catch (error) {
-      set({ error: 'Failed to add transactions', isLoading: false });
+      });
+    } catch (error: any) {
+      console.error('Error adding transactions:', error);
+      set({ error: error.message || 'Failed to add transactions', isLoading: false });
+      throw error;
     }
   },
 }));
