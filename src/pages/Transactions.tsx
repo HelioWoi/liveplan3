@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
 import { format } from 'date-fns';
 import { Download, FilterX, PlusCircle, Search, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
@@ -214,9 +215,18 @@ export default function Transactions() {
                         {transaction.origin || ''}
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className={getCategoryBadgeClass(transaction.category)}>
-                          {transaction.category}
-                        </span>
+                        {transaction.category === 'Tax' ? (
+                          <Link 
+                            to="/tax"
+                            className={`${getCategoryBadgeClass(transaction.category)} cursor-pointer hover:opacity-80 transition-opacity`}
+                          >
+                            {transaction.category}
+                          </Link>
+                        ) : (
+                          <span className={getCategoryBadgeClass(transaction.category)}>
+                            {transaction.category}
+                          </span>
+                        )}
                         {transaction.amount && (
                           <span className={isIncomeCategory(transaction.category) ? 'text-success-600 font-medium' : 'text-error-600 font-medium'}>
                             {isIncomeCategory(transaction.category) ? '+' : '-'}{formatCurrency(transaction.amount)}

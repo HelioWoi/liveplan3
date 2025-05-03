@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Download, Filter, Search, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowLeft, Bell, Download, Filter, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
@@ -19,6 +19,46 @@ export default function StatementPage() {
   const [selectedYear, setSelectedYear] = useState('2025');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Calcular saldo inicial, movimentação total e saldo final
+  const calculateBalances = () => {
+    let openingBalance = 0;
+    let totalMovement = 0;
+    
+    transactions.forEach(transaction => {
+      const amount = Number(transaction.amount) || 0;
+      if (transaction.type === 'income') {
+        totalMovement += amount;
+      } else {
+        totalMovement -= amount;
+      }
+    });
+
+    const closingBalance = openingBalance + totalMovement;
+
+    return {
+      openingBalance,
+      totalMovement,
+      closingBalance
+    };
+  };
+
+  const { openingBalance, totalMovement, closingBalance } = calculateBalances();
+
+  // Calcular saldo acumulado para cada transação
+  const calculateRunningBalance = (index: number): number => {
+    let balance = openingBalance;
+    for (let i = 0; i <= index; i++) {
+      const transaction = transactions[i];
+      const amount = Number(transaction.amount) || 0;
+      if (transaction.type === 'income') {
+        balance += amount;
+      } else {
+        balance -= amount;
+      }
+    }
+    return balance;
+  };
 
   const exportStatement = () => {
     // Implementation for exporting statement
@@ -161,17 +201,21 @@ export default function StatementPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-xl p-6 shadow-card">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Opening Balance</h3>
-            <p className="text-2xl font-bold text-gray-900">$0.00</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(openingBalance)}</p>
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-card">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Total Movement</h3>
-            <p className="text-2xl font-bold text-success-600">+$0.00</p>
+            <p className={`text-2xl font-bold ${totalMovement >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+              {totalMovement >= 0 ? '+' : ''}{formatCurrency(totalMovement)}
+            </p>
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-card">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Closing Balance</h3>
-            <p className="text-2xl font-bold text-primary-600">$0.00</p>
+            <p className={`text-2xl font-bold ${closingBalance >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+              {formatCurrency(closingBalance)}
+            </p>
           </div>
         </div>
 
@@ -210,7 +254,7 @@ export default function StatementPage() {
                         {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-gray-900">
-                        {formatCurrency(0)} {/* Calculate running balance */}
+                        {formatCurrency(calculateRunningBalance(index))}
                       </td>
                     </tr>
                   ))

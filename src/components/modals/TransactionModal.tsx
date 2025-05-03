@@ -49,6 +49,11 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCategory = e.target.value as TransactionCategory;
+    if (newCategory === 'Tax') {
+      onClose();
+      navigate('/tax');
+      return;
+    }
     setFormData(prev => ({ ...prev, category: newCategory }));
     
     // Handle special category redirects
@@ -81,19 +86,20 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
     
     try {
       // Handle special categories
-      if (formData.category === 'Income') {
-        navigate('/income');
-        return;
-      }
-
-      if (formData.category === 'Investimento') {
-        navigate('/investments');
-        return;
-      }
-
-      if (formData.category === 'Invoices') {
-        navigate('/invoices');
-        return;
+      // Handle special categories
+      switch (formData.category) {
+        case 'Income':
+          navigate('/income');
+          return;
+        case 'Investimento':
+          navigate('/investments');
+          return;
+        case 'Invoices':
+          navigate('/invoices');
+          return;
+        case 'Tax':
+          navigate('/tax');
+          return;
       }
 
       if (formData.category === 'Goal' || formData.category === 'Contribution') {
