@@ -16,6 +16,8 @@ import RequestPasswordReset from './pages/auth/RequestPasswordReset';
 import ResetPassword from './pages/auth/ResetPassword';
 import OnboardingPage from './pages/onboarding/OnboardingPage';
 import { useAuthStore } from './stores/authStore';
+import { useOnboardingStore } from './stores/onboardingStore';
+import { useEffect } from 'react';
 import NotFound from './pages/NotFound';
 import StatementPage from './pages/StatementPage';
 import CategoryReport from './pages/CategoryReport';
@@ -27,7 +29,15 @@ import { PassiveIncome } from './pages/PassiveIncome';
 
 function App() {
   const location = useLocation();
+
   const { user } = useAuthStore();
+  const { isOnboardingCompleted, checkOnboardingStatus } = useOnboardingStore();
+
+  useEffect(() => {
+    if (user) {
+      checkOnboardingStatus(user.id);
+    }
+  }, [user, checkOnboardingStatus]);
 
   // Auth routes that don't require authentication
   const authRoutes = ['/login', '/register', '/request-password-reset', '/reset-password'];
@@ -35,6 +45,11 @@ function App() {
 
   if (!user && !isAuthRoute) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Redirecionar para onboarding se o usuário está logado mas não completou o onboarding
+  if (user && !isOnboardingCompleted && !location.pathname.includes('/onboarding')) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   if (user && isAuthRoute) {
