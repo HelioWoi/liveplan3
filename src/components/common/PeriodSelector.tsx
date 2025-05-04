@@ -83,7 +83,7 @@ export default function PeriodSelector({
             onClick={() => handlePeriodClick(period)}
             isActive={selectedPeriod === period}
           >
-            {period}
+            {period === 'Year' && selectedPeriod === 'Year' ? selectedYear : period}
           </PeriodButton>
         ))}
 
