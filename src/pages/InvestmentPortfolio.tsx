@@ -1,22 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
   ResponsiveContainer,
-  AreaChart,
-  Area
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend
 } from 'recharts';
-import { Calculator, Info, TrendingUp, Target, ChevronRight, HeartHandshake, Share2, Download, ChevronLeft } from 'lucide-react';
+import { TrendingUp, Target, ChevronRight, ChevronLeft } from 'lucide-react';
 import { PageHeader } from '../components/layout/PageHeader';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
+import PeriodSelector from '../components/common/PeriodSelector';
 
 // Replace direct Finnhub client with a fetch-based approach
 const API_KEY = 'd08rfs1r01qju5m8a010d08rfs1r01qju5m8a01g';
@@ -36,9 +33,7 @@ async function fetchMarketNews() {
   return response.json();
 }
 
-type Period = 'day' | 'week' | 'month' | 'year';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 
 // Market categories with soft colors
 const MARKET_CATEGORIES = [
@@ -68,10 +63,9 @@ interface StockQuote {
 
 export default function InvestmentPortfolio() {
   const navigate = useNavigate();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
-  const [selectedYear, setSelectedYear] = useState('2025');
-  const [showBrokersModal, setShowBrokersModal] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
+  const [selectedYear, setSelectedYear] = useState('2022');
   const [quotes, setQuotes] = useState<StockQuote[]>([]);
   const [marketNews, setMarketNews] = useState<any[]>([]);
 
@@ -120,64 +114,24 @@ export default function InvestmentPortfolio() {
       <PageHeader title="Investment Portfolio" />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Period Selection */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-3 items-center flex-wrap">
-              {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setSelectedPeriod(period)}
-                  className={classNames(
-                    'px-4 py-1 rounded-full text-sm font-medium border transition-colors',
-                    selectedPeriod === period
-                      ? 'bg-purple-600 text-white border-purple-600'
-                      : 'text-gray-700 border-gray-300 hover:border-purple-300'
-                  )}
-                >
-                  {period.charAt(0).toUpperCase() + period.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {selectedPeriod === 'month' && (
-              <div className="flex flex-wrap gap-2">
-                {months.map(month => (
-                  <button
-                    key={month}
-                    onClick={() => setSelectedMonth(month)}
-                    className={classNames(
-                      'px-3 py-1 rounded-md text-sm border transition-colors',
-                      selectedMonth === month 
-                        ? 'bg-purple-500 text-white border-purple-600' 
-                        : 'text-gray-700 border-gray-300'
-                    )}
-                  >
-                    {month}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {selectedPeriod === 'year' && (
-              <div className="flex flex-wrap gap-2">
-                {years.map(year => (
-                  <button
-                    key={year}
-                    onClick={() => setSelectedYear(year)}
-                    className={classNames(
-                      'px-3 py-1 rounded-md text-sm border transition-colors',
-                      selectedYear === year 
-                        ? 'bg-purple-500 text-white border-purple-600' 
-                        : 'text-gray-700 border-gray-300'
-                    )}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-2xl font-bold">Investment Portfolio</h1>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onPeriodChange={setSelectedPeriod}
+            onMonthChange={setSelectedMonth}
+            onYearChange={setSelectedYear}
+          />
         </div>
 
         {/* Market Categories */}
@@ -265,6 +219,31 @@ export default function InvestmentPortfolio() {
                   {quote.change >= 0 ? '+' : ''}{quote.change.toFixed(2)} today
                 </p>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Brokers */}
+        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <h2 className="text-lg font-semibold">Popular Brokers</h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {BROKERS.map((broker) => (
+              <a
+                key={broker.name}
+                href={broker.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block p-4 border rounded-lg hover:border-purple-300 transition-colors"
+              >
+                <h3 className="font-medium mb-1">{broker.name}</h3>
+                <p className="text-sm text-gray-500">{broker.description}</p>
+              </a>
             ))}
           </div>
         </div>
