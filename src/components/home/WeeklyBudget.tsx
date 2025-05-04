@@ -9,7 +9,8 @@ import { formatCurrency } from '../../utils/formatters';
 
 const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 4 }, (_, i) => (currentYear - 1 + i).toString());
 const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
 
 export default function WeeklyBudget() {
