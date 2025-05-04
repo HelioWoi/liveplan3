@@ -24,7 +24,7 @@ import CategoryReport from './pages/CategoryReport';
 import ExpensesPage from './pages/ExpensesPage';
 import IncomePage from './pages/IncomePage';
 import VariablesPage from './pages/VariablesPage';
-import InvestmentPortfolio from './pages/InvestmentPortfolio';
+import InvestmentPortfolioPage from './pages/InvestmentPortfolioPage';
 import { PassiveIncome } from './pages/PassiveIncome';
 
 function App() {
@@ -93,7 +93,7 @@ function App() {
       <Route path="/income" element={<IncomePage />} />
       <Route path="/variables" element={<VariablesPage />} />
       <Route path="/investments" element={<InvestmentsPage />} />
-      <Route path="/investment-portfolio" element={<InvestmentPortfolio />} />
+      <Route path="/investment-portfolio" element={<InvestmentPortfolioPage />} />
       <Route path="/simulator" element={<PassiveIncome />} />
 
       {/* 404 Route */}
