@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import PeriodButton from './PeriodButton';
 import { ChevronDown } from 'lucide-react';
 
-type Period = 'Day' | 'Week' | 'Month' | 'Year';
+type Period = 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
 
-interface PeriodSelectorProps {
+interface MonthYearSelectorProps {
   onPeriodChange: (period: Period) => void;
   onMonthChange: (month: Month) => void;
   onYearChange?: (year: string) => void;
@@ -14,24 +14,23 @@ interface PeriodSelectorProps {
   selectedYear?: string;
 }
 
-export default function PeriodSelector({
+export default function MonthYearSelector({
   onPeriodChange,
   onMonthChange,
   onYearChange,
   selectedPeriod,
   selectedMonth,
   selectedYear
-}: PeriodSelectorProps) {
+}: MonthYearSelectorProps) {
   const [showMonths, setShowMonths] = useState(false);
   const [showYears, setShowYears] = useState(false);
 
-  const periods: Period[] = ['Day', 'Week', 'Month', 'Year'];
+  const periods: Period[] = ['Month', 'Year'];
   const months: Month[] = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   
-  const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 4 }, (_, i) => (2022 + i).toString());
 
   const handlePeriodClick = (period: Period) => {
@@ -129,7 +128,7 @@ export default function PeriodSelector({
               className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
                 bg-gradient-to-r from-[#A855F7] to-[#9333EA] text-white shadow-sm"
             >
-              {selectedYear || currentYear}
+              {selectedYear}
               <ChevronDown className="h-4 w-4" />
             </button>
 

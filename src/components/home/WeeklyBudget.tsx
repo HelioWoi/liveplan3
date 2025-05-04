@@ -4,7 +4,7 @@ import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { PlusCircle, X, Calendar, Download } from 'lucide-react';
-import PeriodSelector from '../common/PeriodSelector';
+import MonthYearSelector from '../common/MonthYearSelector';
 import { formatCurrency } from '../../utils/formatters';
 
 const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
@@ -77,7 +77,7 @@ export default function WeeklyBudget() {
 
       // Reset form and close modal
       setNewEntry({
-        month: selectedMonth,
+        month: selectedMonth as typeof months[number],
         week: 1,
         category: 'Extra',
         description: '',
@@ -175,11 +175,13 @@ export default function WeeklyBudget() {
 
       {/* Period Selection */}
       <div className="mb-6">
-        <PeriodSelector
+        <MonthYearSelector
           selectedPeriod={selectedPeriod}
           selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
           onPeriodChange={setPeriod}
           onMonthChange={setSelectedMonth}
+          onYearChange={setYear => setSelectedYear(setYear)}
         />
       </div>
 
@@ -260,7 +262,7 @@ export default function WeeklyBudget() {
                 <select
                   className="input w-full"
                   value={newEntry.month}
-                  onChange={(e) => setNewEntry({ ...newEntry, month: e.target.value })}
+                  onChange={(e) => setNewEntry({ ...newEntry, month: e.target.value as typeof months[number] })}
                 >
                   {months.map(month => (
                     <option key={month} value={month}>{month}</option>
@@ -320,15 +322,6 @@ export default function WeeklyBudget() {
                   />
                 </div>
               </div>
-
-              <PeriodSelector
-                selectedPeriod={selectedPeriod}
-                selectedMonth={selectedMonth}
-                selectedYear={selectedYear}
-                onPeriodChange={setPeriod}
-                onMonthChange={setSelectedMonth}
-                onYearChange={(year) => setSelectedYear(year)}
-              />
 
               <div className="flex gap-3 pt-4">
                 <button
