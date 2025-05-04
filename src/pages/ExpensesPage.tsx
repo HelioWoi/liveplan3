@@ -16,11 +16,12 @@ export default function ExpensesPage() {
   const { transactions } = useTransactionStore();
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
+  const [selectedYear, setSelectedYear] = useState('2022');
 
   const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investimento'];
   const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6'];
 
-  const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number]) => {
+  const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
     const now = new Date();
     return transactions.filter(t => {
       const date = new Date(t.date);
@@ -36,9 +37,9 @@ export default function ExpensesPage() {
           weekStart.setDate(now.getDate() - now.getDay());
           return date >= weekStart && date <= now;
         case 'Month':
-          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear() === now.getFullYear();
+          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear().toString() === selectedYear;
         case 'Year':
-          return date.getFullYear() === now.getFullYear();
+          return date.getFullYear().toString() === selectedYear;
         default:
           return false;
       }
@@ -50,8 +51,8 @@ export default function ExpensesPage() {
   };
 
   const filteredExpenses = useMemo(() => {
-    return filterExpensesByPeriod(transactions, selectedPeriod, selectedMonth);
-  }, [transactions, selectedPeriod, selectedMonth]);
+    return filterExpensesByPeriod(transactions, selectedPeriod, selectedMonth, selectedYear);
+  }, [transactions, selectedPeriod, selectedMonth, selectedYear]);
 
   const expensesByCategory = useMemo(() => {
     const groupedExpenses = filteredExpenses.reduce((acc, t) => {
@@ -94,8 +95,10 @@ export default function ExpensesPage() {
           <PeriodSelector
             selectedPeriod={selectedPeriod}
             selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
             onPeriodChange={setSelectedPeriod}
             onMonthChange={setSelectedMonth}
+            onYearChange={setSelectedYear}
           />
         </div>
 
@@ -110,7 +113,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Weekly</h2>
                 <p className="text-2xl font-bold text-primary-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Week', selectedMonth)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Week', selectedMonth, selectedYear)))}
                 </p>
               </div>
             </div>
@@ -125,7 +128,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Monthly</h2>
                 <p className="text-2xl font-bold text-secondary-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Month', selectedMonth)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Month', selectedMonth, selectedYear)))}
                 </p>
               </div>
             </div>
@@ -140,7 +143,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Annual</h2>
                 <p className="text-2xl font-bold text-accent-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Year', selectedMonth)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Year', selectedMonth, selectedYear)))}
                 </p>
               </div>
             </div>
