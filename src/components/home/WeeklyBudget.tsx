@@ -16,9 +16,9 @@ export default function WeeklyBudget() {
   const { user } = useAuthStore();
   const { entries, fetchEntries, addEntry } = useWeeklyBudgetStore();
   
-  const [selectedPeriod, setPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedPeriod, setPeriod] = useState<'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
-  const [selectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -320,6 +320,15 @@ export default function WeeklyBudget() {
                   />
                 </div>
               </div>
+
+              <PeriodSelector
+                selectedPeriod={selectedPeriod}
+                selectedMonth={selectedMonth}
+                selectedYear={selectedYear}
+                onPeriodChange={setPeriod}
+                onMonthChange={setSelectedMonth}
+                onYearChange={(year) => setSelectedYear(year)}
+              />
 
               <div className="flex gap-3 pt-4">
                 <button

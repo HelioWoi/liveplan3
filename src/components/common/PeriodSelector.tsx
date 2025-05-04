@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import PeriodButton from './PeriodButton';
 import { ChevronDown } from 'lucide-react';
 
-type Period = 'Day' | 'Week' | 'Month' | 'Year';
+type Period = 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
 
 interface PeriodSelectorProps {
@@ -25,7 +25,7 @@ export default function PeriodSelector({
   const [showMonths, setShowMonths] = useState(false);
   const [showYears, setShowYears] = useState(false);
 
-  const periods: Period[] = ['Day', 'Week', 'Month', 'Year'];
+  const periods: Period[] = ['Month', 'Year'];
   const months: Month[] = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
