@@ -9,10 +9,10 @@ import classNames from 'classnames';
 import BillDetailsModal from '../components/bills/BillDetailsModal';
 import BillQuickView from '../components/bills/BillQuickView';
 import { Transaction, TransactionCategory } from '../types/transaction';
+import PeriodSelector from '../components/common/PeriodSelector';
 
-type Period = 'day' | 'week' | 'month' | 'year';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
+type Period = 'Day' | 'Week' | 'Month' | 'Year';
+type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
 
 const CATEGORIES = [
   { value: 'Fixed', label: 'Fixed' },
@@ -28,8 +28,8 @@ const CATEGORIES = [
 export default function BillsPage() {
   const navigate = useNavigate();
   const { transactions, addTransaction, updateTransaction } = useTransactionStore();
-  const [selectedPeriod, setPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
+  const [selectedMonth, setSelectedMonth] = useState<Month>('April');
   const [selectedYear, setSelectedYear] = useState('2025');
   const [showAddModal, setShowAddModal] = useState(false);
   const [billToMarkAsPaid, setBillToMarkAsPaid] = useState<Transaction | null>(null);
@@ -192,59 +192,15 @@ export default function BillsPage() {
         </div>
 
         {/* Period Selection */}
-        <div className="bg-white rounded-xl p-4 shadow-card mb-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-3 items-center flex-wrap">
-              {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setPeriod(period)}
-                  className={classNames(
-                    'px-4 py-1 rounded-full text-sm font-medium border',
-                    selectedPeriod === period
-                      ? 'bg-purple-600 text-white border-purple-600'
-                      : 'text-gray-700 border-gray-300 hover:border-purple-300'
-                  )}
-                >
-                  {period.charAt(0).toUpperCase() + period.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {selectedPeriod === 'month' && (
-              <div className="flex flex-wrap gap-2">
-                {months.map(month => (
-                  <button
-                    key={month}
-                    onClick={() => setSelectedMonth(month)}
-                    className={classNames(
-                      'px-3 py-1 rounded-md text-sm border',
-                      selectedMonth === month ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                    )}
-                  >
-                    {month}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {selectedPeriod === 'year' && (
-              <div className="flex flex-wrap gap-2">
-                {years.map(year => (
-                  <button
-                    key={year}
-                    onClick={() => setSelectedYear(year)}
-                    className={classNames(
-                      'px-3 py-1 rounded-md text-sm border',
-                      selectedYear === year ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                    )}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onPeriodChange={setSelectedPeriod}
+            onMonthChange={setSelectedMonth}
+            onYearChange={setSelectedYear}
+          />
         </div>
 
         {/* Summary Cards */}
