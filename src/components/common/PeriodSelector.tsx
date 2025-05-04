@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import PeriodButton from './PeriodButton';
+import { ChevronDown } from 'lucide-react';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
@@ -38,10 +39,23 @@ export default function PeriodSelector({
     onMonthChange(month);
   };
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowMonths(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="space-y-4">
-      {/* Period Buttons */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
+        {/* Period Buttons */}
         {periods.map((period) => (
           <PeriodButton
             key={period}
@@ -51,22 +65,41 @@ export default function PeriodSelector({
             {period}
           </PeriodButton>
         ))}
-      </div>
 
-      {/* Month Buttons - Only show when Month period is selected */}
-      {showMonths && (
-        <div className="flex flex-wrap gap-2">
-          {months.map((month) => (
-            <PeriodButton
-              key={month}
-              onClick={() => handleMonthClick(month)}
-              isActive={selectedMonth === month}
+        {/* Month Dropdown */}
+        {selectedPeriod === 'Month' && (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowMonths(!showMonths)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                bg-gradient-to-r from-[#A855F7] to-[#9333EA] text-white shadow-sm"
             >
-              {month}
-            </PeriodButton>
-          ))}
-        </div>
-      )}
+              {selectedMonth}
+              <ChevronDown className="h-4 w-4" />
+            </button>
+
+            {showMonths && (
+              <div className="absolute z-10 mt-2 w-48 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="py-1 max-h-60 overflow-auto">
+                  {months.map((month) => (
+                    <button
+                      key={month}
+                      onClick={() => {
+                        handleMonthClick(month);
+                        setShowMonths(false);
+                      }}
+                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-purple-50
+                        ${selectedMonth === month ? 'bg-purple-100 text-purple-900' : 'text-gray-700'}`}
+                    >
+                      {month}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

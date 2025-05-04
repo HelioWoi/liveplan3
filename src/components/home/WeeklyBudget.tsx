@@ -4,13 +4,11 @@ import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { PlusCircle, X, Calendar, Download } from 'lucide-react';
-import PeriodButton from '../common/PeriodButton';
+import PeriodSelector from '../common/PeriodSelector';
 import { formatCurrency } from '../../utils/formatters';
 
 const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 4 }, (_, i) => (currentYear - 1 + i).toString());
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
 
 export default function WeeklyBudget() {
@@ -18,14 +16,20 @@ export default function WeeklyBudget() {
   const { user } = useAuthStore();
   const { entries, fetchEntries, addEntry } = useWeeklyBudgetStore();
   
-  const [selectedPeriod, setPeriod] = useState('Month');
-  const [selectedMonth, setSelectedMonth] = useState(months[new Date().getMonth()]);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedPeriod, setPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
+  const [selectedYear] = useState(new Date().getFullYear().toString());
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state
-  const [newEntry, setNewEntry] = useState({
+  const [newEntry, setNewEntry] = useState<{
+    month: typeof months[number];
+    week: number;
+    category: string;
+    description: string;
+    amount: string;
+  }>({
     month: selectedMonth,
     week: 1,
     category: 'Extra',
@@ -170,50 +174,14 @@ export default function WeeklyBudget() {
       </div>
 
       {/* Period Selection */}
-      <div className="flex gap-2 mb-6 items-center flex-wrap">
-        {['Day', 'Week', 'Month', 'Year'].map(p => (
-          <PeriodButton
-            key={p}
-            onClick={() => setPeriod(p)}
-            isActive={selectedPeriod === p}
-          >
-            {p}
-          </PeriodButton>
-        ))}
+      <div className="mb-6">
+        <PeriodSelector
+          selectedPeriod={selectedPeriod}
+          selectedMonth={selectedMonth}
+          onPeriodChange={setPeriod}
+          onMonthChange={setSelectedMonth}
+        />
       </div>
-
-      {/* Month Buttons */}
-      {selectedPeriod === 'Month' && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {months.map(month => (
-            <PeriodButton
-              key={month}
-              onClick={() => setSelectedMonth(month)}
-              isActive={selectedMonth === month}
-            >
-              {month}
-            </PeriodButton>
-          ))}
-        </div>
-      )}
-
-      {/* Year Buttons */}
-      {selectedPeriod === 'Year' && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {years.map(year => (
-            <button
-              key={year}
-              onClick={() => setSelectedYear(year)}
-              className={cn(
-                'px-3 py-1 rounded-md text-sm border',
-                selectedYear === year ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-              )}
-            >
-              {year}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Table */}
       <div className="bg-white rounded-xl p-4 shadow-sm overflow-x-auto">
