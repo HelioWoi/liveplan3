@@ -18,8 +18,8 @@ export default function ExpensesPage() {
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState('2022');
 
-  const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investimento'];
-  const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6'];
+  const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investimento', 'Tax', 'Additional', 'Contribution', 'Goal'];
+  const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#8B5CF6', '#14B8A6'];
 
   const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
     const now = new Date();
