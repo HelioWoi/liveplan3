@@ -7,23 +7,20 @@ import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
-import classNames from 'classnames';
+import PeriodSelector from '../components/common/PeriodSelector';
 
-type Period = 'day' | 'week' | 'month' | 'year';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 
 export default function ExpensesPage() {
   const navigate = useNavigate();
   const { transactions } = useTransactionStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
-  const [selectedYear, setSelectedYear] = useState('2025');
+  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
 
   const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investimento'];
   const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6'];
 
-  const filterExpensesByPeriod = (transactions: Transaction[], period: Period, selectedMonth: string, selectedYear: string) => {
+  const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number]) => {
     const now = new Date();
     return transactions.filter(t => {
       const date = new Date(t.date);
@@ -32,16 +29,16 @@ export default function ExpensesPage() {
       if (!isExpense) return false;
 
       switch (period) {
-        case 'day':
+        case 'Day':
           return date.toDateString() === now.toDateString();
-        case 'week':
+        case 'Week':
           const weekStart = new Date(now);
           weekStart.setDate(now.getDate() - now.getDay());
           return date >= weekStart && date <= now;
-        case 'month':
-          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear() === parseInt(selectedYear);
-        case 'year':
-          return date.getFullYear() === parseInt(selectedYear);
+        case 'Month':
+          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear() === now.getFullYear();
+        case 'Year':
+          return date.getFullYear() === now.getFullYear();
         default:
           return false;
       }
@@ -53,8 +50,8 @@ export default function ExpensesPage() {
   };
 
   const filteredExpenses = useMemo(() => {
-    return filterExpensesByPeriod(transactions, selectedPeriod, selectedMonth, selectedYear);
-  }, [transactions, selectedPeriod, selectedMonth, selectedYear]);
+    return filterExpensesByPeriod(transactions, selectedPeriod, selectedMonth);
+  }, [transactions, selectedPeriod, selectedMonth]);
 
   const expensesByCategory = useMemo(() => {
     const groupedExpenses = filteredExpenses.reduce((acc, t) => {
@@ -94,56 +91,12 @@ export default function ExpensesPage() {
       <div className="max-w-7xl mx-auto px-4 space-y-6 mt-6">
         {/* Period Selection */}
         <div className="flex flex-col gap-4">
-          <div className="flex gap-3 items-center flex-wrap">
-            {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={classNames(
-                  'px-4 py-1 rounded-full text-sm font-medium border',
-                  selectedPeriod === period
-                    ? 'bg-purple-600 text-white border-purple-600'
-                    : 'text-gray-700 border-gray-300 hover:border-purple-300'
-                )}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {selectedPeriod === 'month' && (
-            <div className="flex flex-wrap gap-2">
-              {months.map(month => (
-                <button
-                  key={month}
-                  onClick={() => setSelectedMonth(month)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedMonth === month ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
-                >
-                  {month}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {selectedPeriod === 'year' && (
-            <div className="flex flex-wrap gap-2">
-              {years.map(year => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedYear === year ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            selectedMonth={selectedMonth}
+            onPeriodChange={setSelectedPeriod}
+            onMonthChange={setSelectedMonth}
+          />
         </div>
 
         {/* Period Summaries */}
@@ -157,7 +110,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Weekly</h2>
                 <p className="text-2xl font-bold text-primary-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'week', selectedMonth, selectedYear)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Week', selectedMonth)))}
                 </p>
               </div>
             </div>
@@ -172,7 +125,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Monthly</h2>
                 <p className="text-2xl font-bold text-secondary-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'month', selectedMonth, selectedYear)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Month', selectedMonth)))}
                 </p>
               </div>
             </div>
@@ -187,7 +140,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Annual</h2>
                 <p className="text-2xl font-bold text-accent-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'year', selectedMonth, selectedYear)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Year', selectedMonth)))}
                 </p>
               </div>
             </div>
@@ -238,7 +191,7 @@ export default function ExpensesPage() {
                 No transactions found
               </div>
             ) : (
-              filteredExpenses.map(transaction => (
+              filteredExpenses.map((transaction) => (
                 <div key={transaction.id} className="p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
