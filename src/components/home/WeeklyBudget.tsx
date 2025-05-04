@@ -18,8 +18,8 @@ export default function WeeklyBudget() {
   const { entries, fetchEntries, addEntry } = useWeeklyBudgetStore();
   
   const [selectedPeriod, setPeriod] = useState('Month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
-  const [selectedYear, setSelectedYear] = useState('2025');
+  const [selectedMonth, setSelectedMonth] = useState(months[new Date().getMonth()]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
