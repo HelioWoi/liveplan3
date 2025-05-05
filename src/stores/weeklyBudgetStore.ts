@@ -1,79 +1,26 @@
 import { create } from 'zustand';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface WeeklyBudgetEntry {
-  id?: string;
-  user_id?: string;
-  month: string;
-  week: number;
-  year: number;
-  category: string;
+  id: string;
+  week: 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4';
   description: string;
   amount: number;
-  created_at?: string;
+  category: string;
 }
 
 interface WeeklyBudgetState {
   entries: WeeklyBudgetEntry[];
-  fetchEntries: (supabase: SupabaseClient, userId: string, month: string, year: string) => Promise<void>;
-  addEntry: (supabase: SupabaseClient, entry: WeeklyBudgetEntry) => Promise<void>;
-  deleteEntry: (supabase: SupabaseClient, id: string) => Promise<void>;
 }
 
-export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set) => ({
-  entries: [],
-  fetchEntries: async (supabase: SupabaseClient, userId: string, month: string, year: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('weekly_budget')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('month', month)
-        .eq('year', year)
-        .order('week', { ascending: true });
-
-      if (error) throw error;
-      set({ entries: data || [] });
-    } catch (error) {
-      console.error('Error fetching weekly budget entries:', error);
-      set({ entries: [] });
-    }
-  },
-  addEntry: async (supabase: SupabaseClient, entry: WeeklyBudgetEntry) => {
-    try {
-      const { data, error } = await supabase
-        .from('weekly_budget')
-        .insert([entry])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      set((state) => ({
-        entries: [...state.entries, data],
-      }));
-    } catch (error) {
-      console.error('Error adding weekly budget entry:', error);
-    }
-  },
-  deleteEntry: async (supabase: SupabaseClient, id: string) => {
-    try {
-      const { error } = await supabase
-        .from('weekly_budget')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      set((state) => ({
-        entries: state.entries.filter((entry) => entry.id !== id),
-      }));
-    } catch (error) {
-      console.error('Error deleting weekly budget entry:', error);
-    }
-  },
-
-  clearEntries: () => {
-    set({ entries: [], error: null });
-  }
+export const useWeeklyBudgetStore = create<WeeklyBudgetState>(() => ({
+  entries: [
+    { id: '1', week: 'Week 1', description: 'Salary', amount: 5000, category: 'Income' },
+    { id: '2', week: 'Week 1', description: 'Rent', amount: -1500, category: 'Fixed' },
+    { id: '3', week: 'Week 2', description: 'Freelance', amount: 2000, category: 'Extra' },
+    { id: '4', week: 'Week 2', description: 'Groceries', amount: -400, category: 'Variable' },
+    { id: '5', week: 'Week 3', description: 'Investment', amount: -1000, category: 'Investment' },
+    { id: '6', week: 'Week 3', description: 'Utilities', amount: -300, category: 'Fixed' },
+    { id: '7', week: 'Week 4', description: 'Bonus', amount: 1500, category: 'Income' },
+    { id: '8', week: 'Week 4', description: 'Shopping', amount: -800, category: 'Variable' },
+  ],
 }));
