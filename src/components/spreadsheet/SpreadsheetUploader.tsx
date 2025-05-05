@@ -1,8 +1,9 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Upload, X, Check, AlertCircle } from 'lucide-react';
 import { useTransactionStore } from '../../stores/transactionStore';
-import { validateSpreadsheetFormat, parseSpreadsheet, generateTemplateFile } from '../../utils/spreadsheetParser';
+import { generateTemplateFile } from '../../utils/spreadsheetParser';
+import { Transaction } from '../../types/transaction';
 import SmartSpreadsheetConverter from './SmartSpreadsheetConverter';
 import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
@@ -60,27 +61,9 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
     document.body.removeChild(link);
   };
 
-  const completeOnboarding = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ onboarding_completed: true })
-        .eq('user_id', user.id);
 
-      if (error) throw error;
 
-      // Navigate to home page after successful profile update
-      navigate('/', { replace: true });
-    } catch (err) {
-      console.error('Failed to update onboarding status:', err);
-      // Still navigate to home even if update fails
-      navigate('/', { replace: true });
-    }
-  }, [user, supabase, navigate]);
-
-  const handleMappedData = async (mappedData: any[]) => {
+  const handleMappedData = async (mappedData: Partial<Transaction>[]) => {
     setIsProcessing(true);
     setError(null);
 
@@ -90,12 +73,13 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
 
       // Add new transactions from spreadsheet
       await bulkAddTransactions(mappedData.map(transaction => ({
-        date: transaction.date,
-        amount: transaction.amount,
-        category: transaction.category,
-        type: transaction.type,
-        origin: transaction.description,
-        userId: user?.id || 'current-user'
+        date: transaction.date || new Date().toISOString(),
+        amount: transaction.amount || 0,
+        category: transaction.category || 'Variable',
+        type: transaction.type || 'expense',
+        origin: transaction.origin || '',
+        description: transaction.description || '',
+        user_id: user?.id || 'current-user'
       })));
 
       setSuccess(true);

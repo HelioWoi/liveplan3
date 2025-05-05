@@ -1,11 +1,10 @@
-import { Transaction } from '../types/transaction';
+import { Transaction, TransactionCategory, TransactionType } from '../types/transaction';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
 interface SpreadsheetRow {
   Date: string;
-  Month?: string;
-  Week?: string;
+  Month: string;
   Type: string;
   Category: string;
   Description: string;
@@ -21,7 +20,7 @@ export const validateSpreadsheetFormat = async (file: File): Promise<boolean> =>
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
-            const requiredHeaders = ['Date', 'Type', 'Category', 'Description', 'Amount'];
+            const requiredHeaders = ['Date', 'Month', 'Type', 'Category', 'Description', 'Amount'];
             const headers = results.meta.fields || [];
             
             const hasAllHeaders = requiredHeaders.every(header => 
@@ -102,64 +101,84 @@ const processRows = (rows: SpreadsheetRow[]): Partial<Transaction>[] => {
         row.Amount;
 
       if (isNaN(amount)) {
-        throw new Error(`Invalid amount format in row: ${JSON.stringify(row)}`);
+        throw new Error(`Invalid amount in row: ${JSON.stringify(row)}`);
       }
 
-      if (amount <= 0) {
-        throw new Error(`Amount must be positive in row: ${JSON.stringify(row)}`);
+      // Validate month
+      if (!row.Month) {
+        throw new Error(`Month is required in row: ${JSON.stringify(row)}`);
       }
 
-      // Map spreadsheet categories to app categories
+      // Map category and validate
       const category = mapCategory(row.Category);
       const type = determineType(row.Type);
 
-      return {
+      const transaction: Partial<Transaction> = {
         date: date.toISOString(),
-        origin: row.Description,
-        amount,
+        amount: Math.abs(amount),
         category,
-        type
+        type,
+        origin: row.Description,
+        description: row.Description,
+        user_id: 'current-user'
       };
+
+      return transaction;
     })
-    .filter(t => t !== null);
+    .filter((t): t is Partial<Transaction> => t !== null);
 };
 
-const mapCategory = (category: string): string => {
-  const categoryMap: Record<string, string> = {
-    'Salary': 'Income',
-    'Rent': 'Fixed',
-    'Groceries': 'Variable',
-    'Gift': 'Extra',
-    'Bonus': 'Additional',
-    'Income Tax': 'Tax',
-    'Bank': 'Fixed',
-    'Savings': 'Fixed',
-    'Investment': 'Investimento',
+const mapCategory = (category: string): TransactionCategory => {
+  // Normalize category name
+  const normalizedCategory = category.trim().toLowerCase();
+  
+  const categoryMap: Record<string, TransactionCategory> = {
+    'income': 'Income',
+    'salary': 'Income',
+    'investimento': 'Investimento',
+    'investment': 'Investimento',
+    'fixed': 'Fixed',
+    'variable': 'Variable',
+    'extra': 'Extra',
+    'additional': 'Additional',
+    'tax': 'Tax',
+    'invoices': 'Invoices',
+    'contribution': 'Contribution',
+    'goal': 'Goal',
+    'rent': 'Fixed',
+    'groceries': 'Variable',
+    'gift': 'Extra',
+    'invoice': 'Invoices'
   };
 
-  return categoryMap[category] || category;
+  const mappedCategory = categoryMap[normalizedCategory];
+
+  if (!mappedCategory) {
+    throw new Error(`Invalid category: ${category}. Valid categories are: ${Object.values(categoryMap).join(', ')}`);
+  }
+  return mappedCategory;
 };
 
-const determineType = (type: string): 'income' | 'expense' => {
-  const incomeTypes = ['Income', 'Salary', 'Bonus', 'Investment'];
-  return incomeTypes.includes(type) ? 'income' : 'expense';
+const determineType = (type: string): TransactionType => {
+  const normalizedType = type.trim().toLowerCase();
+  const incomeTypes = ['income', 'salary', 'bonus', 'investment', 'invoices'];
+  return incomeTypes.includes(normalizedType) ? 'income' : 'expense';
 };
 
 export const generateTemplateFile = (): string => {
-  const headers = ['Date', 'Type', 'Category', 'Description', 'Amount', 'Month', 'Week', 'Frequency'];
+  const headers = ['Date', 'Month', 'Type', 'Category', 'Description', 'Amount', 'Frequency'];
   const sampleData = [
-    ['2025-08-05', 'Income', 'Salary', 'Monthly salary', '5000', 'August', 'Week 1', 'Monthly'],
-    ['2025-08-10', 'Fixed Expense', 'Rent', 'Apartment rent', '1500', 'August', 'Week 2', 'Monthly'],
-    ['2025-08-15', 'Variable Expense', 'Groceries', 'Supermarket', '300', 'August', 'Week 3', 'Weekly'],
-    ['2025-08-20', 'Extra', 'Gift', 'Birthday gift', '400', 'August', 'Week 3', ''],
-    ['2025-08-25', 'Investment', 'Bank', 'Stock investment', '2000', 'August', 'Week 4', 'Monthly'],
-    ['2025-08-30', 'Savings', 'Bank', 'Save for holidays', '500', 'August', 'Week 4', 'Weekly']
+    ['2024-01-01', 'January', 'income', 'Income', 'Monthly salary', '5000.00', 'Monthly'],
+    ['2024-01-15', 'January', 'expense', 'Fixed', 'Apartment rent', '1500.00', 'Monthly'],
+    ['2024-01-05', 'January', 'expense', 'Variable', 'Supermarket', '300.00', 'Weekly'],
+    ['2024-01-20', 'January', 'expense', 'Investimento', 'Investment deposit', '1000.00', 'Monthly'],
+    ['2024-01-31', 'January', 'income', 'Income', 'Year-end bonus', '2000.00', 'Yearly'],
+    ['2024-01-10', 'January', 'expense', 'Extra', 'Birthday gift', '100.00', 'Once'],
+    ['2024-01-25', 'January', 'expense', 'Tax', 'Income tax', '800.00', 'Monthly']
   ];
 
-  const csv = [
+  return [
     headers.join(','),
     ...sampleData.map(row => row.join(','))
   ].join('\n');
-
-  return csv;
 };
