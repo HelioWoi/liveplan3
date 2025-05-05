@@ -1,41 +1,65 @@
 import { useState, useEffect } from 'react';
-import { cn } from '../../utils/cn';
+
 import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
-import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
+import { useMonthlyBudgetStore, MonthlyBudgetEntry } from '../../stores/monthlyBudgetStore';
 import { PlusCircle, X, Calendar, Download } from 'lucide-react';
 import MonthYearSelector from '../common/MonthYearSelector';
 import { formatCurrency } from '../../utils/formatters';
 
-const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
 
-export default function WeeklyBudget() {
+export default function MonthlyBudget() {
   const { supabase } = useSupabase();
   const { user } = useAuthStore();
-  const { entries, fetchEntries, addEntry } = useWeeklyBudgetStore();
-  
+  const { entries, fetchEntries, addEntry } = useMonthlyBudgetStore();
+
   const [selectedPeriod, setPeriod] = useState<'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Form state
-  const [newEntry, setNewEntry] = useState<{
-    month: typeof months[number];
-    week: number;
-    category: string;
-    description: string;
-    amount: string;
-  }>({
+  const [newEntry, setNewEntry] = useState<MonthlyBudgetEntry>({
     month: selectedMonth,
-    week: 1,
     category: 'Extra',
     description: '',
-    amount: '',
+    amount: 0,
+    user_id: '',
+    year: parseInt(selectedYear),
+    created_at: '',
+    id: '',
   });
+
+  // Define handleAmountChange function
+  const handleAmountChange = (value: number) => {
+    const currentAmount = parseFloat(newEntry.amount);
+    const newAmount = Math.max(0, Math.min(currentAmount + value, 100000.00));
+    setNewEntry(prev => ({
+      ...prev,
+      amount: newAmount
+    }));
+  };
+
+  // Define handleManualAmountChange function
+  const handleManualAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9.]/g, '');
+    if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+      if (value) {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+          const limitedValue = Math.min(numValue, 100000);
+          setNewEntry(prev => ({
+            ...prev,
+            amount: limitedValue
+          }));
+        }
+      }
+    }
+  };
 
   // Fetch entries when month/year changes or user changes
   useEffect(() => {
@@ -44,31 +68,29 @@ export default function WeeklyBudget() {
   }, [selectedMonth, selectedYear, user, supabase, fetchEntries]);
 
   // Process entries into budget data
-  const budgetData = entries.reduce((acc, entry) => {
-    const weekKey = `Week ${entry.week}`;
-    if (!acc[weekKey]) {
-      acc[weekKey] = {};
+  const budgetData = entries.reduce((acc: Record<string, Record<string, number>>, entry: MonthlyBudgetEntry) => {
+    if (!acc[entry.month]) {
+      acc[entry.month] = {};
     }
-    if (!acc[weekKey][entry.category]) {
-      acc[weekKey][entry.category] = 0;
+    if (!acc[entry.month][entry.category]) {
+      acc[entry.month][entry.category] = 0;
     }
-    acc[weekKey][entry.category] += entry.amount;
+    acc[entry.month][entry.category] += entry.amount;
     return acc;
   }, {} as Record<string, Record<string, number>>);
 
   const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !newEntry.description || !newEntry.amount) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      const amount = parseFloat(newEntry.amount.replace(/[^0-9.-]+/g, ''));
-      
+      const amount = parseFloat(newEntry.amount.toString().replace(/[^0-9.-]+/g, ''));
+
       await addEntry(supabase, {
         user_id: user.id,
         month: newEntry.month,
-        week: newEntry.week,
         year: parseInt(selectedYear),
         category: newEntry.category,
         description: newEntry.description,
@@ -78,10 +100,13 @@ export default function WeeklyBudget() {
       // Reset form and close modal
       setNewEntry({
         month: selectedMonth as typeof months[number],
-        week: 1,
         category: 'Extra',
         description: '',
-        amount: '',
+        amount: 0,
+        user_id: '',
+        year: parseInt(selectedYear),
+        created_at: '',
+        id: '',
       });
       setShowAddModal(false);
     } catch (error) {
@@ -91,61 +116,41 @@ export default function WeeklyBudget() {
     }
   };
 
-  const getBalance = (weekData: Record<string, number> = {}) => {
-    const income = weekData['Income'] || 0;
-    const expenses = Object.entries(weekData)
+  const getBalance = (monthData: Record<string, number> = {}) => {
+    const income = monthData['Income'] || 0;
+    const expenses = Object.entries(monthData)
       .filter(([category]) => category !== 'Income')
       .reduce((sum, [_, amount]) => sum + amount, 0);
     return income - expenses;
   };
 
-  const currentWeekIndex = new Date().getDate() <= 7 ? 0 : new Date().getDate() <= 14 ? 1 : new Date().getDate() <= 21 ? 2 : 3;
-
   const exportToCSV = () => {
     // Create headers
-    const headers = ['Category', ...weeks, 'Total'];
-    
+    const headers = ['Category', 'Amount'];
+
     // Create rows with data
-    const rows = categories.map(category => {
-      const rowData = [category];
-      let total = 0;
-      
-      // Add data for each week
-      weeks.forEach(week => {
-        const amount = budgetData[week]?.[category] || 0;
-        total += amount;
-        rowData.push(formatCurrency(amount));
-      });
-      
-      // Add total
-      rowData.push(formatCurrency(total));
-      
-      return rowData;
-    });
-    
+    const rows = categories.map(category => [
+      category,
+      budgetData[selectedMonth]?.[category] || 0
+    ]);
+
     // Add balance row
-    const balanceRow = ['Balance'];
-    let totalBalance = 0;
-    weeks.forEach(week => {
-      const balance = getBalance(budgetData[week]);
-      totalBalance += balance;
-      balanceRow.push(formatCurrency(balance));
-    });
-    balanceRow.push(formatCurrency(totalBalance));
-    rows.push(balanceRow);
-    
-    // Convert to CSV
+    const balance = getBalance(budgetData[selectedMonth]);
+    rows.push(['Balance', balance]);
+
+    // Convert to CSV format
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.join(','))
     ].join('\n');
-    
-    // Create and trigger download
+
+    // Create and download file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `weekly_budget_${selectedMonth}_${selectedYear}.csv`);
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `budget_${selectedMonth}_${selectedYear}.csv`);
+    link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -160,8 +165,8 @@ export default function WeeklyBudget() {
             <Calendar className="h-6 w-6 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Weekly Budget</h2>
-            <p className="text-sm text-gray-500">Track and manage your weekly expenses</p>
+            <h2 className="text-xl font-bold text-gray-900">Monthly Budget</h2>
+            <p className="text-sm text-gray-500">Track and manage your monthly expenses</p>
           </div>
         </div>
         <button
@@ -191,16 +196,7 @@ export default function WeeklyBudget() {
           <thead>
             <tr className="bg-gray-100 text-left text-sm text-gray-700">
               <th className="p-3">Category</th>
-              {weeks.map((week, i) => (
-                <th key={week} className="p-3 relative">
-                  <div className="flex items-center gap-2">
-                    {week}
-                    {i === currentWeekIndex && (
-                      <span className="text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">Current</span>
-                    )}
-                  </div>
-                </th>
-              ))}
+              <th className="p-3 text-right">Total</th>
               <th className="p-3 text-right">
                 <button
                   onClick={() => setShowAddModal(true)}
@@ -216,26 +212,14 @@ export default function WeeklyBudget() {
             {categories.map(category => (
               <tr key={category} className="border-t border-gray-200 text-sm text-gray-900">
                 <td className="p-3 font-medium">{category}</td>
-                {weeks.map(week => (
-                  <td key={week} className="p-3">
-                    {formatCurrency(budgetData[week]?.[category] || 0)}
-                  </td>
-                ))}
+                <td className="p-3 text-right">{formatCurrency(budgetData[selectedMonth]?.[category] || 0)}</td>
                 <td></td>
               </tr>
             ))}
             {/* Balance row */}
             <tr className="border-t-2 border-gray-300 font-bold">
               <td className="p-3">Balance</td>
-              {weeks.map(week => {
-                const balance = getBalance(budgetData[week]);
-                const color = balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-500' : 'text-black';
-                return (
-                  <td key={week} className={cn("p-3", color)}>
-                    {formatCurrency(balance)}
-                  </td>
-                );
-              })}
+              <td className="p-3 text-right">{formatCurrency(getBalance(budgetData[selectedMonth]))}</td>
               <td></td>
             </tr>
           </tbody>
@@ -271,18 +255,6 @@ export default function WeeklyBudget() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Week</label>
-                <select
-                  className="input w-full"
-                  value={newEntry.week}
-                  onChange={(e) => setNewEntry({ ...newEntry, week: parseInt(e.target.value) })}
-                >
-                  {[1, 2, 3, 4].map(week => (
-                    <option key={week} value={week}>Week {week}</option>
-                  ))}
-                </select>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select

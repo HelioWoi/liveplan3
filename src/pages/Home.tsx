@@ -4,7 +4,7 @@ import { useAuthStore } from '../stores/authStore';
 import { Bell, HomeIcon, Clock, BarChart2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
-import WeeklyBudget from '../components/home/WeeklyBudget';
+import MonthlyBudget from '../components/home/MonthlyBudget';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/TopGoals';
 import UpcomingBills from '../components/home/UpcomingBills';
@@ -157,7 +157,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 gap-6">
-            <WeeklyBudget />
+            <MonthlyBudget />
             <Formula3 data={formula3Data} />
             <TopGoals />
             <UpcomingBills />
