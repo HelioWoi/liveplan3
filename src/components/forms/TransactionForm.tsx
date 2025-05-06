@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useFeedback } from '../feedback/FeedbackProvider';
 import { Calendar } from 'lucide-react';
 import classNames from 'classnames';
 import { TransactionCategory, TRANSACTION_CATEGORIES, isIncomeCategory } from '../../types/transaction';
@@ -11,6 +12,7 @@ interface TransactionFormProps {
   onSuccess?: () => void;
   defaultCategory?: TransactionCategory;
   disableCategory?: boolean;
+  onClose?: () => void;
 }
 
 interface FormValues {
@@ -23,9 +25,11 @@ interface FormValues {
 export default function TransactionForm({ 
   onSuccess, 
   defaultCategory,
-  disableCategory = false
+  disableCategory = false,
+  onClose
 }: TransactionFormProps) {
   const { addTransaction } = useTransactionStore();
+  const { showToast, showLoading, hideLoading } = useFeedback();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,49 +69,59 @@ export default function TransactionForm({
   };
 
   const onSubmit = async (data: FormValues) => {
-    if (!user || !amountValue) return;
-    
-    setIsSubmitting(true);
+    showLoading('Salvando transação...');
     
     try {
-      // Handle special categories
-      if (data.category === 'Invoices') {
-        navigate('/invoices');
-        return;
-      }
-
-      if (data.category === 'Goal') {
-        navigate('/goals');
-        return;
-      }
-
-      // If category is Contribution, redirect to simulator
-      if (data.category === 'Contribution') {
-        navigate('/goals', { 
-          state: { 
-            contributionAmount: amountValue,
-            description: data.origin
-          }
-        });
-        return;
-      }
-
-      await addTransaction({
-        origin: data.origin.trim(),
-        amount: parseFloat(amountValue),
-        category: data.category,
-        type: isIncomeCategory(data.category) ? 'income' : 'expense',
-        date: data.date,
-        user_id: user?.id,
-      });
+      if (!user || !amountValue) return;
       
-      reset();
-      setAmountValue('');
-      onSuccess?.();
+      setIsSubmitting(true);
+      
+      try {
+        // Handle special categories
+        if (data.category === 'Invoices') {
+          navigate('/invoices');
+          return;
+        }
+
+        if (data.category === 'Goal') {
+          navigate('/goals');
+          return;
+        }
+
+        // If category is Contribution, redirect to simulator
+        if (data.category === 'Contribution') {
+          navigate('/goals', { 
+            state: { 
+              contributionAmount: amountValue,
+              description: data.origin
+            }
+          });
+          return;
+        }
+
+        await addTransaction({
+          origin: data.origin.trim(),
+          amount: parseFloat(amountValue),
+          category: data.category,
+          type: isIncomeCategory(data.category) ? 'income' : 'expense',
+          date: data.date,
+          user_id: user?.id,
+        });
+        
+        reset();
+        setAmountValue('');
+        showToast('Transação salva com sucesso!', 'success');
+        onSuccess?.();
+        onClose?.();
+      } catch (error) {
+        console.error('Error saving transaction:', error);
+        showToast('Erro ao salvar transação', 'error');
+      } finally {
+        hideLoading();
+        setIsSubmitting(false);
+      }
     } catch (error) {
       console.error('Failed to add entry', error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

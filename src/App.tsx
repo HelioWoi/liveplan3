@@ -1,7 +1,11 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useSupabase } from './lib/supabase/SupabaseProvider';
+import { useSupabase, SupabaseProvider } from './lib/supabase/SupabaseProvider';
 import { Toaster } from 'react-hot-toast';
 import BottomNavigation from './components/layout/BottomNavigation';
+import QuickActions from './components/layout/QuickActions';
+import SwipeableView from './components/layout/SwipeableView';
+import { FeedbackProvider } from './components/feedback/FeedbackProvider';
+import { useTransactionStore } from './stores/transactionStore';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/signup';
@@ -31,11 +35,20 @@ import BillsPage from './pages/BillsPage';
 function AppContent() {
   const location = useLocation();
   const { session } = useSupabase();
+  const { fetchTransactions } = useTransactionStore();
   const publicRoutes = ['/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
   const showBottomNav = !publicRoutes.includes(location.pathname) && session?.user;
 
+  const handleRefresh = async () => {
+    if (session?.user) {
+      await fetchTransactions();
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <SwipeableView onRefresh={handleRefresh}>
+      <div className="min-h-screen bg-gray-50">
+        {showBottomNav && <QuickActions />}
         <Routes>
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
@@ -197,11 +210,16 @@ function AppContent() {
         {showBottomNav && <BottomNavigation />}
         <Toaster />
       </div>
+    </SwipeableView>
   );
 }
 
-function App() {
-  return <AppContent />;
+export default function App() {
+  return (
+    <SupabaseProvider>
+      <FeedbackProvider>
+        <AppContent />
+      </FeedbackProvider>
+    </SupabaseProvider>
+  );
 }
-
-export default App;

@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.2",
+    "@hello-pangea/dnd": "^18.0.1",
     "@radix-ui/react-dialog": "^1.1.11",
     "@supabase/supabase-js": "^2.39.8",
     "classnames": "^2.5.1",
     "date-fns": "^3.6.0",
     "finnhub": "^1.2.18",
+    "framer-motion": "^12.9.7",
     "lucide-react": "^0.363.0",
     "papaparse": "^5.4.1",
     "react": "^18.2.0",
@@ -22,6 +24,7 @@
     "react-hook-form": "^7.51.1",
     "react-hot-toast": "^2.5.2",
     "react-router-dom": "^6.22.3",
+    "react-swipeable": "^7.0.2",
     "recharts": "^2.12.3",
     "xlsx": "^0.18.5",
     "zustand": "^4.5.2"

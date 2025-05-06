@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useGoalsStore } from '../../stores/goalsStore';
+import { useFeedback } from '../feedback/FeedbackProvider';
 import { formatISO } from 'date-fns';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -18,6 +19,7 @@ interface FormValues {
 
 export default function GoalForm({ onSuccess }: GoalFormProps) {
   const { addGoal } = useGoalsStore();
+  const { showToast, showLoading, hideLoading } = useFeedback();
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -38,6 +40,13 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
   const onSubmit = async (data: FormValues) => {
     if (!user) return;
     
+    if (!data.title || !data.target_amount || !data.target_date) {
+      showToast('Preencha todos os campos obrigatórios', 'warning');
+      return;
+    }
+
+    showLoading('Criando meta...');
+
     setIsSubmitting(true);
     
     try {
@@ -50,10 +59,13 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
       });
       
       reset();
+      showToast('Meta criada com sucesso!', 'success');
       onSuccess?.();
     } catch (error) {
       console.error('Failed to add goal', error);
+      showToast('Erro ao criar meta', 'error');
     } finally {
+      hideLoading();
       setIsSubmitting(false);
     }
   };
