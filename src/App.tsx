@@ -25,6 +25,7 @@ import Dashboard from './pages/Dashboard';
 import TransactionsPage from './pages/TransactionsPage';
 import Goals from './pages/Goals';
 import Profile from './pages/Profile';
+import BillsPage from './pages/BillsPage';
 
 function AppContent() {
   const location = useLocation();
@@ -176,6 +177,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/bills"
+            element={
+              <PrivateRoute>
+                <BillsPage />
               </PrivateRoute>
             }
           />

@@ -32,6 +32,13 @@ export default function WeeklyBudget() {
       .reduce((total, entry) => total + entry.amount, 0);
   };
 
+  const getCurrentWeek = () => {
+    const now = new Date();
+    const dayOfMonth = now.getDate();
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return `Week ${weekNumber}`;
+  };
+
   const getWeekBalance = (week: string) => {
     return entries
       .filter(entry => 
@@ -136,18 +143,15 @@ export default function WeeklyBudget() {
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Week 1
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Week 2
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Week 3
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Week 4
-                </th>
+                {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
+                  <th 
+                    key={week}
+                    className={`px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider
+                      ${week === getCurrentWeek() ? 'bg-purple-50' : 'bg-gray-50'}`}
+                  >
+                    {week}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -157,7 +161,12 @@ export default function WeeklyBudget() {
                     {category}
                   </td>
                   {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
-                    <td key={`${category}-${week}`} className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
+                    <td 
+                      key={`${category}-${week}`} 
+                      className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium
+                        ${week === getCurrentWeek() ? 'bg-purple-50' : ''}
+                        ${getCategoryTotal(week, category) > 0 ? 'text-green-600' : getCategoryTotal(week, category) < 0 ? 'text-red-600' : 'text-gray-900'}`}
+                    >
                       {formatCurrency(getCategoryTotal(week, category))}
                     </td>
                   ))}
@@ -168,7 +177,12 @@ export default function WeeklyBudget() {
                   Balance
                 </td>
                 {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
-                  <td key={`balance-${week}`} className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
+                  <td 
+                    key={`balance-${week}`} 
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold
+                      ${week === getCurrentWeek() ? 'bg-purple-50' : ''}
+                      ${getWeekBalance(week) > 0 ? 'text-green-600' : getWeekBalance(week) < 0 ? 'text-red-600' : 'text-gray-900'}`}
+                  >
                     {formatCurrency(getWeekBalance(week))}
                   </td>
                 ))}
