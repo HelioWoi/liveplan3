@@ -30,33 +30,37 @@ export default function Home() {
     .reduce((sum, t) => sum + t.amount, 0);
     
   // Calculate formula3 data
+  const fixedExpenses = transactions
+    .filter(t => t.category === 'Fixed')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const variableExpenses = transactions
+    .filter(t => t.category === 'Variable')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const investments = transactions
+    .filter(t => t.category === 'Investimento')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Usar o total de gastos como base para os targets
+  const totalExpensesAndInvestments = fixedExpenses + variableExpenses + investments;
+  const targetTotal = Math.max(totalExpensesAndInvestments, totalIncome);
+
   const formula3Data = {
     fixed: {
-      current: transactions
-        .filter(t => t.category === 'Fixed')
-        .reduce((sum, t) => sum + t.amount, 0),
-      target: totalIncome * 0.5,
-      percentage: totalIncome ? (transactions
-        .filter(t => t.category === 'Fixed')
-        .reduce((sum, t) => sum + t.amount, 0) / totalIncome) * 100 : 0
+      current: fixedExpenses,
+      target: targetTotal * 0.5,
+      percentage: targetTotal ? (fixedExpenses / targetTotal) * 100 : 0
     },
     variable: {
-      current: transactions
-        .filter(t => t.category === 'Variable')
-        .reduce((sum, t) => sum + t.amount, 0),
-      target: totalIncome * 0.3,
-      percentage: totalIncome ? (transactions
-        .filter(t => t.category === 'Variable')
-        .reduce((sum, t) => sum + t.amount, 0) / totalIncome) * 100 : 0
+      current: variableExpenses,
+      target: targetTotal * 0.3,
+      percentage: targetTotal ? (variableExpenses / targetTotal) * 100 : 0
     },
     investments: {
-      current: transactions
-        .filter(t => t.category === 'Investimento')
-        .reduce((sum, t) => sum + t.amount, 0),
-      target: totalIncome * 0.2,
-      percentage: totalIncome ? (transactions
-        .filter(t => t.category === 'Investimento')
-        .reduce((sum, t) => sum + t.amount, 0) / totalIncome) * 100 : 0
+      current: investments,
+      target: targetTotal * 0.2,
+      percentage: targetTotal ? (investments / targetTotal) * 100 : 0
     }
   };
 

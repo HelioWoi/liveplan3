@@ -114,21 +114,30 @@ export default function Dashboard() {
       color: COLORS[index % COLORS.length]
     }));
 
+  // Calcular o total de gastos e investimentos
+  const totalExpensesAndInvestments = 
+    financialSummary.categoryTotals.Fixed + 
+    financialSummary.categoryTotals.Variable + 
+    financialSummary.categoryTotals.Investimento;
+
+  // Usar o maior valor entre gastos totais e renda como base
+  const targetTotal = Math.max(totalExpensesAndInvestments, financialSummary.totalIncome);
+
   const formula3Data = {
     fixed: {
       current: financialSummary.categoryTotals.Fixed,
-      target: financialSummary.totalIncome * 0.5,
-      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.Fixed / financialSummary.totalIncome) * 100 : 0
+      target: targetTotal * 0.5,
+      percentage: targetTotal ? (financialSummary.categoryTotals.Fixed / targetTotal) * 100 : 0
     },
     variable: {
       current: financialSummary.categoryTotals.Variable,
-      target: financialSummary.totalIncome * 0.3,
-      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.Variable / financialSummary.totalIncome) * 100 : 0
+      target: targetTotal * 0.3,
+      percentage: targetTotal ? (financialSummary.categoryTotals.Variable / targetTotal) * 100 : 0
     },
     investments: {
       current: financialSummary.categoryTotals.Investimento,
-      target: financialSummary.totalIncome * 0.2,
-      percentage: financialSummary.totalIncome ? (financialSummary.categoryTotals.Investimento / financialSummary.totalIncome) * 100 : 0
+      target: targetTotal * 0.2,
+      percentage: targetTotal ? (financialSummary.categoryTotals.Investimento / targetTotal) * 100 : 0
     }
   };
 
