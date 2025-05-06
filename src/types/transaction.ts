@@ -1,6 +1,6 @@
 export type TransactionCategory = 
   | 'Income'
-  | 'Investimento'
+  | 'Investment'
   | 'Fixed'
   | 'Variable'
   | 'Extra'
@@ -12,7 +12,7 @@ export type TransactionCategory =
 
 export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
   'Income',
-  'Investimento',
+  'Investment',
   'Fixed',
   'Variable',
   'Extra',
@@ -41,14 +41,14 @@ export interface Transaction {
 }
 
 export const isIncomeCategory = (category: TransactionCategory): boolean => {
-  return ['Income', 'Investimento', 'Invoices'].includes(category);
+  return ['Income', 'Investment', 'Invoices'].includes(category);
 };
 
 export const getCategoryForFormula = (category: TransactionCategory) => {
   switch (category) {
     case 'Income':
       return 'income';
-    case 'Investimento':
+    case 'Investment':
       return 'investment';
     case 'Fixed':
       return 'fixed';
@@ -73,7 +73,7 @@ export const getCategoryColor = (category: TransactionCategory) => {
   switch (category) {
     case 'Income':
       return 'bg-success-100 text-success-800';
-    case 'Investimento':
+    case 'Investment':
       return 'bg-primary-100 text-primary-800';
     case 'Fixed':
       return 'bg-secondary-100 text-secondary-800';

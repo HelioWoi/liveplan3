@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useSupabase } from './lib/supabase/SupabaseProvider';
+import { Toaster } from 'react-hot-toast';
 import BottomNavigation from './components/layout/BottomNavigation';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
@@ -194,6 +195,7 @@ function AppContent() {
         </Routes>
 
         {showBottomNav && <BottomNavigation />}
+        <Toaster />
       </div>
   );
 }

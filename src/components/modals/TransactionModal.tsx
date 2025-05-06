@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, X } from 'lucide-react';
-import { TransactionCategory, TRANSACTION_CATEGORIES, isIncomeCategory } from '../../types/transaction';
 import classNames from 'classnames';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useIncomeStore } from '../../stores/incomeStore';
+import { toast } from 'react-hot-toast';
+import { Transaction, TransactionType, TransactionCategory, TRANSACTION_CATEGORIES, isIncomeCategory } from '../../types/transaction';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -13,7 +15,8 @@ interface TransactionModalProps {
 
 export default function TransactionModal({ isOpen, onClose }: TransactionModalProps) {
   const navigate = useNavigate();
-  const { addTransaction } = useTransactionStore();
+  const { addTransaction, transactions } = useTransactionStore();
+  const { totalIncome } = useIncomeStore();
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -62,7 +65,7 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
         onClose();
         navigate('/income');
         break;
-      case 'Investimento':
+      case 'Investment':
         onClose();
         navigate('/investments');
         break;
@@ -86,12 +89,11 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
     
     try {
       // Handle special categories
-      // Handle special categories
       switch (formData.category) {
         case 'Income':
           navigate('/income');
           return;
-        case 'Investimento':
+        case 'Investment':
           navigate('/investments');
           return;
         case 'Invoices':
@@ -102,20 +104,64 @@ export default function TransactionModal({ isOpen, onClose }: TransactionModalPr
           return;
       }
 
-      if (formData.category === 'Goal' || formData.category === 'Contribution') {
-        navigate('/goals');
-        return;
-      }
-
-      await addTransaction({
+      // Preparar a nova transação
+      const newTransaction: Omit<Transaction, 'id'> = {
         origin: formData.origin.trim(),
         amount: parseFloat(formData.amount.replace(/,/g, '')),
-        category: formData.category,
-        type: isIncomeCategory(formData.category) ? 'income' : 'expense',
+        category: formData.category as TransactionCategory,
+        type: (isIncomeCategory(formData.category) ? 'income' : 'expense') as TransactionType,
         date: formData.date,
-        user_id: user.id,
-      });
+        user_id: user.id
+      };
+
+      // Calcular o impacto na Fórmula 3 para categorias relevantes
+      if (newTransaction.type === 'expense' && 
+          ['Fixed', 'Variable', 'Investimento'].includes(newTransaction.category)) {
+        const totalExpenses = transactions
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const newAmount = newTransaction.amount;
+        const targetTotal = Math.max(totalExpenses + newAmount, totalIncome);
+        let impact = '';
+
+        if (newTransaction.category === 'Fixed') {
+          const currentFixed = transactions
+            .filter(t => t.category === 'Fixed')
+            .reduce((sum, t) => sum + t.amount, 0);
+          const newPercentage = ((currentFixed + newAmount) / targetTotal) * 100;
+          impact = `This fixed expense represents ${newPercentage.toFixed(1)}% of your fixed budget (target: 50%)`;
+        } else if (newTransaction.category === 'Variable') {
+          const currentVariable = transactions
+            .filter(t => t.category === 'Variable')
+            .reduce((sum, t) => sum + t.amount, 0);
+          const newPercentage = ((currentVariable + newAmount) / targetTotal) * 100;
+          impact = `This variable expense represents ${newPercentage.toFixed(1)}% of your flexible budget (target: 30%)`;
+        } else if (newTransaction.category === 'Investment') {
+          const currentInvestments = transactions
+            .filter(t => t.category === 'Investment')
+            .reduce((sum, t) => sum + t.amount, 0);
+          const newPercentage = ((currentInvestments + newAmount) / targetTotal) * 100;
+          impact = `This investment represents ${newPercentage.toFixed(1)}% of your investment budget (target: 20%)`;
+        }
+
+        if (impact) {
+          toast.success(impact, {
+            duration: 5000,
+            position: 'bottom-center',
+          });
+        }
+      }
+
+      // Redirecionar para Goals se for uma meta ou contribuição
+      if (formData.category === 'Goal' || formData.category === 'Contribution') {
+        navigate('/goals');
+      }
+
+      // Adicionar a transação
+      await addTransaction(newTransaction);
       
+      // Resetar o formulário e fechar
       setFormData({
         origin: '',
         category: 'Fixed',
