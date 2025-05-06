@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
@@ -8,9 +8,24 @@ type Period = 'Month' | 'Year';
 
 export default function WeeklyBudget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const getCurrentMonth = () => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[new Date().getMonth()];
+  };
+
+  const getCurrentYear = () => new Date().getFullYear();
+
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const { entries, currentYear, setCurrentYear } = useWeeklyBudgetStore();
+
+  // Inicializar com o ano atual
+  useEffect(() => {
+    setCurrentYear(getCurrentYear());
+  }, []);
   
   // Anos fixos de 2022 a 2025
   const years = [2022, 2023, 2024, 2025];
