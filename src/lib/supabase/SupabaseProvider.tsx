@@ -3,7 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { useAuthStore } from '../../stores/authStore';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Enhanced validation of Supabase credentials
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -18,11 +18,13 @@ type SupabaseContextType = {
   supabase: SupabaseClient;
   isInitialized: boolean;
   connectionError: string | null;
+  session: any | null;
 };
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<any | null>(null);
   const [supabase] = useState(() => createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
@@ -42,18 +44,21 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
 
   // Check initial auth state
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user);
-      setUser(session?.user || null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      console.log('Auth state changed:', event, currentSession?.user);
+      setUser(currentSession?.user || null);
+      setSession(currentSession);
       
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing session');
+        setSession(null);
       }
     });
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setUser(initialSession?.user || null);
+      setSession(initialSession);
     });
 
     return () => {
@@ -73,7 +78,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
         setConnectionError(null);
 
         // Simple health check query
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('user_profiles')
           .select('count')
           .limit(1)
@@ -131,7 +136,8 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const value = {
     supabase,
     isInitialized,
-    connectionError
+    connectionError,
+    session
   };
 
   return (

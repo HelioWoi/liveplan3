@@ -39,6 +39,22 @@ export default function Login() {
       }
       
       if (authData.session) {
+        // Criar ou atualizar o perfil do usuário
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .upsert({
+            user_id: authData.user.id,
+            onboarding_completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (profileError) {
+          console.error('Error creating user profile:', profileError);
+        }
+
         navigate(from, { replace: true });
       }
     } catch (error: any) {
@@ -133,7 +149,7 @@ export default function Login() {
               </div>
 
               <Link 
-                to="/request-password-reset" 
+                to="/forgot-password" 
                 className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
               >
                 Forgot password?
@@ -167,7 +183,7 @@ export default function Login() {
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{' '}
               <Link
-                to="/register"
+                to="/signup"
                 className="font-medium text-primary-600 hover:text-primary-700 transition-colors"
               >
                 Create one now

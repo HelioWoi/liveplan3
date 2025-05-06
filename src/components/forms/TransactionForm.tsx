@@ -83,10 +83,10 @@ export default function TransactionForm({
 
       // If category is Contribution, redirect to simulator
       if (data.category === 'Contribution') {
-        navigate('/simulator', { 
+        navigate('/goals', { 
           state: { 
-            initialInvestment: amountValue,
-            origin: data.origin
+            contributionAmount: amountValue,
+            description: data.origin
           }
         });
         return;
@@ -98,7 +98,7 @@ export default function TransactionForm({
         category: data.category,
         type: isIncomeCategory(data.category) ? 'income' : 'expense',
         date: data.date,
-        userId: user.id,
+        user_id: user?.id,
       });
       
       reset();
