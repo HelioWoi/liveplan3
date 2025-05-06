@@ -114,30 +114,38 @@ export default function Dashboard() {
       color: COLORS[index % COLORS.length]
     }));
 
-  // Calcular o total de gastos e investimentos
-  const totalExpensesAndInvestments = 
-    financialSummary.categoryTotals.Fixed + 
-    financialSummary.categoryTotals.Variable + 
-    financialSummary.categoryTotals.Investimento;
+  // Calcular totais usando todas as transações (não filtradas)
+  const fixedExpenses = transactions
+    .filter(t => t.category === 'Fixed')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const variableExpenses = transactions
+    .filter(t => t.category === 'Variable')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const investments = transactions
+    .filter(t => t.category === 'Investimento')
+    .reduce((sum, t) => sum + t.amount, 0);
 
   // Usar o maior valor entre gastos totais e renda como base
-  const targetTotal = Math.max(totalExpensesAndInvestments, financialSummary.totalIncome);
+  const totalExpensesAndInvestments = fixedExpenses + variableExpenses + investments;
+  const targetTotal = Math.max(totalExpensesAndInvestments, totalIncome);
 
   const formula3Data = {
     fixed: {
-      current: financialSummary.categoryTotals.Fixed,
+      current: fixedExpenses,
       target: targetTotal * 0.5,
-      percentage: targetTotal ? (financialSummary.categoryTotals.Fixed / targetTotal) * 100 : 0
+      percentage: targetTotal ? (fixedExpenses / targetTotal) * 100 : 0
     },
     variable: {
-      current: financialSummary.categoryTotals.Variable,
+      current: variableExpenses,
       target: targetTotal * 0.3,
-      percentage: targetTotal ? (financialSummary.categoryTotals.Variable / targetTotal) * 100 : 0
+      percentage: targetTotal ? (variableExpenses / targetTotal) * 100 : 0
     },
     investments: {
-      current: financialSummary.categoryTotals.Investimento,
+      current: investments,
       target: targetTotal * 0.2,
-      percentage: targetTotal ? (financialSummary.categoryTotals.Investimento / targetTotal) * 100 : 0
+      percentage: targetTotal ? (investments / targetTotal) * 100 : 0
     }
   };
 
