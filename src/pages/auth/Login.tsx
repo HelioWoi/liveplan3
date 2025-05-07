@@ -55,7 +55,19 @@ export default function Login() {
           console.error('Error creating user profile:', profileError);
         }
 
-        navigate(from, { replace: true });
+        // Verificar se o usuário já completou o onboarding
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('onboarding_completed')
+          .eq('user_id', authData.user.id)
+          .single();
+
+        // Se o onboarding não foi completado, redirecionar para /onboarding
+        if (!profile?.onboarding_completed) {
+          navigate('/onboarding', { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
       }
     } catch (error: any) {
       setLoginError(error.message);

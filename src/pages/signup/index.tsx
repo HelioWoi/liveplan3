@@ -8,7 +8,6 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -30,7 +29,22 @@ export default function Signup() {
       if (error) throw error;
 
       if (data?.user) {
-        setSuccess(true);
+        // Criar perfil do usuário com onboarding_completed = false
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: data.user.id,
+            onboarding_completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error('Error creating user profile:', profileError);
+        }
+
+        // Redirecionar para o onboarding
+        navigate('/onboarding', { replace: true });
       }
     } catch (error: any) {
       setError(error.message);
@@ -39,22 +53,7 @@ export default function Signup() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Verifique seu e-mail
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Enviamos um link de confirmação para {email}. Por favor, verifique seu e-mail para continuar.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
