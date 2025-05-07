@@ -18,7 +18,7 @@ export default function Login() {
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>();
   
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as any)?.from?.pathname || '/onboarding';
   const message = (location.state as any)?.message;
   
   const onSubmit = async (data: LoginFormValues) => {
@@ -45,23 +45,41 @@ export default function Login() {
           throw new Error('Please verify your email before logging in. Check your inbox for the confirmation link.');
         }
 
-        // Criar ou atualizar o perfil do usuário
-        const { error: profileError } = await supabase
+        // Verificar se o usuário já completou o onboarding
+        const { data: profile, error: profileFetchError } = await supabase
           .from('user_profiles')
-          .upsert({
-            user_id: authData.user.id,
-            onboarding_completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id'
-          });
+          .select('onboarding_completed')
+          .eq('user_id', authData.user.id)
+          .single();
 
-        if (profileError) {
-          console.error('Error creating user profile:', profileError);
+        if (profileFetchError && profileFetchError.code !== 'PGRST116') {
+          throw profileFetchError;
         }
 
-        navigate(from, { replace: true });
+        if (!profile) {
+          // Se não tem perfil, criar um novo e ir para onboarding
+          const { error: profileCreateError } = await supabase
+            .from('user_profiles')
+            .insert({
+              user_id: authData.user.id,
+              onboarding_completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+
+          if (profileCreateError) throw profileCreateError;
+          navigate('/onboarding');
+          return;
+        }
+        
+        if (!profile.onboarding_completed) {
+          // Se tem perfil mas não completou onboarding
+          navigate('/onboarding');
+          return;
+        }
+        
+        // Se já completou onboarding
+        navigate('/');
       }
     } catch (error: any) {
       setLoginError(error.message);
