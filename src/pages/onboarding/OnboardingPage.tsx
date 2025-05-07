@@ -34,17 +34,24 @@ const ONBOARDING_STEPS = [
 ];
 
 export default function OnboardingPage() {
+  // Prevent layout shift during navigation
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { supabase } = useSupabase();
   const { user } = useAuthStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [showUploader, setShowUploader] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    setIsLoading(true);
     if (currentStep < ONBOARDING_STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+        setIsLoading(false);
+      }, 100);
     } else {
       setShowUploader(true);
+      setIsLoading(false);
     }
   };
 
@@ -76,11 +83,15 @@ export default function OnboardingPage() {
     navigate('/');
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    setIsLoading(true);
     if (currentStep === ONBOARDING_STEPS.length - 1) {
       handleSkipUpload();
     } else {
-      setCurrentStep(prev => prev + 1);
+      setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+        setIsLoading(false);
+      }, 100);
     }
   };
 
@@ -89,7 +100,10 @@ export default function OnboardingPage() {
   const currentStepData = ONBOARDING_STEPS[currentStep];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
+    <div className={classNames('fixed inset-0 bg-white', {
+      'pointer-events-none': isLoading
+    })}>
+      <div className="absolute inset-0 flex flex-col">
       {/* Spreadsheet Uploader Modal */}
       {showUploader && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -111,7 +125,7 @@ export default function OnboardingPage() {
         </div>
       )}
       {/* Progress Dots */}
-      <div className="absolute top-8 left-0 right-0 flex justify-center gap-2 z-20">
+      <div className="absolute top-8 left-0 right-0 flex justify-center gap-2 z-20 select-none pointer-events-none">
         {ONBOARDING_STEPS.map((_, index) => (
           <div
             key={index}
@@ -124,14 +138,18 @@ export default function OnboardingPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 animate-fade-in relative z-10">
-        <div className="w-full max-w-sm text-center space-y-8">
+      <div className={classNames(
+        'flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10 transform-gpu',
+        { 'opacity-50 transition-opacity duration-200': isLoading }
+      )}>
+        <div className="w-full max-w-sm text-center space-y-8 select-none">
           {/* Image */}
           <div className="mx-auto">
             <img
               src={currentStepData.image}
               alt={currentStepData.title}
-              className="w-64 h-64 object-contain mx-auto"
+              className="w-64 h-64 object-contain mx-auto select-none pointer-events-none"
+              loading="eager"
             />
           </div>
 
@@ -171,8 +189,7 @@ export default function OnboardingPage() {
           {currentStep === ONBOARDING_STEPS.length - 1 ? 'Skip Import' : 'Skip This Step'}
         </button>
       </div>
-
-
+      </div>
     </div>
   );
 }
