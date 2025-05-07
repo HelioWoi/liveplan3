@@ -11,6 +11,7 @@ import Login from './pages/auth/Login';
 import Signup from './pages/signup';
 import Onboarding from './pages/onboarding/OnboardingPage';
 import PrivateRoute from './components/auth/PrivateRoute';
+import EmailVerificationRoute from './components/auth/EmailVerificationRoute';
 import NotFound from './pages/NotFound';
 import StatementPage from './pages/StatementPage';
 import CategoryReport from './pages/CategoryReport';
@@ -82,7 +83,14 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-          <Route path="/onboarding" element={<Onboarding />} />
+          <Route
+            path="/onboarding"
+            element={
+              <EmailVerificationRoute>
+                <Onboarding />
+              </EmailVerificationRoute>
+            }
+          />
           <Route
             path="/statement"
             element={
