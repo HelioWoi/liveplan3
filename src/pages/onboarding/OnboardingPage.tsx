@@ -36,7 +36,8 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { supabase } = useSupabase();
   const { user } = useAuthStore();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(-1); // -1 representa a tela de escolha
+  const [showSetupChoice, setShowSetupChoice] = useState(true);
 
 
   const handleNext = async () => {
@@ -76,6 +77,57 @@ export default function OnboardingPage() {
 
 
   const currentStepData = ONBOARDING_STEPS[currentStep];
+
+  const handleSetupChoice = (choice: 'import' | 'manual') => {
+    setShowSetupChoice(false);
+    if (choice === 'import') {
+      // Redirecionar para a página de importação
+      navigate('/import');
+    } else {
+      // Iniciar o onboarding
+      setCurrentStep(0);
+    }
+  };
+
+  if (showSetupChoice) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Bem-vindo ao LivePlan³!</h1>
+          <p className="text-gray-600 text-lg">Como você gostaria de começar?</p>
+          
+          <div className="space-y-4 mt-8">
+            <button
+              onClick={() => handleSetupChoice('import')}
+              className="w-full bg-black text-white rounded-full py-4 font-semibold text-lg transition-colors hover:bg-gray-900"
+            >
+              Importar dados financeiros
+            </button>
+            <p className="text-sm text-gray-500">Você pode importar seus dados financeiros de outros aplicativos ou planilhas</p>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">ou</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleSetupChoice('manual')}
+              className="w-full border-2 border-black text-black rounded-full py-4 font-semibold text-lg transition-colors hover:bg-gray-50"
+            >
+              Configurar manualmente
+            </button>
+            <p className="text-sm text-gray-500">Configure suas finanças do zero, passo a passo</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentStep === -1) return null;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

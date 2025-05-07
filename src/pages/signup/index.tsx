@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { supabase } from '../../lib/supabase';
 
 export default function Signup() {
@@ -8,7 +8,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +35,7 @@ export default function Signup() {
           .insert({
             user_id: data.user.id,
             onboarding_completed: false,
+            email_confirmed: false,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
@@ -43,8 +44,8 @@ export default function Signup() {
           console.error('Error creating user profile:', profileError);
         }
 
-        // Redirecionar para o onboarding
-        navigate('/onboarding', { replace: true });
+        // Mostrar mensagem de confirmação de email
+        setEmailSent(true);
       }
     } catch (error: any) {
       setError(error.message);
@@ -54,6 +55,23 @@ export default function Signup() {
   };
 
 
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Verifique seu e-mail
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Enviamos um link de confirmação para {email}. Por favor, verifique seu e-mail para continuar.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
