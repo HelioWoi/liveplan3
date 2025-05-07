@@ -8,7 +8,7 @@ import { SupabaseProvider } from './lib/supabase/SupabaseProvider';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SupabaseProvider>
-      <BrowserRouter basename="/">
+      <BrowserRouter>
         <App />
       </BrowserRouter>
     </SupabaseProvider>

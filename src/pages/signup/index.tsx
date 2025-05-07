@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
 export default function Signup() {
@@ -8,7 +8,8 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,23 +30,7 @@ export default function Signup() {
       if (error) throw error;
 
       if (data?.user) {
-        // Criar perfil do usuário com onboarding_completed = false
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            user_id: data.user.id,
-            onboarding_completed: false,
-            email_confirmed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-
-        if (profileError) {
-          console.error('Error creating user profile:', profileError);
-        }
-
-        // Mostrar mensagem de confirmação de email
-        setEmailSent(true);
+        setSuccess(true);
       }
     } catch (error: any) {
       setError(error.message);
@@ -54,9 +39,7 @@ export default function Signup() {
     }
   };
 
-
-
-  if (emailSent) {
+  if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">

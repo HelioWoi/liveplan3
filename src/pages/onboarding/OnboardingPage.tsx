@@ -4,6 +4,7 @@ import { DollarSign, Target, PiggyBank } from 'lucide-react';
 import classNames from 'classnames';
 import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
+import SpreadsheetUploader from '../../components/spreadsheet/SpreadsheetUploader';
 
 const ONBOARDING_STEPS = [
   {
@@ -36,31 +37,18 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { supabase } = useSupabase();
   const { user } = useAuthStore();
-  const [currentStep, setCurrentStep] = useState(-1); // -1 representa a tela de escolha
-  const [showSetupChoice, setShowSetupChoice] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showUploader, setShowUploader] = useState(false);
 
-
-  const handleNext = async () => {
+  const handleNext = () => {
     if (currentStep < ONBOARDING_STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      // Mark onboarding as completed
-      if (user) {
-        const { error } = await supabase
-          .from('user_profiles')
-          .update({ onboarding_completed: true })
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error('Failed to update onboarding status:', error);
-        }
-      }
-      navigate('/');
+      setShowUploader(true);
     }
   };
 
-  const handleSkip = async () => {
-    // Mark onboarding as completed
+  const handleUploadSuccess = async () => {
     if (user) {
       const { error } = await supabase
         .from('user_profiles')
@@ -74,63 +62,54 @@ export default function OnboardingPage() {
     navigate('/');
   };
 
+  const handleSkipUpload = async () => {
+    if (user) {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ onboarding_completed: true })
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Failed to update onboarding status:', error);
+      }
+    }
+    navigate('/');
+  };
+
+  const handleSkip = () => {
+    if (currentStep === ONBOARDING_STEPS.length - 1) {
+      handleSkipUpload();
+    } else {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
 
 
   const currentStepData = ONBOARDING_STEPS[currentStep];
 
-  const handleSetupChoice = (choice: 'import' | 'manual') => {
-    setShowSetupChoice(false);
-    if (choice === 'import') {
-      // Redirecionar para a página de importação
-      navigate('/import');
-    } else {
-      // Iniciar o onboarding
-      setCurrentStep(0);
-    }
-  };
-
-  if (showSetupChoice) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full space-y-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Bem-vindo ao LivePlan³!</h1>
-          <p className="text-gray-600 text-lg">Como você gostaria de começar?</p>
-          
-          <div className="space-y-4 mt-8">
-            <button
-              onClick={() => handleSetupChoice('import')}
-              className="w-full bg-black text-white rounded-full py-4 font-semibold text-lg transition-colors hover:bg-gray-900"
-            >
-              Importar dados financeiros
-            </button>
-            <p className="text-sm text-gray-500">Você pode importar seus dados financeiros de outros aplicativos ou planilhas</p>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">ou</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleSetupChoice('manual')}
-              className="w-full border-2 border-black text-black rounded-full py-4 font-semibold text-lg transition-colors hover:bg-gray-50"
-            >
-              Configurar manualmente
-            </button>
-            <p className="text-sm text-gray-500">Configure suas finanças do zero, passo a passo</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (currentStep === -1) return null;
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {/* Spreadsheet Uploader Modal */}
+      {showUploader && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Import Your Data</h2>
+              <button onClick={() => setShowUploader(false)} className="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <SpreadsheetUploader onClose={() => {
+              setShowUploader(false);
+              handleUploadSuccess();
+            }} />
+          </div>
+        </div>
+      )}
       {/* Progress Dots */}
       <div className="fixed top-8 left-0 right-0 flex justify-center gap-2">
         {ONBOARDING_STEPS.map((_, index) => (
@@ -183,13 +162,13 @@ export default function OnboardingPage() {
           onClick={handleNext}
           className="w-full bg-black text-white rounded-full py-4 font-semibold text-lg transition-colors hover:bg-gray-900"
         >
-          {currentStep === ONBOARDING_STEPS.length - 1 ? 'Create Account' : 'Next Step'}
+          {currentStep === ONBOARDING_STEPS.length - 1 ? 'Get Started' : 'Next Step'}
         </button>
         <button
           onClick={handleSkip}
           className="w-full text-gray-600 font-medium hover:text-gray-900 transition-colors"
         >
-          Skip This Step
+          {currentStep === ONBOARDING_STEPS.length - 1 ? 'Skip Import' : 'Skip This Step'}
         </button>
       </div>
 
