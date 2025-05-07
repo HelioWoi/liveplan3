@@ -89,7 +89,7 @@ export default function OnboardingPage() {
   const currentStepData = ONBOARDING_STEPS[currentStep];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col relative overflow-hidden">
       {/* Spreadsheet Uploader Modal */}
       {showUploader && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -111,7 +111,7 @@ export default function OnboardingPage() {
         </div>
       )}
       {/* Progress Dots */}
-      <div className="fixed top-8 left-0 right-0 flex justify-center gap-2">
+      <div className="absolute top-8 left-0 right-0 flex justify-center gap-2 z-20">
         {ONBOARDING_STEPS.map((_, index) => (
           <div
             key={index}
@@ -124,7 +124,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 animate-fade-in">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 animate-fade-in relative z-10">
         <div className="w-full max-w-sm text-center space-y-8">
           {/* Image */}
           <div className="mx-auto">
@@ -157,7 +157,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Bottom Buttons */}
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 relative z-10">
         <button
           onClick={handleNext}
           className="w-full bg-black text-white rounded-full py-4 font-semibold text-lg transition-colors hover:bg-gray-900"
