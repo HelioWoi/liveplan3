@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useFeedback } from '../feedback/FeedbackProvider';
@@ -7,6 +9,8 @@ import { Calendar } from 'lucide-react';
 import classNames from 'classnames';
 import { TransactionCategory, TRANSACTION_CATEGORIES, isIncomeCategory } from '../../types/transaction';
 import { useNavigate } from 'react-router-dom';
+import { transactionFormSchema } from '../../lib/validations/schemas';
+import FormInput from '../common/FormInput';
 
 interface TransactionFormProps {
   onSuccess?: () => void;
@@ -15,12 +19,7 @@ interface TransactionFormProps {
   onClose?: () => void;
 }
 
-interface FormValues {
-  category: TransactionCategory;
-  origin: string;
-  amount: string;
-  date: string;
-}
+type FormValues = z.infer<typeof transactionFormSchema>;
 
 export default function TransactionForm({ 
   onSuccess, 
@@ -35,12 +34,15 @@ export default function TransactionForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [amountValue, setAmountValue] = useState('');
   
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, watch, reset, setValue } = useForm<FormValues>({
+    resolver: zodResolver(transactionFormSchema),
+    mode: 'onChange', // Validação em tempo real
     defaultValues: {
       category: defaultCategory || 'Fixed',
-      origin: '',
+      description: '',
       amount: '',
       date: new Date().toISOString().split('T')[0],
+      type: 'expense' as const
     }
   });
 
@@ -48,21 +50,29 @@ export default function TransactionForm({
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
+    // Permite apenas números e até 2 casas decimais
+    if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
       setAmountValue(value);
+      // Atualiza o valor no formulário
+      setValue('amount', value, {
+        shouldValidate: true,
+        shouldDirty: true
+      });
     }
   };
   
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategory = e.target.value as TransactionCategory;
-    
-    // Redirect to appropriate page based on category
-    if (newCategory === 'Invoices') {
+    const category = e.target.value as TransactionCategory;
+    setValue('category', category, {
+      shouldValidate: true,
+      shouldDirty: true
+    });
+    if (category === 'Invoices') {
       navigate('/invoices');
       return;
     }
     
-    if (newCategory === 'Goal') {
+    if (category === 'Goal') {
       navigate('/goals');
       return;
     }
@@ -93,19 +103,24 @@ export default function TransactionForm({
           navigate('/goals', { 
             state: { 
               contributionAmount: amountValue,
-              description: data.origin
+              description: data.description
             }
           });
           return;
         }
 
+        const category = TRANSACTION_CATEGORIES.find(c => c === data.category);
+        if (!category) {
+          throw new Error('Invalid category');
+        }
+
         await addTransaction({
-          origin: data.origin.trim(),
-          amount: parseFloat(amountValue),
-          category: data.category,
-          type: isIncomeCategory(data.category) ? 'income' : 'expense',
+          origin: data.description, // Mantendo compatibilidade com a interface existente
+          amount: parseFloat(data.amount),
           date: data.date,
-          user_id: user?.id,
+          category: category,
+          type: data.type,
+          user_id: user?.id || ''
         });
         
         reset();
@@ -155,20 +170,11 @@ export default function TransactionForm({
         <label className="text-lg font-medium text-gray-900 mb-2 block">
           Origin / Description <span className="text-error-600">*</span>
         </label>
-        <input 
-          type="text" 
-          className={classNames(
-            "w-full px-4 py-3 text-lg bg-gray-50 rounded-xl border transition-colors",
-            errors.origin 
-              ? "border-error-300 focus:border-error-500 focus:ring-error-500"
-              : "border-gray-200 focus:border-[#120B39] focus:ring-[#120B39]"
-          )}
-          placeholder="Salary, Rent payment, etc."
-          {...register('origin', { required: 'Origin is required' })}
+        <FormInput
+          {...register('description')}
+          placeholder="Description"
+          error={errors.description?.message}
         />
-        {errors.origin && (
-          <p className="mt-1 text-sm text-error-600">{errors.origin.message}</p>
-        )}
       </div>
 
       <div>
@@ -177,23 +183,14 @@ export default function TransactionForm({
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-          <input 
+          <FormInput
             type="text"
-            inputMode="decimal"
-            className={classNames(
-              "w-full pl-8 pr-4 py-3 text-lg bg-gray-50 rounded-xl border transition-colors",
-              !amountValue
-                ? "border-error-300 focus:border-error-500 focus:ring-error-500" 
-                : "border-gray-200 focus:border-[#120B39] focus:ring-[#120B39]"
-            )}
-            placeholder="0.00"
             value={amountValue}
             onChange={handleAmountChange}
+            placeholder="Amount"
+            error={errors.amount?.message}
           />
         </div>
-        {!amountValue && (
-          <p className="mt-1 text-sm text-error-600">Amount is required</p>
-        )}
       </div>
 
       <div>
@@ -201,15 +198,10 @@ export default function TransactionForm({
           Date <span className="text-error-600">*</span>
         </label>
         <div className="relative">
-          <input 
-            type="date" 
-            className={classNames(
-              "w-full px-4 py-3 text-lg bg-gray-50 rounded-xl border transition-colors",
-              errors.date
-                ? "border-error-300 focus:border-error-500 focus:ring-error-500"
-                : "border-gray-200 focus:border-[#120B39] focus:ring-[#120B39]"
-            )}
-            {...register('date', { required: 'Date is required' })}
+          <FormInput
+            type="date"
+            {...register('date')}
+            error={errors.date?.message}
           />
           <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
         </div>

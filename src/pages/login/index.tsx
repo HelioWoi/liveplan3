@@ -15,18 +15,29 @@ export default function Login() {
     setError('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) throw error;
+        if (error) {
+          if (error.message === 'Failed to fetch') {
+            throw new Error('Connection error. Please check your internet connection.');
+          }
+          throw error;
+        }
 
-      if (data?.user) {
-        navigate('/');
+        if (data?.user) {
+          navigate('/');
+        }
+      } catch (error: any) {
+        console.error('Login error:', error);
+        setError(error.message || 'An error occurred during login. Please try again.');
       }
-    } catch (error: any) {
-      setError(error.message);
+    } catch (outerError: any) {
+      console.error('Outer error:', outerError);
+      setError(outerError.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -40,7 +51,7 @@ export default function Login() {
             LivePlan³
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Faça login na sua conta
+            Sign in to your account
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
@@ -52,7 +63,7 @@ export default function Login() {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
-                E-mail
+                Email
               </label>
               <input
                 id="email-address"
@@ -63,12 +74,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="E-mail"
+                placeholder="Email"
               />
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
-                Senha
+                Password
               </label>
               <input
                 id="password"
@@ -79,7 +90,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Senha"
+                placeholder="Password"
               />
             </div>
           </div>
@@ -90,17 +101,25 @@ export default function Login() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <a
+                href="/forgot-password"
+                className="font-medium text-purple-600 hover:text-purple-500"
+              >
+                Forgot your password?
+              </a>
+            </div>
             <div className="text-sm">
               <a
                 href="/signup"
                 className="font-medium text-purple-600 hover:text-purple-500"
               >
-                Não tem uma conta? Criar conta
+                Don't have an account? Sign up
               </a>
             </div>
           </div>

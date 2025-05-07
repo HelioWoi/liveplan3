@@ -41,11 +41,11 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
     if (!user) return;
     
     if (!data.title || !data.target_amount || !data.target_date) {
-      showToast('Preencha todos os campos obrigatórios', 'warning');
+      showToast('Please fill in all required fields', 'warning');
       return;
     }
 
-    showLoading('Criando meta...');
+    showLoading('Creating goal...');
 
     setIsSubmitting(true);
     
@@ -59,11 +59,11 @@ export default function GoalForm({ onSuccess }: GoalFormProps) {
       });
       
       reset();
-      showToast('Meta criada com sucesso!', 'success');
+      showToast('Goal created successfully!', 'success');
       onSuccess?.();
     } catch (error) {
       console.error('Failed to add goal', error);
-      showToast('Erro ao criar meta', 'error');
+      showToast('Error creating goal', 'error');
     } finally {
       hideLoading();
       setIsSubmitting(false);

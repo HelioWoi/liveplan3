@@ -20,8 +20,8 @@ export const useAnimations = () => {
         opacity: 1,
         transition: {
           type: 'spring',
-          damping: 20,
-          stiffness: 300
+          damping: 6,
+          stiffness: 90
         }
       },
       exit: {
@@ -29,8 +29,8 @@ export const useAnimations = () => {
         opacity: 0,
         transition: {
           type: 'spring',
-          damping: 20,
-          stiffness: 300
+          damping: 6,
+          stiffness: 90
         }
       }
     };
