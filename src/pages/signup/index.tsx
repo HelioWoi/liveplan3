@@ -31,6 +31,11 @@ export default function Signup() {
 
       if (data?.user) {
         setSuccess(true);
+        // Fazer logout para forçar verificação de email
+        await supabase.auth.signOut();
+        setTimeout(() => {
+          navigate('/login');
+        }, 5000);
       }
     } catch (error: any) {
       setError(error.message);
@@ -48,7 +53,7 @@ export default function Signup() {
               Check your email
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              We've sent a confirmation link to {email}. Please check your email to continue.
+              We've sent a confirmation link to {email}. Please check your email to verify your account. Redirecting to login page in 5 seconds...
             </p>
           </div>
         </div>

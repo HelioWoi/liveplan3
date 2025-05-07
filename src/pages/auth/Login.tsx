@@ -39,6 +39,12 @@ export default function Login() {
       }
       
       if (authData.session) {
+        // Verificar se o email foi confirmado
+        if (!authData.user.email_confirmed_at) {
+          await supabase.auth.signOut();
+          throw new Error('Please verify your email before logging in. Check your inbox for the confirmation link.');
+        }
+
         // Criar ou atualizar o perfil do usuário
         const { error: profileError } = await supabase
           .from('user_profiles')

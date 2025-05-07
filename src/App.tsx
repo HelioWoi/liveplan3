@@ -11,7 +11,7 @@ import Login from './pages/auth/Login';
 import Signup from './pages/signup';
 import Onboarding from './pages/onboarding/OnboardingPage';
 import PrivateRoute from './components/auth/PrivateRoute';
-import EmailVerificationRoute from './components/auth/EmailVerificationRoute';
+
 import NotFound from './pages/NotFound';
 import StatementPage from './pages/StatementPage';
 import CategoryReport from './pages/CategoryReport';
@@ -86,9 +86,9 @@ function AppContent() {
           <Route
             path="/onboarding"
             element={
-              <EmailVerificationRoute>
+              <PrivateRoute>
                 <Onboarding />
-              </EmailVerificationRoute>
+              </PrivateRoute>
             }
           />
           <Route
