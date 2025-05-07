@@ -9,7 +9,7 @@ import { useTransactionStore } from './stores/transactionStore';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/signup';
-import Onboarding from './pages/onboarding';
+import Onboarding from './pages/onboarding/OnboardingPage';
 import PrivateRoute from './components/auth/PrivateRoute';
 import NotFound from './pages/NotFound';
 import StatementPage from './pages/StatementPage';
@@ -82,14 +82,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/onboarding"
-            element={
-              <PrivateRoute>
-                <Onboarding />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route
             path="/statement"
             element={
