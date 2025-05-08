@@ -94,7 +94,7 @@ export default function QuickActions({ onAddTransaction }: QuickActionsProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 60 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="fixed bottom-20 -right-16 z-50"
+          className="fixed bottom-20 right-4 z-50"
         >
           <div className={`
             flex flex-col items-end space-y-2
@@ -110,7 +110,7 @@ export default function QuickActions({ onAddTransaction }: QuickActionsProps) {
                   flex items-center space-x-2 px-4 py-2 rounded-full
                   bg-[#1A1A40] text-white hover:bg-[#2A2A50]
                   shadow-lg transform transition-all duration-200
-                  ${isExpanded ? 'translate-x-0' : 'translate-x-12'}
+                  ${isExpanded ? '-translate-x-16' : 'translate-x-12'}
                 `}
               >
                 <span className="text-sm whitespace-nowrap">{action.label}</span>
