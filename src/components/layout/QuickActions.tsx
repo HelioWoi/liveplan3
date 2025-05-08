@@ -94,7 +94,7 @@ export default function QuickActions({ onAddTransaction }: QuickActionsProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 60 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="fixed bottom-20 right-6 z-50"
+          className="fixed bottom-20 -right-16 z-50"
         >
           <div className={`
             flex flex-col items-end space-y-2
