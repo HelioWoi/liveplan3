@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import InvestmentRegistrationModal from '../components/modals/InvestmentRegistrationModal';
-import InvestmentDetailsModal from '../components/modals/InvestmentDetailsModal';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { ArrowLeft, PlusCircle, TrendingUp, ExternalLink } from 'lucide-react';
+import classNames from 'classnames';
+
 import { useTransactionStore } from '../stores/transactionStore';
 import { Transaction } from '../types/transaction';
-import { ArrowLeft, PlusCircle, TrendingUp, ExternalLink } from 'lucide-react';
-import { format } from 'date-fns';
-
+import InvestmentRegistrationModal from '../components/modals/InvestmentRegistrationModal';
+import InvestmentDetailsModal from '../components/modals/InvestmentDetailsModal';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
-import classNames from 'classnames';
+// Importações de componentes de layout
 
 // Replace direct Finnhub client with a fetch-based approach
 const API_KEY = 'd08rfs1r01qju5m8a010d08rfs1r01qju5m8a01g';
@@ -49,9 +50,8 @@ async function fetchMarketNews() {
     .slice(0, 3);  // Pegar as 3 mais recentes
 }
 
-type Period = 'day' | 'week' | 'month' | 'year';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
+// Tipos para o seletor de meses e anos
+type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
 
 // Popular brokers list
 const BROKERS = [
@@ -75,8 +75,7 @@ export function InvestmentsPage() {
   const [activeInvestments, setActiveInvestments] = useState(0);
   const navigate = useNavigate();
   const { transactions, deleteTransaction } = useTransactionStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
+  const [selectedMonth, setSelectedMonth] = useState<Month>('April');
   const [selectedYear, setSelectedYear] = useState('2025');
 
   const [showBrokersModal, setShowBrokersModal] = useState(false);
@@ -93,15 +92,36 @@ export function InvestmentsPage() {
   }>>([]);
 
   // Filter investment transactions
-  const investments = transactions.filter(t => t.category === 'Investimento');
+  const investments = transactions.filter((t: any) => t.category === 'Investment');
 
   // Calculate total invested
-  const totalInvested = investments.reduce((sum, t) => sum + t.amount, 0);
+  const totalInvested = investments.reduce((sum: number, t: any) => sum + t.amount, 0);
+
+  // Commented out unused code
+  // Group investments by type
+  /*
+  const investmentsByType = investments.reduce((acc: Record<string, number>, inv: any) => {
+    const type = inv.description.split('|').reduce((acc: string, line: string) => {
+      const [key, value] = line.split(':');
+      if (key?.trim() === 'Type') {
+        return value?.trim() || 'Other';
+      }
+      return acc;
+    }, 'Other');
+
+    if (!acc[type]) {
+      acc[type] = 0;
+    }
+
+    acc[type] += inv.amount;
+    return acc;
+  }, {});
+  */
 
   // Calculate active investments
   useEffect(() => {
-    const active = investments.filter(inv => {
-      const details = inv.description?.split('\n').reduce((acc, line) => {
+    const active = investments.filter((inv: any) => {
+      const details = inv.description?.split('\n').reduce((acc: Record<string, string>, line: string) => {
         const match = line.match(/- (.*?): (.*)/);
         if (match) {
           acc[match[1].toLowerCase()] = match[2];
@@ -236,60 +256,6 @@ export function InvestmentsPage() {
           </div>
         </div>
 
-        {/* Period Selection */}
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-3 items-center flex-wrap">
-            {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={classNames(
-                  'px-4 py-1 rounded-full text-sm font-medium border',
-                  selectedPeriod === period
-                    ? 'bg-purple-600 text-white border-purple-600'
-                    : 'text-gray-700 border-gray-300 hover:border-purple-300'
-                )}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {selectedPeriod === 'month' && (
-            <div className="flex flex-wrap gap-2">
-              {months.map(month => (
-                <button
-                  key={month}
-                  onClick={() => setSelectedMonth(month)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedMonth === month ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
-                >
-                  {month}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {selectedPeriod === 'year' && (
-            <div className="flex flex-wrap gap-2">
-              {years.map(year => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedYear === year ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Recent Investments */}
         <div className="bg-white rounded-2xl p-6 space-y-6">
           <div className="flex items-center justify-between">
@@ -297,13 +263,11 @@ export function InvestmentsPage() {
             <div className="flex items-center gap-2">
               <select
                 value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
+                onChange={(e) => setSelectedMonth(e.target.value as Month)}
                 className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm"
               >
-                {months.map((month) => (
-                  <option key={month} value={month}>
-                    {month}
-                  </option>
+                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month) => (
+                  <option key={month} value={month}>{month}</option>
                 ))}
               </select>
               <select
@@ -311,10 +275,8 @@ export function InvestmentsPage() {
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm"
               >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
+                {['2022', '2023', '2024', '2025'].map((year) => (
+                  <option key={year} value={year}>{year}</option>
                 ))}
               </select>
             </div>
@@ -326,7 +288,7 @@ export function InvestmentsPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {investments.map((investment: Transaction) => (
+              {investments.map((investment: any) => (
                 <div
                   key={investment.id}
                   className="flex items-center justify-between py-4 hover:bg-gray-50 active:bg-gray-100 cursor-pointer px-4 -mx-4 rounded-lg transition-all duration-200 hover:shadow-sm"
