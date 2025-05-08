@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { ChevronDown, HelpCircle, MessageCircle, Calculator, Target, DollarSign, PiggyBank, ArrowUpCircle } from 'lucide-react';
+import { ChevronDown, HelpCircle, MessageCircle, Calculator, Target, DollarSign, PiggyBank, ArrowUpCircle, Upload } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNavigation from '../components/layout/BottomNavigation';
-import classNames from 'classnames';
 
 interface TaxBracket {
   min: number;
@@ -265,6 +264,70 @@ export default function HelpPage() {
               <p className="mt-4 text-gray-600">
                 The Tax page shows how much has been paid, how much is remaining, and how much you might be saving or overpaying.
               </p>
+            </div>
+          )}
+        </div>
+
+        {/* Spreadsheet Upload Section */}
+        <div className="bg-white rounded-xl shadow-card overflow-hidden mb-6">
+          <button
+            className="w-full px-6 py-4 flex items-center justify-between"
+            onClick={() => toggleSection('spreadsheet')}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                <Upload className="h-5 w-5 text-primary-600" />
+              </div>
+              <h2 className="text-xl font-bold">Upload My Own Spreadsheet</h2>
+            </div>
+            <ChevronDown className={`h-5 w-5 transition-transform ${
+              expandedSection === 'spreadsheet' ? 'rotate-180' : ''
+            }`} />
+          </button>
+
+          {expandedSection === 'spreadsheet' && (
+            <div className="px-6 pb-6">
+              <p className="text-gray-600 mb-4">
+                You can upload your own transaction spreadsheet to automatically import data into LivePlan³. 
+                Just follow these simple steps:
+              </p>
+              
+              <ol className="list-decimal pl-5 space-y-2 mb-6">
+                <li className="text-gray-600">Download our spreadsheet template or use your own format</li>
+                <li className="text-gray-600">Fill it with your transactions (date, amount, category, description)</li>
+                <li className="text-gray-600">Save as a CSV, XLS, or XLSX file</li>
+                <li className="text-gray-600">Upload using the button below</li>
+              </ol>
+
+              <button 
+                onClick={() => {
+                  // Create a hidden file input element
+                  const fileInput = document.createElement('input');
+                  fileInput.type = 'file';
+                  fileInput.accept = '.csv,.xlsx,.xls';
+                  fileInput.style.display = 'none';
+                  
+                  // Add event listener for when a file is selected
+                  fileInput.addEventListener('change', (e) => {
+                    const target = e.target as HTMLInputElement;
+                    if (target.files && target.files.length > 0) {
+                      // Navigate to dashboard with the file
+                      window.location.href = '/dashboard?openUpload=true';
+                    }
+                  });
+                  
+                  // Append to body, click to open file dialog, then remove
+                  document.body.appendChild(fileInput);
+                  fileInput.click();
+                  setTimeout(() => {
+                    document.body.removeChild(fileInput);
+                  }, 1000);
+                }} 
+                className="btn btn-primary w-full flex items-center justify-center gap-2"
+              >
+                <Upload className="h-5 w-5" />
+                Upload Spreadsheet
+              </button>
             </div>
           )}
         </div>
