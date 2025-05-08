@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
 import { DollarSign, Wallet, PiggyBank, ChevronRight, PlusCircle } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Formula3 from '../components/home/Formula3';
@@ -46,7 +47,29 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Day');
   const [selectedMonth, setSelectedMonth] = useState<Month>('May');
   const [selectedYear, setSelectedYear] = useState('2025');
+  const [dataRefreshed, setDataRefreshed] = useState(false);
 
+  // Check for data refresh flags and reload data as needed
+  useEffect(() => {
+    const needsRefresh = checkRefreshFlag(REFRESH_FLAGS.ALL) || 
+                         checkRefreshFlag(REFRESH_FLAGS.TRANSACTIONS) || 
+                         checkRefreshFlag(REFRESH_FLAGS.INCOME);
+    
+    if (needsRefresh && !dataRefreshed) {
+      console.log('Refreshing Dashboard data...');
+      // Fetch fresh data
+      fetchTransactions();
+      fetchTotalIncome();
+      
+      // Clear the flags after refresh
+      clearRefreshFlag(REFRESH_FLAGS.TRANSACTIONS);
+      clearRefreshFlag(REFRESH_FLAGS.INCOME);
+      
+      // Mark as refreshed to prevent multiple refreshes
+      setDataRefreshed(true);
+    }
+  }, [fetchTransactions, fetchTotalIncome, dataRefreshed]);
+  
   // Meses e anos são gerenciados pelo componente PeriodSelector
 
   useEffect(() => {

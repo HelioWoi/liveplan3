@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, HelpCircle, MessageCircle, Calculator, Target, DollarSign, PiggyBank, ArrowUpCircle, Upload } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNavigation from '../components/layout/BottomNavigation';
+import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 
 interface TaxBracket {
   min: number;
@@ -74,6 +75,7 @@ const CATEGORIES: Category[] = [
 
 export default function HelpPage() {
   const [expandedSection, setExpandedSection] = useState<string | null>('categories');
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -312,29 +314,7 @@ export default function HelpPage() {
               </div>
 
               <button 
-                onClick={() => {
-                  // Create a hidden file input element
-                  const fileInput = document.createElement('input');
-                  fileInput.type = 'file';
-                  fileInput.accept = '.csv,.xlsx,.xls';
-                  fileInput.style.display = 'none';
-                  
-                  // Add event listener for when a file is selected
-                  fileInput.addEventListener('change', (e) => {
-                    const target = e.target as HTMLInputElement;
-                    if (target.files && target.files.length > 0) {
-                      // Navigate to dashboard with the file
-                      window.location.href = '/dashboard?openUpload=true&preview=required';
-                    }
-                  });
-                  
-                  // Append to body, click to open file dialog, then remove
-                  document.body.appendChild(fileInput);
-                  fileInput.click();
-                  setTimeout(() => {
-                    document.body.removeChild(fileInput);
-                  }, 1000);
-                }} 
+                onClick={() => setShowUploadModal(true)} 
                 className="btn btn-primary w-full flex items-center justify-center gap-2"
               >
                 <Upload className="h-5 w-5" />
@@ -425,6 +405,12 @@ export default function HelpPage() {
       </div>
 
       <BottomNavigation />
+      
+      {/* Spreadsheet Upload Modal */}
+      <SpreadsheetUploadModal 
+        open={showUploadModal} 
+        onClose={() => setShowUploadModal(false)} 
+      />
     </div>
   );
 }

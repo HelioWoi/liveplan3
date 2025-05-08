@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
+import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
 import { Bell, HomeIcon, Clock, BarChart2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
@@ -17,7 +18,8 @@ import { motion } from 'framer-motion';
 
 export default function Home() {
   const { user } = useAuthStore();
-  const { transactions } = useTransactionStore();
+  const { transactions, fetchTransactions } = useTransactionStore();
+  const [dataRefreshed, setDataRefreshed] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Day');
   const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -30,6 +32,26 @@ export default function Home() {
       setShowSpreadsheetModal(true);
     }
   }, []);
+  
+  // Check for data refresh flags and reload data as needed
+  useEffect(() => {
+    const needsRefresh = checkRefreshFlag(REFRESH_FLAGS.ALL) || 
+                         checkRefreshFlag(REFRESH_FLAGS.TRANSACTIONS) || 
+                         checkRefreshFlag(REFRESH_FLAGS.WEEKLY_BUDGET);
+    
+    if (needsRefresh && !dataRefreshed) {
+      console.log('Refreshing Home page data...');
+      // Fetch fresh data
+      fetchTransactions();
+      
+      // Clear the flags after refresh
+      clearRefreshFlag(REFRESH_FLAGS.TRANSACTIONS);
+      clearRefreshFlag(REFRESH_FLAGS.WEEKLY_BUDGET);
+      
+      // Mark as refreshed to prevent multiple refreshes
+      setDataRefreshed(true);
+    }
+  }, [fetchTransactions, dataRefreshed]);
 
   // Callback para fechar e marcar como importado
   const handleCloseSpreadsheetModal = () => {

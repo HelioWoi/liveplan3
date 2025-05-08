@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
 import { useTransactionStore } from '../stores/transactionStore';
 import { Transaction, TransactionCategory } from '../types/transaction';
 import { ArrowLeft, Bell, Calendar, ArrowDownCircle } from 'lucide-react';
@@ -13,13 +14,32 @@ const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 
 export default function ExpensesPage() {
   const navigate = useNavigate();
-  const { transactions } = useTransactionStore();
+  const { transactions, fetchTransactions } = useTransactionStore();
+  const [dataRefreshed, setDataRefreshed] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
   const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investment', 'Tax', 'Additional', 'Contribution', 'Goal'];
   const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#8B5CF6', '#14B8A6'];
+  
+  // Check for data refresh flags and reload data as needed
+  useEffect(() => {
+    const needsRefresh = checkRefreshFlag(REFRESH_FLAGS.ALL) || 
+                         checkRefreshFlag(REFRESH_FLAGS.TRANSACTIONS);
+    
+    if (needsRefresh && !dataRefreshed) {
+      console.log('Refreshing Expenses page data...');
+      // Fetch fresh data
+      fetchTransactions();
+      
+      // Clear the flags after refresh
+      clearRefreshFlag(REFRESH_FLAGS.TRANSACTIONS);
+      
+      // Mark as refreshed to prevent multiple refreshes
+      setDataRefreshed(true);
+    }
+  }, [fetchTransactions, dataRefreshed]);
 
   const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
     const now = new Date();

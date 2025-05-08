@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Download, Upload, X, Check, AlertCircle } from 'lucide-react';
+import { setAllRefreshFlags } from '../../utils/dataRefreshService';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { generateTemplateFile } from '../../utils/spreadsheetParser';
 import { Transaction } from '../../types/transaction';
@@ -13,7 +13,6 @@ interface SpreadsheetUploaderProps {
 }
 
 export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProps) {
-  const navigate = useNavigate();
   const { supabase } = useSupabase();
   const { user } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,10 +95,13 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
           console.error('Failed to update profile:', profileError);
         }
       }
-      // Fecha o modal e força atualização após 2 segundos
+      // Fecha o modal e redireciona para a home page após 2 segundos
       setTimeout(() => {
         onClose();
-        window.location.reload();
+        // Set all refresh flags to ensure data is updated across the entire app
+        setAllRefreshFlags();
+        // Redirect to home page with cache-busting parameter
+        window.location.href = '/?refresh=' + Date.now();
       }, 2000);
     } catch (err) {
       console.error('Error importing transactions:', err);
