@@ -4,7 +4,6 @@ import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal'
 import { Bell, HomeIcon, Clock, BarChart2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
-import PageHeader from '../components/layout/PageHeader';
 import WeeklyBudget from '../components/home/WeeklyBudget';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/TopGoals';
@@ -90,30 +89,28 @@ export default function Home() {
         animate={{ opacity: 1 }}
         className="min-h-screen bg-gray-50"
       >
-        <PageHeader title="Home" showBackButton={false} />
-        <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-          <TransactionModal 
-            isOpen={isTransactionModalOpen}
-            onClose={() => setIsTransactionModalOpen(false)}
-          />
-          <div className="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] text-white">
-            <div className="px-4 pt-6 pb-8">
-              {/* Top Bar */}
-              <div className="flex justify-between items-center mb-6">
-  <div>
-    <p className="text-gray-400 text-sm">Welcome Back</p>
-    <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</h1>
-  </div>
-  <div className="flex items-center gap-4">
-  <span className="font-poppins font-semibold text-2xl tracking-tight text-white select-none">
-  LivePlan<sup className="align-super text-xs ml-0.5">3</sup>
-</span>
-  <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative ml-2">
-    <Bell className="h-6 w-6" />
-    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-  </button>
-</div>
-</div>
+        <div className="w-full bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] text-white pt-8 pb-8">
+          <div className="max-w-3xl mx-auto px-4">
+            <TransactionModal 
+              isOpen={isTransactionModalOpen}
+              onClose={() => setIsTransactionModalOpen(false)}
+            />
+            {/* Top Bar */}
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <p className="text-gray-400 text-sm">Welcome Back</p>
+                <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</h1>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="font-poppins font-semibold text-2xl tracking-tight text-white select-none">
+                  LivePlan<sup className="align-super text-xs ml-0.5">3</sup>
+                </span>
+                <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative ml-2">
+                  <Bell className="h-6 w-6" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+              </div>
+            </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
@@ -160,7 +157,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 space-y-6 mt-6">
+        <div className="max-w-3xl mx-auto px-4 space-y-6 mt-6">
           <PeriodSelector
             selectedPeriod={selectedPeriod}
             selectedMonth={selectedMonth}
@@ -202,8 +199,7 @@ export default function Home() {
 
           <BottomNavigation />
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
     </>
   );
 }
