@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
 export default function Home() {
   const { user } = useAuthStore();
   const { transactions } = useTransactionStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Day');
   const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
@@ -102,7 +102,7 @@ export default function Home() {
               <div className="flex justify-between items-center mb-6">
   <div>
     <p className="text-gray-400 text-sm">Welcome Back</p>
-    <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || 'User'}</h1>
+    <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</h1>
   </div>
   <div className="flex items-center gap-4">
   <span className="font-poppins font-semibold text-2xl tracking-tight text-white select-none">
