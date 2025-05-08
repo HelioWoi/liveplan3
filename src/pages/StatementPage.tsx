@@ -6,16 +6,16 @@ import { format } from 'date-fns';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
+import PeriodSelector from '../components/common/PeriodSelector';
 
-type Period = 'day' | 'week' | 'month' | 'year';
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2022', '2023', '2024', '2025'];
+type Period = 'Day' | 'Week' | 'Month' | 'Year';
+type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
 
 export default function StatementPage() {
   const navigate = useNavigate();
   const { transactions } = useTransactionStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('April');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Day');
+  const [selectedMonth, setSelectedMonth] = useState<Month>('April');
   const [selectedYear, setSelectedYear] = useState('2025');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -92,56 +92,14 @@ export default function StatementPage() {
       <div className="max-w-7xl mx-auto px-4 space-y-6 mt-6">
         {/* Period Selection */}
         <div className="flex flex-col gap-4">
-          <div className="flex gap-3 items-center flex-wrap">
-            {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={classNames(
-                  'px-4 py-1 rounded-full text-sm font-medium border',
-                  selectedPeriod === period
-                    ? 'bg-purple-600 text-white border-purple-600'
-                    : 'text-gray-700 border-gray-300 hover:border-purple-300'
-                )}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {selectedPeriod === 'month' && (
-            <div className="flex flex-wrap gap-2">
-              {months.map(month => (
-                <button
-                  key={month}
-                  onClick={() => setSelectedMonth(month)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedMonth === month ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
-                >
-                  {month}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {selectedPeriod === 'year' && (
-            <div className="flex flex-wrap gap-2">
-              {years.map(year => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={classNames(
-                    'px-3 py-1 rounded-md text-sm border',
-                    selectedYear === year ? 'bg-purple-500 text-white border-purple-600' : 'text-gray-700 border-gray-300'
-                  )}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onPeriodChange={setSelectedPeriod}
+            onMonthChange={setSelectedMonth}
+            onYearChange={setSelectedYear}
+          />
         </div>
 
         {/* Search and Filters */}

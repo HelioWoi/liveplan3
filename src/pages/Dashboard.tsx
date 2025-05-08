@@ -5,7 +5,7 @@ import PageHeader from '../components/layout/PageHeader';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/home/TopGoals';
 import TransactionModal from '../components/modals/TransactionModal';
-import PeriodButton from '../components/common/PeriodButton';
+import PeriodSelector from '../components/common/PeriodSelector';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useIncomeStore } from '../stores/incomeStore';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
@@ -19,7 +19,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 
 interface CategoryTotals {
   Income: number;
-  Investimento: number;
+  Investment: number;
   Fixed: number;
   Variable: number;
   Extra: number;
@@ -36,22 +36,18 @@ interface FinancialSummary {
   categoryTotals: CategoryTotals;
 }
 
-type Period = 'day' | 'week' | 'month' | 'year';
+type Period = 'Day' | 'Week' | 'Month' | 'Year';
+type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
 
 export default function Dashboard() {
   const { transactions, fetchTransactions } = useTransactionStore();
   const { totalIncome, fetchTotalIncome } = useIncomeStore();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('month');
-  const [selectedMonth, setSelectedMonth] = useState('May');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Day');
+  const [selectedMonth, setSelectedMonth] = useState<Month>('May');
   const [selectedYear, setSelectedYear] = useState('2025');
 
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const years = ['2023', '2024', '2025', '2026'];
+  // Meses e anos são gerenciados pelo componente PeriodSelector
 
   useEffect(() => {
     fetchTransactions();
@@ -64,13 +60,13 @@ export default function Dashboard() {
     const today = new Date();
     
     switch (selectedPeriod) {
-      case 'day':
+      case 'Day':
         return transactionDate >= startOfDay(today) && transactionDate <= endOfDay(today);
-      case 'week':
+      case 'Week':
         return transactionDate >= subDays(today, 7);
-      case 'month':
+      case 'Month':
         return transactionDate >= new Date(today.getFullYear(), today.getMonth(), 1);
-      case 'year':
+      case 'Year':
         return transactionDate >= new Date(today.getFullYear(), 0, 1);
       default:
         return true;
@@ -92,7 +88,7 @@ export default function Dashboard() {
     totalSpent: 0,
     categoryTotals: {
       Income: 0,
-      Investimento: 0,
+      Investment: 0,
       Fixed: 0,
       Variable: 0,
       Extra: 0,
@@ -114,7 +110,6 @@ export default function Dashboard() {
       color: COLORS[index % COLORS.length]
     }));
 
-  // Calcular totais usando todas as transações (não filtradas)
   const fixedExpenses = transactions
     .filter(t => t.category === 'Fixed')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -124,10 +119,9 @@ export default function Dashboard() {
     .reduce((sum, t) => sum + t.amount, 0);
     
   const investments = transactions
-    .filter(t => t.category === 'Investimento')
+    .filter(t => t.category === 'Investment')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Usar o maior valor entre gastos totais e renda como base
   const totalExpensesAndInvestments = fixedExpenses + variableExpenses + investments;
   const targetTotal = Math.max(totalExpensesAndInvestments, totalIncome);
 
@@ -159,45 +153,14 @@ export default function Dashboard() {
       
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
-          <div className="flex gap-2 mb-4">
-            {(['day', 'week', 'month', 'year'] as Period[]).map((period) => (
-              <PeriodButton
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                isActive={selectedPeriod === period}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </PeriodButton>
-            ))}
-          </div>
-
-          {selectedPeriod === 'month' && (
-            <div className="flex flex-wrap gap-2">
-              {months.map(month => (
-                <PeriodButton
-                  key={month}
-                  onClick={() => setSelectedMonth(month)}
-                  isActive={selectedMonth === month}
-                >
-                  {month}
-                </PeriodButton>
-              ))}
-            </div>
-          )}
-
-          {selectedPeriod === 'year' && (
-            <div className="flex flex-wrap gap-2">
-              {years.map(year => (
-                <PeriodButton
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  isActive={selectedYear === year}
-                >
-                  {year}
-                </PeriodButton>
-              ))}
-            </div>
-          )}
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onPeriodChange={setSelectedPeriod}
+            onMonthChange={setSelectedMonth}
+            onYearChange={setSelectedYear}
+          />
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
