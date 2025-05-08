@@ -84,34 +84,23 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
 
       setSuccess(true);
       setIsProcessing(false);
-      
-      // Update profile and navigate
+      // Atualiza perfil, mas apenas fecha o modal após 2 segundos
       if (user) {
         try {
           const { error } = await supabase
             .from('user_profiles')
             .update({ onboarding_completed: true })
             .eq('user_id', user.id);
-
           if (error) throw error;
-
-          // Short delay to show success message before navigating
-          setTimeout(() => {
-            navigate('/', { replace: true });
-          }, 1500);
         } catch (profileError) {
           console.error('Failed to update profile:', profileError);
-          // Continue with navigation even if profile update fails
-          setTimeout(() => {
-            navigate('/', { replace: true });
-          }, 1500);
         }
-      } else {
-        // Navigate even if no user (shouldn't happen)
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 1500);
       }
+      // Fecha o modal e força atualização após 2 segundos
+      setTimeout(() => {
+        onClose();
+        window.location.reload();
+      }, 2000);
     } catch (err) {
       console.error('Error importing transactions:', err);
       setError(err instanceof Error ? err.message : 'Failed to import transactions');

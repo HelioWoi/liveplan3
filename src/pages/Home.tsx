@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
+import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 import { Bell, HomeIcon, Clock, BarChart2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
@@ -21,6 +22,21 @@ export default function Home() {
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
+
+  useEffect(() => {
+    // Exemplo: checar no localStorage ou perfil se já fez upload
+    const imported = localStorage.getItem('spreadsheet_imported');
+    if (!imported) {
+      setShowSpreadsheetModal(true);
+    }
+  }, []);
+
+  // Callback para fechar e marcar como importado
+  const handleCloseSpreadsheetModal = () => {
+    setShowSpreadsheetModal(false);
+    localStorage.setItem('spreadsheet_imported', 'true');
+  };
 
   // Calculate totals
   const totalIncome = transactions
@@ -67,34 +83,33 @@ export default function Home() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-gray-50"
-    >
-      <PageHeader title="Home" showBackButton={false} />
-      
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        <TransactionModal 
-          isOpen={isTransactionModalOpen}
-          onClose={() => setIsTransactionModalOpen(false)}
-        />
-        <div className="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] text-white">
-          <div className="px-4 pt-6 pb-8">
-            {/* Top Bar */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <p className="text-gray-400 text-sm">Welcome Back</p>
-                <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || 'User'}</h1>
-              </div>
+    <>
+      <SpreadsheetUploadModal open={showSpreadsheetModal} onClose={handleCloseSpreadsheetModal} />
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gray-50"
+      >
+        <PageHeader title="Home" showBackButton={false} />
+        <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+          <TransactionModal 
+            isOpen={isTransactionModalOpen}
+            onClose={() => setIsTransactionModalOpen(false)}
+          />
+          <div className="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] text-white">
+            <div className="px-4 pt-6 pb-8">
+              {/* Top Bar */}
+              <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  LivePlan³
-                </h2>
+                <img src="/logo.svg" alt="Logo" className="h-10 w-auto" />
                 <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
                   <Bell className="h-6 w-6" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Welcome Back</p>
+                <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || 'User'}</h1>
               </div>
             </div>
 
@@ -193,5 +208,6 @@ export default function Home() {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
