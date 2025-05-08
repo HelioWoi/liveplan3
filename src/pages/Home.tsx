@@ -100,24 +100,20 @@ export default function Home() {
             <div className="px-4 pt-6 pb-8">
               {/* Top Bar */}
               <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-4">
-                <img src="/logo.svg" alt="Logo" className="h-10 w-auto" />
-                <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
-                  <Bell className="h-6 w-6" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Welcome Back</p>
-                <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || 'User'}</h1>
-              </div>
-            </div>
-
-            {/* Balance Card */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
-              <p className="text-gray-400 mb-1">Weekly Balance</p>
-              <p className="text-3xl font-bold">{formatCurrency(totalIncome - totalExpenses)}</p>
-            </div>
+  <div>
+    <p className="text-gray-400 text-sm">Welcome Back</p>
+    <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || 'User'}</h1>
+  </div>
+  <div className="flex items-center gap-4">
+  <span className="font-poppins font-semibold text-2xl tracking-tight text-white select-none">
+  LivePlan<sup className="align-super text-xs ml-0.5">3</sup>
+</span>
+  <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative ml-2">
+    <Bell className="h-6 w-6" />
+    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+  </button>
+</div>
+</div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">

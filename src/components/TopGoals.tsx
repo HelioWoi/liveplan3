@@ -38,9 +38,9 @@ export default function TopGoals() {
       <div className="text-center py-8">
         <div className="flex flex-col items-center gap-4">
           <Target className="h-12 w-12 text-gray-400" />
-          <p className="text-gray-600">Nenhuma meta criada ainda</p>
+          <p className="text-gray-600">No goals created yet</p>
           <Link to="/goals" className="text-[#1A1A40] hover:text-[#2A2A50]">
-            Criar sua primeira meta →
+            Create your first goal →
           </Link>
         </div>
       </div>
