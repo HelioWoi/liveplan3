@@ -1,10 +1,26 @@
-import { Calendar, PlusCircle } from 'lucide-react';
+import { Calendar, PlusCircle, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
 
 type Period = 'Month' | 'Year';
+
+interface TooltipProps {
+  children: React.ReactNode;
+  content: string;
+}
+
+function Tooltip({ children, content }: TooltipProps) {
+  return (
+    <div className="group relative inline-block">
+      {children}
+      <div className="absolute top-0 left-full ml-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-48 z-50 shadow-lg whitespace-normal">
+        {content}
+      </div>
+    </div>
+  );
+}
 
 export default function WeeklyBudget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +81,16 @@ export default function WeeklyBudget() {
   };
 
   const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
+
+  // Categoria descriptions for tooltips
+  const categoryDescriptions: Record<string, string> = {
+    Fixed: 'Mandatory and recurring expenses, such as rent, school, health insurance, etc.',
+    Variable: 'Flexible and monthly expenses, such as groceries, fuel, delivery.',
+    Extra: 'Non-standard costs, such as unexpected repairs or last-minute travel. Should be used with caution.',
+    Additional: 'Non-essential expenses that you chose to make, such as gifts or parties. Ideally, these should be planned.',
+    Income: 'Money received from salary, freelance work, or other sources.',
+    Investment: 'Money allocated to assets expected to generate income or appreciate in value over time.'
+  };
 
   return (
     <div>
@@ -173,7 +199,16 @@ export default function WeeklyBudget() {
               {categories.map(category => (
                 <tr key={category}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {category}
+                    {categoryDescriptions[category] ? (
+                      <Tooltip content={categoryDescriptions[category]}>
+                        <div className="flex items-center gap-1">
+                          {category}
+                          <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
+                        </div>
+                      </Tooltip>
+                    ) : (
+                      category
+                    )}
                   </td>
                   {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
                     <td 

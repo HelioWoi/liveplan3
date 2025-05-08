@@ -16,9 +16,9 @@ export default function ExpensesPage() {
   const { transactions } = useTransactionStore();
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
-  const [selectedYear, setSelectedYear] = useState('2022');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
-  const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investimento', 'Tax', 'Additional', 'Contribution', 'Goal'];
+  const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investment', 'Tax', 'Additional', 'Contribution', 'Goal'];
   const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#8B5CF6', '#14B8A6'];
 
   const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
@@ -35,7 +35,8 @@ export default function ExpensesPage() {
         case 'Week':
           const weekStart = new Date(now);
           weekStart.setDate(now.getDate() - now.getDay());
-          return date >= weekStart && date <= now;
+          const weekEnd = new Date(now);
+          return date >= weekStart && date <= weekEnd;
         case 'Month':
           return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear().toString() === selectedYear;
         case 'Year':
@@ -48,6 +49,43 @@ export default function ExpensesPage() {
 
   const calculateTotal = (transactions: Transaction[]) => {
     return transactions.reduce((sum, t) => sum + t.amount, 0);
+  };
+
+  // Calculate formula3 data based on filtered expenses
+  const getFormula3Data = (transactions: Transaction[]) => {
+    const fixedExpenses = transactions
+      .filter(t => t.category === 'Fixed')
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    const variableExpenses = transactions
+      .filter(t => t.category === 'Variable')
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    const investments = transactions
+      .filter(t => t.category === 'Investment')
+      .reduce((sum, t) => sum + t.amount, 0);
+  
+    // Usar o total de gastos como base para os targets
+    const totalExpensesAndInvestments = fixedExpenses + variableExpenses + investments;
+    const targetTotal = Math.max(totalExpensesAndInvestments, 0);
+  
+    return {
+      fixed: {
+        current: fixedExpenses,
+        target: targetTotal * 0.5,
+        percentage: targetTotal ? (fixedExpenses / targetTotal) * 100 : 0
+      },
+      variable: {
+        current: variableExpenses,
+        target: targetTotal * 0.3,
+        percentage: targetTotal ? (variableExpenses / targetTotal) * 100 : 0
+      },
+      investments: {
+        current: investments,
+        target: targetTotal * 0.2,
+        percentage: targetTotal ? (investments / targetTotal) * 100 : 0
+      }
+    };
   };
 
   const filteredExpenses = useMemo(() => {
@@ -179,6 +217,84 @@ export default function ExpensesPage() {
                 />
               </PieChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Formula 3 Distribution */}
+        <div className="bg-white rounded-xl p-6 shadow-card">
+          <h2 className="text-xl font-bold mb-6">Formula 3 Distribution (50-30-20)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Fixed Expenses */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-gray-900">Fixed Expenses (50%)</h3>
+              <div className="mt-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">Current</span>
+                  <span className="text-sm font-medium">{formatCurrency(getFormula3Data(filteredExpenses).fixed.current)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">Target</span>
+                  <span className="text-sm font-medium">{formatCurrency(getFormula3Data(filteredExpenses).fixed.target)}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                  <div 
+                    className="bg-purple-600 h-2.5 rounded-full" 
+                    style={{ width: `${Math.min(getFormula3Data(filteredExpenses).fixed.percentage, 100)}%` }}
+                  ></div>
+                </div>
+                <div className="text-right mt-1">
+                  <span className="text-xs text-gray-500">{getFormula3Data(filteredExpenses).fixed.percentage.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Variable Expenses */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-gray-900">Variable Expenses (30%)</h3>
+              <div className="mt-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">Current</span>
+                  <span className="text-sm font-medium">{formatCurrency(getFormula3Data(filteredExpenses).variable.current)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">Target</span>
+                  <span className="text-sm font-medium">{formatCurrency(getFormula3Data(filteredExpenses).variable.target)}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                  <div 
+                    className="bg-orange-500 h-2.5 rounded-full" 
+                    style={{ width: `${Math.min(getFormula3Data(filteredExpenses).variable.percentage, 100)}%` }}
+                  ></div>
+                </div>
+                <div className="text-right mt-1">
+                  <span className="text-xs text-gray-500">{getFormula3Data(filteredExpenses).variable.percentage.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Investments */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-gray-900">Investments (20%)</h3>
+              <div className="mt-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">Current</span>
+                  <span className="text-sm font-medium">{formatCurrency(getFormula3Data(filteredExpenses).investments.current)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">Target</span>
+                  <span className="text-sm font-medium">{formatCurrency(getFormula3Data(filteredExpenses).investments.target)}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                  <div 
+                    className="bg-blue-500 h-2.5 rounded-full" 
+                    style={{ width: `${Math.min(getFormula3Data(filteredExpenses).investments.percentage, 100)}%` }}
+                  ></div>
+                </div>
+                <div className="text-right mt-1">
+                  <span className="text-xs text-gray-500">{getFormula3Data(filteredExpenses).investments.percentage.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
