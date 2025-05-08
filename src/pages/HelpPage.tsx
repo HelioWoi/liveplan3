@@ -299,6 +299,18 @@ export default function HelpPage() {
                 <li className="text-gray-600">Upload using the button below</li>
               </ol>
 
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h4 className="font-semibold text-blue-800 mb-2">What happens after upload?</h4>
+                <ol className="list-decimal pl-5 space-y-1 text-sm text-blue-700">
+                  <li>You'll see a preview of all transactions before confirming</li>
+                  <li>You can map your spreadsheet columns to our system fields</li>
+                  <li>The system will verify the data for any errors or duplicates</li>
+                  <li>After confirmation, all transactions will be added to your account</li>
+                  <li>All calculations (weekly budgets, income/expenses, formulas) will be automatically updated</li>
+                  <li>Your dashboard will reflect the new financial situation immediately</li>
+                </ol>
+              </div>
+
               <button 
                 onClick={() => {
                   // Create a hidden file input element
@@ -312,7 +324,7 @@ export default function HelpPage() {
                     const target = e.target as HTMLInputElement;
                     if (target.files && target.files.length > 0) {
                       // Navigate to dashboard with the file
-                      window.location.href = '/dashboard?openUpload=true';
+                      window.location.href = '/dashboard?openUpload=true&preview=required';
                     }
                   });
                   
