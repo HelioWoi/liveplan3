@@ -1,6 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
+import { WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
+import { TransactionCategory, TransactionType } from '../../types/transaction';
 
 interface AddEntryModalProps {
   isOpen: boolean;
@@ -10,14 +12,13 @@ interface AddEntryModalProps {
 }
 
 export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April', selectedYear }: AddEntryModalProps) {
-  const { currentYear } = useWeeklyBudgetStore();
+  const { addEntry } = useWeeklyBudgetStore();
   const [month, setMonth] = useState(selectedMonth);
   const [week, setWeek] = useState('Week 1');
   const [category, setCategory] = useState('Extra');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-
-  const { addEntry } = useWeeklyBudgetStore();
+  const [syncToTransactions, setSyncToTransactions] = useState(true);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -27,21 +28,89 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
   const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
   const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
 
-  const handleSubmit = () => {
-    const numericAmount = parseFloat(amount);
-    if (!description || isNaN(numericAmount)) {
+  const handleSubmit = async () => {
+    if (!description || !amount) {
       return;
     }
 
-    addEntry({
+    const entry: WeeklyBudgetEntry = {
       id: Date.now().toString(),
-      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
       description,
-      amount: numericAmount,
-      category,
-      month: month,
-      year: selectedYear || currentYear,
-    });
+      amount: parseFloat(amount),
+      category: category as TransactionCategory,
+      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+      month,
+      year: selectedYear || new Date().getFullYear()
+    };
+
+    // Adiciona a entrada ao orçamento semanal
+    addEntry(entry);
+    
+    // Se o usuário quiser sincronizar com transações, cria apenas uma transação local
+    if (syncToTransactions) {
+      try {
+        // Converte a semana para uma data real
+        const getWeekNumber = (weekString: string) => {
+          return parseInt(weekString.replace('Week ', ''));
+        };
+        
+        const getMonthNumber = (monthName: string) => {
+          const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+          ];
+          return months.indexOf(monthName);
+        };
+        
+        // Cria uma data a partir da semana, mês e ano
+        const weekNum = getWeekNumber(entry.week);
+        const monthNum = getMonthNumber(entry.month);
+        const year = entry.year;
+        
+        // Calcula o dia aproximado com base na semana (7 dias por semana)
+        const day = (weekNum - 1) * 7 + 1;
+        const entryDate = new Date(year, monthNum, day);
+        
+        // Log para debug
+        console.log(`Criando transação para: Semana ${weekNum}, Mês ${monthNum} (${entry.month}), Ano ${year}`);
+        console.log(`Data calculada: ${entryDate.toLocaleDateString()}`);
+        console.log(`Mês da data: ${entryDate.getMonth()}, Ano da data: ${entryDate.getFullYear()}`);
+        
+        // Garantir que a data está correta
+        if (entryDate.getMonth() !== monthNum) {
+          console.warn('Correção de mês necessária!');
+          entryDate.setMonth(monthNum);
+          console.log(`Data corrigida: ${entryDate.toLocaleDateString()}`);
+        }
+        
+        // Cria uma transação local e salva no localStorage
+        const storedTransactions = localStorage.getItem('local_transactions');
+        const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+        
+        const newTransaction = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          date: entryDate.toISOString(),
+          amount: entry.amount,
+          category: entry.category,
+          type: entry.amount > 0 ? 'income' as TransactionType : 'expense' as TransactionType,
+          description: entry.description,
+          origin: 'Weekly Budget',
+          user_id: 'local-user'
+        };
+        
+        transactions.push(newTransaction);
+        localStorage.setItem('local_transactions', JSON.stringify(transactions));
+        
+        // Dispara um evento para notificar outras partes do app
+        window.dispatchEvent(new CustomEvent('local-transaction-added', { 
+          detail: newTransaction 
+        }));
+        
+        console.log('Transação local criada com sucesso:', newTransaction);
+      } catch (error) {
+        console.error('Erro ao criar transação local:', error);
+      }
+    }
 
     // Reset form
     setDescription('');
@@ -98,6 +167,8 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
                       ))}
                     </select>
                   </div>
+
+
 
                   {/* Week Selection */}
                   <div>
@@ -164,6 +235,21 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
                         className="w-full rounded-lg border border-gray-300 pl-8 pr-4 py-2.5 text-gray-900"
                       />
                     </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 mb-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="syncTransactions"
+                      checked={syncToTransactions}
+                      onChange={(e) => setSyncToTransactions(e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="syncTransactions" className="ml-2 block text-sm text-gray-600">
+                      Also add as a transaction (will appear in Expenses page)
+                    </label>
                   </div>
                 </div>
 

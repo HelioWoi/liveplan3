@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
 import { useTransactionStore } from '../stores/transactionStore';
-import { Transaction, TransactionCategory } from '../types/transaction';
+import { Transaction, TransactionCategory, TransactionType } from '../types/transaction';
 import { ArrowLeft, Bell, Calendar, ArrowDownCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -12,10 +12,23 @@ import PeriodSelector from '../components/common/PeriodSelector';
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 
+// Interface para transações locais
+interface LocalTransaction {
+  id: string;
+  date: string;
+  amount: number;
+  category: TransactionCategory;
+  type: TransactionType;
+  description: string;
+  origin: string;
+  user_id: string;
+}
+
 export default function ExpensesPage() {
   const navigate = useNavigate();
   const { transactions, fetchTransactions } = useTransactionStore();
   const [dataRefreshed, setDataRefreshed] = useState(false);
+  const [localTransactions, setLocalTransactions] = useState<LocalTransaction[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
@@ -40,6 +53,58 @@ export default function ExpensesPage() {
       setDataRefreshed(true);
     }
   }, [fetchTransactions, dataRefreshed]);
+  
+  // Carregar transações locais do localStorage
+  useEffect(() => {
+    const loadLocalTransactions = () => {
+      const storedTransactions = localStorage.getItem('local_transactions');
+      if (storedTransactions) {
+        try {
+          const parsedTransactions = JSON.parse(storedTransactions);
+          setLocalTransactions(parsedTransactions);
+          console.log('Transações locais carregadas:', parsedTransactions.length);
+        } catch (error) {
+          console.error('Erro ao carregar transações locais:', error);
+        }
+      } else {
+        console.log('Nenhuma transação local encontrada');
+        setLocalTransactions([]);
+      }
+    };
+    
+    // Carregar inicialmente
+    loadLocalTransactions();
+    
+    // Configurar listener para atualizações
+    const handleLocalTransactionsUpdated = () => {
+      console.log('Evento de atualização de transações locais detectado');
+      loadLocalTransactions();
+    };
+    
+    window.addEventListener('local-transactions-updated', handleLocalTransactionsUpdated);
+    window.addEventListener('local-transaction-added', handleLocalTransactionsUpdated);
+    
+    return () => {
+      window.removeEventListener('local-transactions-updated', handleLocalTransactionsUpdated);
+      window.removeEventListener('local-transaction-added', handleLocalTransactionsUpdated);
+    };
+  }, []);
+  
+  // Forçar recarregamento quando o mês ou ano selecionado mudar
+  useEffect(() => {
+    console.log(`Seleção alterada: ${selectedMonth} ${selectedYear}`);
+    // Recarregar transações locais quando o mês ou ano mudar
+    const storedTransactions = localStorage.getItem('local_transactions');
+    if (storedTransactions) {
+      try {
+        const parsedTransactions = JSON.parse(storedTransactions);
+        setLocalTransactions(parsedTransactions);
+        console.log('Transações locais recarregadas após mudança de mês/ano');
+      } catch (error) {
+        console.error('Erro ao recarregar transações locais:', error);
+      }
+    }
+  }, [selectedMonth, selectedYear, selectedPeriod]);
 
   const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
     const now = new Date();
@@ -58,7 +123,19 @@ export default function ExpensesPage() {
           const weekEnd = new Date(now);
           return date >= weekStart && date <= weekEnd;
         case 'Month':
-          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear().toString() === selectedYear;
+          const monthIndex = months.indexOf(selectedMonth);
+          const transactionMonth = date.getMonth();
+          const transactionYear = date.getFullYear().toString();
+          const isMatchingMonth = transactionMonth === monthIndex;
+          const isMatchingYear = transactionYear === selectedYear;
+          const result = isMatchingMonth && isMatchingYear;
+          
+          // Log para debug
+          console.log(`Transação: ${t.description}, Data: ${date.toLocaleDateString()}, Mês: ${transactionMonth}, Ano: ${transactionYear}`);
+          console.log(`Comparando com: Mês selecionado: ${monthIndex} (${selectedMonth}), Ano selecionado: ${selectedYear}`);
+          console.log(`Resultado: ${result ? 'Incluir' : 'Excluir'}\n`);
+          
+          return result;
         case 'Year':
           return date.getFullYear().toString() === selectedYear;
         default:
@@ -108,9 +185,17 @@ export default function ExpensesPage() {
     };
   };
 
+  // Combinar transações do banco de dados com transações locais
+  const allTransactions = useMemo(() => {
+    // Garantir que ambos são arrays antes de tentar combinar
+    const dbTransactions = Array.isArray(transactions) ? transactions : [];
+    const localTxs = Array.isArray(localTransactions) ? localTransactions : [];
+    return [...dbTransactions, ...localTxs];
+  }, [transactions, localTransactions]);
+  
   const filteredExpenses = useMemo(() => {
-    return filterExpensesByPeriod(transactions, selectedPeriod, selectedMonth, selectedYear);
-  }, [transactions, selectedPeriod, selectedMonth, selectedYear]);
+    return filterExpensesByPeriod(allTransactions, selectedPeriod, selectedMonth, selectedYear);
+  }, [allTransactions, selectedPeriod, selectedMonth, selectedYear]);
 
   const expensesByCategory = useMemo(() => {
     const groupedExpenses = filteredExpenses.reduce((acc, t) => {

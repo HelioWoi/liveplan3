@@ -7,6 +7,7 @@ import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/home/TopGoals';
 import TransactionModal from '../components/modals/TransactionModal';
 import PeriodSelector from '../components/common/PeriodSelector';
+import PeriodSummary from '../components/dashboard/PeriodSummary';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useIncomeStore } from '../stores/incomeStore';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
@@ -197,6 +198,9 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+
+        {/* Period Summary Cards - Weekly, Monthly, Annual */}
+        <PeriodSummary />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-blue-50 rounded-xl p-6 shadow-card">

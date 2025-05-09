@@ -38,7 +38,7 @@ export default function WeeklyBudget() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const { entries, currentYear, setCurrentYear } = useWeeklyBudgetStore();
 
-  // Inicializar com o ano atual
+  // Initialize with current year
   useEffect(() => {
     setCurrentYear(getCurrentYear());
   }, []);

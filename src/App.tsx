@@ -1,11 +1,12 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useSupabase, SupabaseProvider } from './lib/supabase/SupabaseProvider';
 import { Toaster } from 'react-hot-toast';
 import BottomNavigation from './components/layout/BottomNavigation';
 import QuickActions from './components/layout/QuickActions';
 import SwipeableView from './components/layout/SwipeableView';
 import { FeedbackProvider } from './components/feedback/FeedbackProvider';
-import { useTransactionStore } from './stores/transactionStore';
+import { syncService } from './utils/syncService';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/signup';
@@ -36,18 +37,19 @@ import BillsPage from './pages/BillsPage';
 function AppContent() {
   const location = useLocation();
   const { session } = useSupabase();
-  const { fetchTransactions } = useTransactionStore();
   const publicRoutes = ['/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
   const showBottomNav = !publicRoutes.includes(location.pathname) && session?.user;
 
-  const handleRefresh = async () => {
-    if (session?.user) {
-      await fetchTransactions();
-    }
-  };
+  // Função de atualização de dados removida pois não é mais necessária
+
+  // Inicializa o serviço de sincronização quando o componente montar
+  useEffect(() => {
+    // Configura o serviço para tentar sincronizar transações pendentes a cada 5 minutos
+    syncService.setupPeriodicSync(5);
+  }, []);
 
   return (
-    <SwipeableView onRefresh={handleRefresh}>
+    <SwipeableView>
       <div className="min-h-screen bg-gray-50">
         {showBottomNav && <QuickActions />}
         <Routes>
