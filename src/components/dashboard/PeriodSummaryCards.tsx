@@ -1,27 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
+import { useTransactionStore } from '../../stores/transactionStore';
 
 interface PeriodSummaryCardsProps {
   period: 'Weekly' | 'Monthly' | 'Annual';
+  selectedMonth?: string;
+  selectedYear?: string;
 }
 
-interface LocalTransaction {
-  id: string;
-  date: string;
-  amount: number;
-  category: string;
-  type: string;
-  description: string;
-  origin: string;
-  user_id: string;
-}
+// Removida interface não utilizada
 
-export default function PeriodSummaryCards({ period }: PeriodSummaryCardsProps) {
-  const [localTransactions, setLocalTransactions] = useState<LocalTransaction[]>([]);
-  const [total, setTotal] = useState(0);
+export default function PeriodSummaryCards({ period, selectedMonth, selectedYear }: PeriodSummaryCardsProps) {
+  const { transactions } = useTransactionStore();
   const [iconColor, setIconColor] = useState('text-purple-600');
   const [bgColor, setBgColor] = useState('bg-purple-100');
+  const [incomeTotal, setIncomeTotal] = useState(0);
+  const [expenseTotal, setExpenseTotal] = useState(0);
 
   useEffect(() => {
     // Definir cores com base no período
@@ -40,25 +35,29 @@ export default function PeriodSummaryCards({ period }: PeriodSummaryCardsProps) 
         break;
     }
 
-    // Carregar transações locais
-    const loadLocalTransactions = () => {
-      const storedTransactions = localStorage.getItem('local_transactions');
-      if (storedTransactions) {
-        try {
-          const parsedTransactions = JSON.parse(storedTransactions);
-          setLocalTransactions(parsedTransactions);
-          calculateTotal(parsedTransactions);
-        } catch (error) {
-          console.error(`Erro ao carregar transações locais para ${period}:`, error);
-        }
-      }
+    // Carregar e processar transações
+    const loadTransactions = () => {
+      // Processar diretamente as transações do store
+      calculateTotal(transactions);
     };
 
+    // Converter nome do mês para número (0-11)
+    const getMonthNumber = (monthName: string): number => {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      return months.indexOf(monthName);
+    };
+    
     // Calcular total com base no período
-    const calculateTotal = (transactions: LocalTransaction[]) => {
+    const calculateTotal = (transactions: any[]) => {
       const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
+      // Usar seleções do usuário ou valores atuais
+      const currentMonth = selectedMonth ? getMonthNumber(selectedMonth) : now.getMonth();
+      const currentYear = selectedYear ? parseInt(selectedYear) : now.getFullYear();
+      
+      console.log(`PeriodSummaryCards (${period}) - Calculating total:`);
+      console.log(`- Selected Month: ${selectedMonth} (index: ${currentMonth})`);
+      console.log(`- Selected Year: ${selectedYear || now.getFullYear()}`);
 
       // Filtrar transações com base no período
       const filteredTransactions = transactions.filter(t => {
@@ -85,33 +84,44 @@ export default function PeriodSummaryCards({ period }: PeriodSummaryCardsProps) 
         }
       });
 
-      // Calcular o total
-      const sum = filteredTransactions.reduce((acc, t) => {
-        // Considerar apenas transações de despesa (valores negativos)
-        if (t.type === 'expense') {
-          return acc + t.amount;
+      // Calcular o total para cada tipo de transação
+      let income = 0;
+      let expense = 0;
+      
+      console.log(`- Total transactions before filtering: ${transactions.length}`);
+      console.log(`- Filtered transactions: ${filteredTransactions.length}`);
+      
+      filteredTransactions.forEach(t => {
+        if (t.type === 'income') {
+          income += Number(t.amount);
+        } else if (t.type === 'expense') {
+          expense += Number(t.amount);
         }
-        return acc;
-      }, 0);
-
-      setTotal(sum);
+      });
+      
+      console.log(`- Income total: ${income}`);
+      console.log(`- Expense total: ${expense}`);
+      
+      // Atualizar os estados com os totais calculados
+      setIncomeTotal(income);
+      setExpenseTotal(expense);
     };
 
-    loadLocalTransactions();
+    loadTransactions();
 
     // Configurar listener para atualizações
-    const handleLocalTransactionsUpdated = () => {
-      loadLocalTransactions();
+    const handleTransactionsUpdated = () => {
+      loadTransactions();
     };
     
-    window.addEventListener('local-transactions-updated', handleLocalTransactionsUpdated);
-    window.addEventListener('local-transaction-added', handleLocalTransactionsUpdated);
+    window.addEventListener('local-transactions-updated', handleTransactionsUpdated);
+    window.addEventListener('local-transaction-added', handleTransactionsUpdated);
     
     return () => {
-      window.removeEventListener('local-transactions-updated', handleLocalTransactionsUpdated);
-      window.removeEventListener('local-transaction-added', handleLocalTransactionsUpdated);
+      window.removeEventListener('local-transactions-updated', handleTransactionsUpdated);
+      window.removeEventListener('local-transaction-added', handleTransactionsUpdated);
     };
-  }, [period]);
+  }, [period, transactions, selectedMonth, selectedYear]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4">
@@ -121,7 +131,17 @@ export default function PeriodSummaryCards({ period }: PeriodSummaryCardsProps) 
         </div>
         <div>
           <h2 className="text-xl font-bold text-gray-900">{period}</h2>
-          <p className="text-sm text-gray-500">{formatCurrency(total)}</p>
+          <div>
+            {incomeTotal > 0 && (
+              <p className="text-sm text-success-600">Income: {formatCurrency(incomeTotal)}</p>
+            )}
+            {expenseTotal > 0 && (
+              <p className="text-sm text-error-600">Spent: {formatCurrency(expenseTotal)}</p>
+            )}
+            {incomeTotal === 0 && expenseTotal === 0 && (
+              <p className="text-sm text-gray-500">No transactions</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

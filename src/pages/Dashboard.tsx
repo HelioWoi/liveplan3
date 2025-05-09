@@ -77,11 +77,37 @@ export default function Dashboard() {
     fetchTransactions();
     fetchTotalIncome();
   }, [fetchTransactions, fetchTotalIncome]);
+  
+  // Recarregar dados quando o período, mês ou ano mudar
+  useEffect(() => {
+    console.log(`Período mudou: ${selectedPeriod}, Mês: ${selectedMonth}, Ano: ${selectedYear}`);
+    // Forçar recarga dos dados
+    fetchTransactions();
+    fetchTotalIncome();
+    // Resetar o estado de dados atualizados
+    setDataRefreshed(false);
+  }, [selectedPeriod, selectedMonth, selectedYear, fetchTransactions, fetchTotalIncome]);
+
+  // Converter nome do mês para número (0-11)
+  const getMonthNumber = (monthName: string): number => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                   'July', 'August', 'September', 'October', 'November', 'December'];
+    return months.indexOf(monthName);
+  };
 
   // Filter transactions by selected period
   const filteredTransactions = transactions.filter(transaction => {
     const transactionDate = new Date(transaction.date);
     const today = new Date();
+    const selectedMonthIndex = getMonthNumber(selectedMonth);
+    const selectedYearNumber = parseInt(selectedYear);
+    
+    // Log para debug
+    console.log(`Dashboard - Filtering transactions:`);
+    console.log(`- Selected Period: ${selectedPeriod}`);
+    console.log(`- Selected Month: ${selectedMonth} (index: ${selectedMonthIndex})`);
+    console.log(`- Selected Year: ${selectedYear}`);
+    console.log(`- Transaction date: ${transactionDate.toISOString()}`);
     
     switch (selectedPeriod) {
       case 'Day':
@@ -89,9 +115,12 @@ export default function Dashboard() {
       case 'Week':
         return transactionDate >= subDays(today, 7);
       case 'Month':
-        return transactionDate >= new Date(today.getFullYear(), today.getMonth(), 1);
+        // Usar o mês e ano selecionados
+        return transactionDate.getMonth() === selectedMonthIndex && 
+               transactionDate.getFullYear() === selectedYearNumber;
       case 'Year':
-        return transactionDate >= new Date(today.getFullYear(), 0, 1);
+        // Usar o ano selecionado
+        return transactionDate.getFullYear() === selectedYearNumber;
       default:
         return true;
     }
@@ -200,7 +229,7 @@ export default function Dashboard() {
         </div>
 
         {/* Period Summary Cards - Weekly, Monthly, Annual */}
-        <PeriodSummary />
+        <PeriodSummary selectedMonth={selectedMonth} selectedYear={selectedYear} />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-blue-50 rounded-xl p-6 shadow-card">
