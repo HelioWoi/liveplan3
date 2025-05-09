@@ -10,8 +10,8 @@ export default function BottomNavigation() {
       <div className="max-w-screen-xl mx-auto px-6 py-2">
         <div className="flex items-center justify-between">
           <Link 
-            to="/" 
-            className={`flex flex-col items-center ${isActive('/') ? 'text-[#1A1A40]' : 'text-gray-400 hover:text-[#2A2A50]'}`}
+            to="/home" 
+            className={`flex flex-col items-center ${isActive('/home') ? 'text-[#1A1A40]' : 'text-gray-400 hover:text-[#2A2A50]'}`}
           >
             <Home className="h-6 w-6" />
             <span className="text-xs mt-1">Home</span>

@@ -45,7 +45,7 @@ export default function Login() {
         }
 
         // ✅ Redireciona diretamente para a home
-        navigate('/');
+        navigate('/home');
       }
     } catch (error: any) {
       setLoginError(error.message);

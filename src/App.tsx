@@ -16,6 +16,7 @@ import PrivateRoute from './components/auth/PrivateRoute';
 import NotFound from './pages/NotFound';
 import StatementPage from './pages/StatementPage';
 import CategoryReport from './pages/CategoryReport';
+import TestPage from './pages/TestPage';
 import ExpensesPage from './pages/ExpensesPage';
 import IncomePage from './pages/IncomePage';
 import VariablesPage from './pages/VariablesPage';
@@ -37,7 +38,7 @@ import BillsPage from './pages/BillsPage';
 function AppContent() {
   const location = useLocation();
   const { session } = useSupabase();
-  const publicRoutes = ['/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
   const showBottomNav = !publicRoutes.includes(location.pathname) && session?.user;
 
   // Função de atualização de dados removida pois não é mais necessária
@@ -53,6 +54,9 @@ function AppContent() {
       <div className="min-h-screen bg-gray-50">
         {showBottomNav && <QuickActions />}
         <Routes>
+          {/* Página de teste para diagnóstico */}
+          <Route path="/test" element={<TestPage />} />
+          
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -77,14 +81,9 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+          <Route path="/" element={<Login />} />
+          <Route path="/test" element={<TestPage />} />
           <Route
             path="/onboarding"
             element={

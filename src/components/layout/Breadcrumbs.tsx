@@ -46,7 +46,7 @@ export default function Breadcrumbs() {
       <ol className="flex items-center space-x-2">
         <li>
           <Link 
-            to="/" 
+            to="/home" 
             className="hover:text-[#1A1A40] transition-colors"
           >
             Home
