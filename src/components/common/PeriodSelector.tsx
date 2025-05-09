@@ -25,7 +25,7 @@ export default function PeriodSelector({
   const [showMonths, setShowMonths] = useState(false);
   const [showYears, setShowYears] = useState(false);
 
-  const periods: Period[] = ['Day', 'Week', 'Month', 'Year'];
+  const periods: Period[] = ['Week', 'Month', 'Year'];
   const months: Month[] = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'

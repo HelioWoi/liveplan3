@@ -7,6 +7,8 @@ import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import classNames from 'classnames';
 import PeriodSelector from '../components/common/PeriodSelector';
+import TransactionDetailModal from '../components/modals/TransactionDetailModal';
+import { Transaction } from '../types/transaction';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
@@ -19,6 +21,13 @@ export default function StatementPage() {
   const [selectedYear, setSelectedYear] = useState('2025');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  
+  const handleTransactionClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsDetailModalOpen(true);
+  };
 
   // Calcular saldo inicial, movimentação total e saldo final
   const calculateBalances = () => {
@@ -198,8 +207,12 @@ export default function StatementPage() {
                     </td>
                   </tr>
                 ) : (
-                  transactions.map((transaction, index) => (
-                    <tr key={transaction.id} className="hover:bg-gray-50">
+                   transactions.map((transaction, index) => (
+                    <tr 
+                      key={transaction.id} 
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => handleTransactionClick(transaction)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {format(new Date(transaction.date), 'MMM d, yyyy')}
                       </td>
@@ -224,6 +237,13 @@ export default function StatementPage() {
       </div>
 
       <BottomNavigation />
+      
+      {/* Transaction Detail Modal */}
+      <TransactionDetailModal
+        transaction={selectedTransaction}
+        open={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+      />
     </div>
   );
 }
