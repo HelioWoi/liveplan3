@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
 import PeriodSelector from '../components/common/PeriodSelector';
+import TransactionDetailModal from '../components/modals/TransactionDetailModal';
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 
@@ -32,6 +33,8 @@ export default function ExpensesPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investment', 'Tax', 'Additional', 'Contribution', 'Goal'];
   const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#8B5CF6', '#14B8A6'];
@@ -463,7 +466,14 @@ export default function ExpensesPage() {
               </div>
             ) : (
               filteredExpenses.map((transaction) => (
-                <div key={transaction.id} className="p-4 hover:bg-gray-50">
+                <div 
+                  key={transaction.id} 
+                  className="p-4 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedTransaction(transaction);
+                    setIsModalOpen(true);
+                  }}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-error-100 flex items-center justify-center">
@@ -488,6 +498,13 @@ export default function ExpensesPage() {
       </div>
 
       <BottomNavigation />
+      
+      {/* Transaction Detail Modal */}
+      <TransactionDetailModal
+        transaction={selectedTransaction}
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
