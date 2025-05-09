@@ -101,7 +101,7 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
         // Set all refresh flags to ensure data is updated across the entire app
         setAllRefreshFlags();
         // Redirect to home page with cache-busting parameter
-        window.location.href = '/?refresh=' + Date.now();
+        window.location.href = '/home?refresh=' + Date.now();
       }, 2000);
     } catch (err) {
       console.error('Error importing transactions:', err);

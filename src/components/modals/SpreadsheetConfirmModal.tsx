@@ -19,6 +19,8 @@ export default function SpreadsheetConfirmModal({ open, onClose }: SpreadsheetCo
     // Marcar que o usuário optou por não fazer upload
     localStorage.setItem('spreadsheet_imported', 'skipped');
     onClose();
+    // Redirecionar para a página home
+    window.location.href = '/home';
   };
   
   const handleUploaderClose = () => {
@@ -26,6 +28,8 @@ export default function SpreadsheetConfirmModal({ open, onClose }: SpreadsheetCo
     localStorage.setItem('spreadsheet_imported', 'completed');
     setShowUploader(false);
     onClose();
+    // Redirecionar para a página home
+    window.location.href = '/home';
   };
   
   if (!open) return null;

@@ -26,12 +26,21 @@ export default function Home() {
   const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
 
   useEffect(() => {
-    // Exemplo: checar no localStorage ou perfil se já fez upload
+    // Verificar se o usuário já fez upload da planilha
     const imported = localStorage.getItem('spreadsheet_imported');
-    if (!imported) {
+    
+    // Verificar se é um usuário novo (criado há menos de 1 hora)
+    const isNewUser = user && new Date().getTime() - new Date(user.created_at).getTime() < 60 * 60 * 1000;
+    
+    // Verificar se está vindo de um login (usando o parâmetro na URL)
+    const isFromLogin = window.location.search.includes('fromLogin=true');
+    
+    // Mostrar o modal apenas se for um novo usuário E não tiver feito upload ainda E estiver vindo do login
+    if (!imported && isNewUser && isFromLogin) {
+      console.log('Showing spreadsheet modal for new user first login');
       setShowSpreadsheetModal(true);
     }
-  }, []);
+  }, [user]);
   
   // Check for data refresh flags and reload data as needed
   useEffect(() => {
