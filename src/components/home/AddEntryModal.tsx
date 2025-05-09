@@ -69,24 +69,34 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
         
         // Calcula o dia aproximado com base na semana (7 dias por semana)
         const day = (weekNum - 1) * 7 + 1;
+        
+        // Cria a data usando o construtor de data para garantir que o mês seja o correto
+        // Nota: os meses em JavaScript são baseados em zero (0-11)
         const entryDate = new Date(year, monthNum, day);
         
-        // Log para debug
-        console.log(`Criando transação para: Semana ${weekNum}, Mês ${monthNum} (${entry.month}), Ano ${year}`);
-        console.log(`Data calculada: ${entryDate.toLocaleDateString()}`);
+        // Log para debug detalhado
+        console.log('=== CRIANDO NOVA TRANSAÇÃO ===');
+        console.log(`Entrada do Weekly Budget: Semana ${entry.week}, Mês ${entry.month}, Ano ${entry.year}`);
+        console.log(`Índices calculados: Semana ${weekNum}, Mês ${monthNum}, Dia ${day}`);
+        console.log(`Data ISO resultante: ${entryDate.toISOString()}`);
+        console.log(`Data formatada: ${entryDate.toLocaleDateString()}`);
         console.log(`Mês da data: ${entryDate.getMonth()}, Ano da data: ${entryDate.getFullYear()}`);
         
-        // Garantir que a data está correta
+        // Garantir que a data está correta - forçar o mês correto
         if (entryDate.getMonth() !== monthNum) {
-          console.warn('Correção de mês necessária!');
+          console.warn('CORREÇÃO DE MÊS NECESSÁRIA!');
+          // Criar uma nova data com o dia 15 do mês para evitar problemas com dias inválidos
+          entryDate.setDate(15);
           entryDate.setMonth(monthNum);
           console.log(`Data corrigida: ${entryDate.toLocaleDateString()}`);
+          console.log(`Nova data ISO: ${entryDate.toISOString()}`);
         }
         
         // Cria uma transação local e salva no localStorage
         const storedTransactions = localStorage.getItem('local_transactions');
         const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
         
+        // Criar objeto de transação com metadados adicionais para facilitar a depuração
         const newTransaction = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
           date: entryDate.toISOString(),
@@ -95,7 +105,16 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
           type: entry.amount > 0 ? 'income' as TransactionType : 'expense' as TransactionType,
           description: entry.description,
           origin: 'Weekly Budget',
-          user_id: 'local-user'
+          user_id: 'local-user',
+          // Metadados adicionais para facilitar a depuração
+          metadata: {
+            sourceWeek: entry.week,
+            sourceMonth: entry.month,
+            sourceYear: entry.year,
+            calculatedMonth: monthNum,
+            calculatedDay: day,
+            createdAt: new Date().toISOString()
+          }
         };
         
         transactions.push(newTransaction);

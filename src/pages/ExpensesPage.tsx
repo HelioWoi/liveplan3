@@ -106,42 +106,81 @@ export default function ExpensesPage() {
     }
   }, [selectedMonth, selectedYear, selectedPeriod]);
 
+  // Versão simplificada e mais direta da função de filtragem
   const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
-    const now = new Date();
-    return transactions.filter(t => {
-      const date = new Date(t.date);
+    // Converter o mês selecionado para índice (0-11)
+    const selectedMonthIndex = months.indexOf(selectedMonth);
+    const selectedYearNumber = parseInt(selectedYear);
+    
+    console.log(`Filtrando transações para: ${selectedMonth} ${selectedYear} (Mês ${selectedMonthIndex})`);
+    console.log(`Total de transações a filtrar: ${transactions.length}`);
+    
+    // Filtrar as transações
+    const filtered = transactions.filter(t => {
+      // Verificar se é uma despesa
       const isExpense = expenseCategories.includes(t.category);
-      
       if (!isExpense) return false;
-
+      
+      // Converter a data da transação
+      const date = new Date(t.date);
+      const transactionMonth = date.getMonth();
+      const transactionYear = date.getFullYear();
+      
+      // Verificar se a transação é do Weekly Budget
+      const isWeeklyBudget = t.origin === 'Weekly Budget';
+      
+      // Lógica de filtragem baseada no período
+      let shouldInclude = false;
+      
       switch (period) {
-        case 'Day':
-          return date.toDateString() === now.toDateString();
-        case 'Week':
-          const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - now.getDay());
-          const weekEnd = new Date(now);
-          return date >= weekStart && date <= weekEnd;
         case 'Month':
-          const monthIndex = months.indexOf(selectedMonth);
-          const transactionMonth = date.getMonth();
-          const transactionYear = date.getFullYear().toString();
-          const isMatchingMonth = transactionMonth === monthIndex;
-          const isMatchingYear = transactionYear === selectedYear;
-          const result = isMatchingMonth && isMatchingYear;
+          // Verificar se o mês e ano correspondem
+          shouldInclude = (transactionMonth === selectedMonthIndex && 
+                          transactionYear === selectedYearNumber);
           
-          // Log para debug
-          console.log(`Transação: ${t.description}, Data: ${date.toLocaleDateString()}, Mês: ${transactionMonth}, Ano: ${transactionYear}`);
-          console.log(`Comparando com: Mês selecionado: ${monthIndex} (${selectedMonth}), Ano selecionado: ${selectedYear}`);
-          console.log(`Resultado: ${result ? 'Incluir' : 'Excluir'}\n`);
+          // Para transações do Weekly Budget, verificar também os metadados
+          if (isWeeklyBudget && !shouldInclude && 'metadata' in t) {
+            const metadata = (t as any).metadata;
+            if (metadata && metadata.sourceMonth) {
+              // Verificar se o mês de origem corresponde ao mês selecionado
+              const sourceMonthIndex = months.indexOf(metadata.sourceMonth);
+              const sourceYear = metadata.sourceYear;
+              
+              shouldInclude = (sourceMonthIndex === selectedMonthIndex && 
+                              sourceYear === selectedYearNumber);
+            }
+          }
+          break;
           
-          return result;
         case 'Year':
-          return date.getFullYear().toString() === selectedYear;
+          shouldInclude = transactionYear === selectedYearNumber;
+          break;
+          
+        // Outros casos (Day, Week) - manter a lógica original
         default:
-          return false;
+          const now = new Date();
+          if (period === 'Day') {
+            shouldInclude = date.toDateString() === now.toDateString();
+          } else if (period === 'Week') {
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            shouldInclude = date >= weekStart && date <= now;
+          }
+          break;
       }
+      
+      // Log para transações do Weekly Budget
+      if (isWeeklyBudget) {
+        console.log(`Transação do Weekly Budget: ${t.description}`);
+        console.log(`Data: ${date.toLocaleDateString()}, Mês: ${transactionMonth}, Ano: ${transactionYear}`);
+        console.log(`Incluir? ${shouldInclude ? 'SIM' : 'NÃO'}`);
+      }
+      
+      return shouldInclude;
     });
+    
+    console.log(`Transações filtradas: ${filtered.length}`);
+    return filtered;
   };
 
   const calculateTotal = (transactions: Transaction[]) => {
@@ -190,7 +229,15 @@ export default function ExpensesPage() {
     // Garantir que ambos são arrays antes de tentar combinar
     const dbTransactions = Array.isArray(transactions) ? transactions : [];
     const localTxs = Array.isArray(localTransactions) ? localTransactions : [];
-    return [...dbTransactions, ...localTxs];
+    
+    // Combinar as transações
+    const combined = [...dbTransactions, ...localTxs];
+    
+    console.log(`Total de transações combinadas: ${combined.length}`);
+    console.log(`- Transações do banco de dados: ${dbTransactions.length}`);
+    console.log(`- Transações locais: ${localTxs.length}`);
+    
+    return combined;
   }, [transactions, localTransactions]);
   
   const filteredExpenses = useMemo(() => {
@@ -308,7 +355,7 @@ export default function ExpensesPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {expensesByCategory.map((entry, index) => (
+                  {expensesByCategory.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -410,7 +457,7 @@ export default function ExpensesPage() {
           </div>
 
           <div className="divide-y divide-gray-100">
-            {transactions.length === 0 ? (
+            {filteredExpenses.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 No transactions found
               </div>
@@ -423,7 +470,7 @@ export default function ExpensesPage() {
                         <ArrowDownCircle className="h-5 w-5 text-error-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{transaction.origin}</p>
+                        <p className="font-medium text-gray-900">{transaction.description}</p>
                         <p className="text-sm text-gray-500">
                           {format(new Date(transaction.date), 'MMM d, yyyy')}
                         </p>
