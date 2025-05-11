@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useSupabase, SupabaseProvider } from './lib/supabase/SupabaseProvider';
 import { Toaster } from 'react-hot-toast';
+import { usePWAUpdate } from './hooks/usePWAUpdate';
 import BottomNavigation from './components/layout/BottomNavigation';
 import QuickActions from './components/layout/QuickActions';
 import SwipeableView from './components/layout/SwipeableView';
@@ -217,6 +218,9 @@ function AppContent() {
 }
 
 export default function App() {
+  // Use the PWA update hook to detect and notify about new versions
+  usePWAUpdate();
+  
   return (
     <SupabaseProvider>
       <FeedbackProvider>
