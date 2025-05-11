@@ -51,7 +51,7 @@ export default function UpcomingBills() {
 
   if (upcomingBills.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-4 shadow-sm">
+      <div className="bg-white rounded-xl p-4 shadow-sm mb-16">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Upcoming Bills</h2>
           <Link 
@@ -76,7 +76,7 @@ export default function UpcomingBills() {
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm">
+    <div className="bg-white rounded-xl p-4 shadow-sm mb-16">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Upcoming Bills</h2>
         <Link 
