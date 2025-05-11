@@ -26,8 +26,8 @@ export default function WeeklyBudget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const getCurrentMonth = () => {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return months[new Date().getMonth()];
   };
@@ -48,8 +48,8 @@ export default function WeeklyBudget() {
 
   const periods: Period[] = ['Month', 'Year'];
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
   const getCategoryTotal = (week: string, category: string) => {

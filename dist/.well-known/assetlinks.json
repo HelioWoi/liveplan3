@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "www.liveplan3.com",
+        "sha256_cert_fingerprints": ["50:2C:08:C9:AF:FB:DC:AA:DC:28:CB:8D:3E:EC:71:F3:FC:D1:AD:58:03:01:E4:C1:0E:0A:87:B2:A8:24:69:B2"]
+      }
+    }]
