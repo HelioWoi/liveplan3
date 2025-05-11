@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'offline.html'],
       manifest: {
         name: "LivePlan³",
         short_name: "LivePlan",
@@ -35,6 +35,20 @@ export default defineConfig({
             type: "image/png"
           }
         ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages',
+              networkTimeoutSeconds: 10
+            }
+          }
+        ],
+        navigateFallback: '/offline.html'
       }
     })
   ]
