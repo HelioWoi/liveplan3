@@ -1,9 +1,11 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import type { Transaction } from '../../types/transaction';
 import { formatCurrency } from '../../utils/formatters';
 import { format } from 'date-fns';
-import { Calendar, DollarSign } from 'lucide-react';
+import { Calendar, DollarSign, CheckCircle } from 'lucide-react';
+import { useTransactionStore } from '../../stores/transactionStore';
+import { toast } from 'react-hot-toast';
 
 interface BillDetailsModalProps {
   bill: Transaction | null;
@@ -12,7 +14,33 @@ interface BillDetailsModalProps {
 }
 
 export default function BillDetailsModal({ bill, isOpen, onClose }: BillDetailsModalProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { updateTransaction } = useTransactionStore();
+  
   if (!bill) return null;
+  
+  const handleMarkAsPaid = async () => {
+    if (!bill) return;
+    
+    setIsProcessing(true);
+    try {
+      // Criar uma cópia da transação com prefixo PAID: no origin
+      await updateTransaction(bill.id, {
+        origin: `PAID: ${bill.origin}`,
+      });
+      
+      // Criar uma nova transação no statement para registrar o pagamento
+      // Não precisamos criar uma nova transação, apenas marcar a existente como paga
+      
+      toast.success('Bill marked as paid successfully!');
+      onClose();
+    } catch (error) {
+      console.error('Error marking bill as paid:', error);
+      toast.error('Failed to mark bill as paid');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -79,7 +107,24 @@ export default function BillDetailsModal({ bill, isOpen, onClose }: BillDetailsM
                   </div>
                 </div>
 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex justify-between">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleMarkAsPaid}
+                    disabled={isProcessing || bill.origin.startsWith('PAID:')}
+                  >
+                    {isProcessing ? (
+                      'Processing...'
+                    ) : bill.origin.startsWith('PAID:') ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Already Paid
+                      </>
+                    ) : (
+                      'Mark as Paid'
+                    )}
+                  </button>
                   <button
                     type="button"
                     className="inline-flex justify-center rounded-md border border-transparent bg-primary-100 px-4 py-2 text-sm font-medium text-primary-900 hover:bg-primary-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
