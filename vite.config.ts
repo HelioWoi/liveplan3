@@ -49,6 +49,10 @@ export default defineConfig({
           }
         ],
         navigateFallback: '/offline.html'
+      },
+      injectManifest: {
+        swSrc: 'src/sw-custom.js',
+        swDest: 'sw.js'
       }
     })
   ]
