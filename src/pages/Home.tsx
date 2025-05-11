@@ -42,6 +42,12 @@ export default function Home() {
     }
   }, [user]);
   
+  // Carrega os dados na montagem inicial do componente
+  useEffect(() => {
+    console.log('Home component mounted - Loading initial data');
+    fetchTransactions();
+  }, [fetchTransactions]);
+
   // Check for data refresh flags and reload data as needed
   useEffect(() => {
     const needsRefresh = checkRefreshFlag(REFRESH_FLAGS.ALL) || 
