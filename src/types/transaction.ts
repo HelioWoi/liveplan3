@@ -38,6 +38,7 @@ export interface Transaction {
   user_id: string;
   type: TransactionType;
   description?: string;
+  basiq_id?: string; // ID da transação no Basiq (opcional)
 }
 
 export const isIncomeCategory = (category: TransactionCategory): boolean => {

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useSupabase } from '../../lib/supabase/SupabaseProvider';
-import { Mail, LockKeyhole, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import CubeLogoLivePlan from '../../components/brand/CubeLogoLivePlan';
 
 interface LoginFormValues {
   email: string;
@@ -59,7 +60,7 @@ export default function Login() {
       {/* Esquerda: Formulário de login */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center bg-white px-4 py-8">
         <div className="max-w-[400px] w-full mx-auto">
-          <h1 className="text-3xl font-bold text-[#1A1A40] mb-2 text-center">LivePlan<sup className="text-base align-super">3</sup></h1>
+          <CubeLogoLivePlan className="mb-2 text-center mx-auto" />
           <p className="text-gray-500 text-center mb-6">Welcome back to your financial journey</p>
           {message && (
             <div className="mb-4 text-green-600 text-sm text-center">{message}</div>

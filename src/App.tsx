@@ -35,12 +35,16 @@ import TransactionsPage from './pages/TransactionsPage';
 import Goals from './pages/Goals';
 import Profile from './pages/Profile';
 import BillsPage from './pages/BillsPage';
+import BasiqTestPage from './pages/BasiqTestPage';
+import BankOnboardingPage from './pages/BankOnboardingPage';
+import OnboardingChoicePage from './pages/OnboardingChoicePage';
 
 function AppContent() {
   const location = useLocation();
   const { session } = useSupabase();
   const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
-  const showBottomNav = !publicRoutes.includes(location.pathname) && session?.user;
+  const onboardingRoutes = ['/onboarding-choice', '/bank-onboarding', '/onboarding'];
+  const showBottomNav = !publicRoutes.includes(location.pathname) && !onboardingRoutes.includes(location.pathname) && session?.user;
 
   // Função de atualização de dados removida pois não é mais necessária
 
@@ -85,6 +89,30 @@ function AppContent() {
           <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/" element={<Login />} />
           <Route path="/test" element={<TestPage />} />
+          <Route
+            path="/basiq-test"
+            element={
+              <PrivateRoute>
+                <BasiqTestPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/onboarding-choice"
+            element={
+              <PrivateRoute>
+                <OnboardingChoicePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/bank-onboarding"
+            element={
+              <PrivateRoute>
+                <BankOnboardingPage />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/onboarding"
             element={

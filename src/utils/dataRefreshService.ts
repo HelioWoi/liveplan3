@@ -7,6 +7,7 @@ export const REFRESH_FLAGS = {
   WEEKLY_BUDGET: 'refresh_weekly_budget_data',
   GOALS: 'refresh_goals_data',
   INCOME: 'refresh_income_data',
+  BANK_CONNECTIONS: 'refresh_bank_connections_data',
   ALL: 'refresh_all_data'
 };
 

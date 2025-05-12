@@ -49,19 +49,14 @@ export default function Profile() {
     await supabase.auth.signOut();
   };
   
-  const onSubmitProfile = async (_formData: ProfileFormValues) => {
+  const onSubmitProfile = async (_data: ProfileFormValues) => {
     setIsUpdating(true);
     setUpdateSuccess(false);
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       setUpdateSuccess(true);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setUpdateSuccess(false);
-      }, 3000);
+      setTimeout(() => setUpdateSuccess(false), 3000);
     } catch (error) {
       console.error('Failed to update profile', error);
     } finally {
@@ -69,19 +64,14 @@ export default function Profile() {
     }
   };
   
-  const onSubmitPassword = async (_formData: PasswordFormValues) => {
+  const onSubmitPassword = async (_data: PasswordFormValues) => {
     setIsChangingPassword(true);
     setPasswordSuccess(false);
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       setPasswordSuccess(true);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setPasswordSuccess(false);
-      }, 3000);
+      setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (error) {
       console.error('Failed to change password', error);
     } finally {
@@ -100,24 +90,24 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <SpreadsheetUploadModal open={showSpreadsheetModal} onClose={handleCloseSpreadsheetModal} />
-      <div className="max-w-4xl mx-auto pb-24 px-4 pt-6">
-        <h1 className="text-2xl font-bold sm:text-3xl mb-6">Your Profile</h1>
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="card">
-              <div className="flex flex-col items-center text-center p-4">
-                <div className="h-24 w-24 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                  <User className="h-12 w-12 text-primary-600" />
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex flex-col items-center text-center">
+                <div className="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                  <User className="h-12 w-12 text-blue-600" />
                 </div>
                 <h2 className="text-xl font-semibold">{user?.user_metadata?.full_name || 'User'}</h2>
                 <p className="text-gray-500 mb-4">{user?.email}</p>
                 <button 
-                  className="btn btn-outline w-full"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
                   onClick={handleSignOut}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4 inline mr-2" />
                   Sign Out
                 </button>
               </div>
@@ -128,43 +118,10 @@ export default function Profile() {
                     <span className="text-sm text-gray-500">Member Since</span>
                     <span className="text-sm font-medium">Jan 2025</span>
                   </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-sm text-gray-500">Account Type</span>
-                    <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800">
-                      PRO
-                    </span>
-                  </div>
                   <div className="border-t border-gray-100 mt-2 pt-2">
                     <Link 
-                      to="/invoices"
-                      className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
-                    >
-                      <span className="flex items-center">
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Invoices
-                      </span>
-                    </Link>
-                    <Link 
-                      to="/tax"
-                      className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
-                    >
-                      <span className="flex items-center">
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Tax Overview
-                      </span>
-                    </Link>
-                    <Link 
-                      to="/help"
-                      className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
-                    >
-                      <span className="flex items-center">
-                        <HelpCircle className="h-4 w-4 mr-2" />
-                        Help & Support
-                      </span>
-                    </Link>
-                    <Link 
                       to="/bank-onboarding"
-                      className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
+                      className="flex items-center justify-between py-2 text-sm text-blue-600 hover:text-blue-700"
                     >
                       <span className="flex items-center">
                         <Landmark className="h-4 w-4 mr-2" />
@@ -173,7 +130,7 @@ export default function Profile() {
                     </Link>
                     <button 
                       onClick={handleOpenSpreadsheetModal}
-                      className="w-full flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
+                      className="w-full flex items-center justify-between py-2 text-sm text-blue-600 hover:text-blue-700"
                     >
                       <span className="flex items-center">
                         <FileSpreadsheet className="h-4 w-4 mr-2" />
@@ -190,59 +147,34 @@ export default function Profile() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Form */}
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2 text-primary-600" />
-                Account Information
-              </h2>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">Account Information</h2>
               
               <form onSubmit={handleSubmit(onSubmitProfile)}>
-                <div className="form-group">
-                  <label htmlFor="email" className="label">Email Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                    <input
-                      id="email"
-                      type="email"
-                      className="input pl-10"
-                      disabled
-                      {...register('email')}
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">Email cannot be changed for security reasons</p>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    disabled
+                    {...register('email')}
+                  />
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="fullName" className="label">Full Name</label>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                   <input
-                    id="fullName"
                     type="text"
-                    className={`input ${errors.fullName ? 'input-error' : ''}`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     {...register('fullName', { required: 'Full name is required' })}
                   />
                   {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="currency" className="label">Preferred Currency</label>
-                  <select
-                    id="currency"
-                    className="input"
-                    {...register('currency')}
-                  >
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="JPY">JPY (¥)</option>
-                    <option value="CAD">CAD ($)</option>
-                    <option value="AUD">AUD ($)</option>
-                  </select>
-                </div>
-                
                 <div className="flex justify-end mt-6">
                   <button 
                     type="submit" 
-                    className="btn btn-primary"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md"
                     disabled={isUpdating}
                   >
                     {isUpdating ? 'Updating...' : 'Update Profile'}
@@ -258,40 +190,30 @@ export default function Profile() {
             </div>
             
             {/* Password Form */}
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <Shield className="h-5 w-5 mr-2 text-primary-600" />
-                Security
-              </h2>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">Change Password</h2>
               
               <form onSubmit={handleSubmitPassword(onSubmitPassword)}>
-                <div className="form-group">
-                  <label htmlFor="currentPassword" className="label">Current Password</label>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
                   <input
-                    id="currentPassword"
                     type="password"
-                    className={`input ${passwordErrors?.currentPassword ? 'input-error' : ''}`}
-                    {...registerPassword('currentPassword', { 
-                      required: 'Current password is required' 
-                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    {...registerPassword('currentPassword', { required: 'Current password is required' })}
                   />
                   {passwordErrors?.currentPassword && (
                     <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
                   )}
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="newPassword" className="label">New Password</label>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                   <input
-                    id="newPassword"
                     type="password"
-                    className={`input ${passwordErrors?.newPassword ? 'input-error' : ''}`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     {...registerPassword('newPassword', { 
                       required: 'New password is required',
-                      minLength: {
-                        value: 8,
-                        message: 'Password must be at least 8 characters'
-                      }
+                      minLength: { value: 8, message: 'Password must be at least 8 characters' }
                     })}
                   />
                   {passwordErrors?.newPassword && (
@@ -299,12 +221,11 @@ export default function Profile() {
                   )}
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="confirmPassword" className="label">Confirm New Password</label>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
                   <input
-                    id="confirmPassword"
                     type="password"
-                    className={`input ${passwordErrors?.confirmPassword ? 'input-error' : ''}`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     {...registerPassword('confirmPassword', { 
                       required: 'Please confirm your password',
                       validate: value => value === newPassword || 'Passwords do not match'
@@ -318,7 +239,7 @@ export default function Profile() {
                 <div className="flex justify-end mt-6">
                   <button 
                     type="submit" 
-                    className="btn btn-primary"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md"
                     disabled={isChangingPassword}
                   >
                     {isChangingPassword ? 'Updating...' : 'Change Password'}
