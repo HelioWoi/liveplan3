@@ -37,10 +37,10 @@ export default function PeriodSelector({
   const handlePeriodClick = (period: Period) => {
     onPeriodChange(period);
     if (period === 'Month') {
-      setShowMonths(true);
+      setShowMonths(false);
       setShowYears(false);
     } else if (period === 'Year') {
-      setShowYears(true);
+      setShowYears(false);
       setShowMonths(false);
     } else {
       setShowMonths(false);

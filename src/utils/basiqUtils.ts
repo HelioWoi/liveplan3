@@ -22,16 +22,26 @@ export const storeBasiqApiKey = (apiKey: string): void => {
 
 /**
  * Retrieve the Basiq API key
+ * Checks both localStorage and environment variables
  */
 export const getBasiqApiKey = (): string => {
   try {
+    // First check if we have a key in localStorage
     const encodedKey = localStorage.getItem(BASIQ_API_KEY_STORAGE);
-    if (!encodedKey) {
-      return '';
+    if (encodedKey) {
+      // Decode the key from localStorage
+      return atob(encodedKey);
     }
     
-    // Decode the key
-    return atob(encodedKey);
+    // If not in localStorage, check environment variables
+    const envApiKey = import.meta.env.VITE_BASIQ_API_KEY;
+    if (envApiKey) {
+      console.log('Using Basiq API key from environment variables');
+      return envApiKey as string;
+    }
+    
+    // No API key found
+    return '';
   } catch (error) {
     console.error('Error retrieving Basiq API key:', error);
     return '';
@@ -47,9 +57,14 @@ export const clearBasiqApiKey = (): void => {
 
 /**
  * Check if Basiq API key is stored
+ * Checks both localStorage and environment variables
  */
 export const hasBasiqApiKey = (): boolean => {
-  return !!localStorage.getItem(BASIQ_API_KEY_STORAGE);
+  // Check both localStorage and environment variables
+  const localStorageKey = !!localStorage.getItem(BASIQ_API_KEY_STORAGE);
+  const envKey = !!import.meta.env.VITE_BASIQ_API_KEY;
+  
+  return localStorageKey || envKey;
 };
 
 /**

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { basiqService } from '../../services/basiqService';
+// Importação correta do basiqService como exportação padrão
+import basiqService from '../../services/basiqService';
 import { storeBasiqApiKey, getBasiqApiKey, hasBasiqApiKey } from '../../utils/basiqUtils';
 import { useBankConnectionStore } from '../../stores/bankConnectionStore';
 
@@ -32,10 +33,16 @@ export default function BasiqConnectionTest() {
     }
     
     try {
+      console.log('Storing API key, length:', apiKey.length);
       storeBasiqApiKey(apiKey);
       setHasKey(true);
       setTestResult('API key stored successfully');
+      
+      // Log the stored key (partially masked)
+      const maskedKey = apiKey.substring(0, 5) + '...' + apiKey.substring(apiKey.length - 5);
+      console.log('Stored API key (masked):', maskedKey);
     } catch (error: any) {
+      console.error('Error storing API key:', error);
       setTestResult(`Error storing API key: ${error.message}`);
     }
   };
@@ -43,11 +50,26 @@ export default function BasiqConnectionTest() {
   const handleTestConnection = async () => {
     setIsLoading(true);
     setTestResult('Testing connection...');
+    console.log('Testing connection to Basiq API');
     
     try {
+      // Check if we have a key first
+      const storedKey = getBasiqApiKey();
+      if (!storedKey) {
+        console.error('No API key found before testing');
+        setTestResult('No API key found. Please set an API key first.');
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('API key is available, length:', storedKey.length);
+      
+      // Test the connection
       const result = await basiqService.testConnection();
-      setTestResult(result ? 'Connection successful!' : 'Connection failed');
+      console.log('Connection test result:', result);
+      setTestResult(result ? 'Connection successful!' : 'Connection failed - check console for details');
     } catch (error: any) {
+      console.error('Connection test error:', error);
       setTestResult(`Connection error: ${error.message}`);
     } finally {
       setIsLoading(false);

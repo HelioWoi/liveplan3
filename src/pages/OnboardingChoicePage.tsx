@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { ArrowRight, Upload, Key, Building, ChevronRight } from 'lucide-react';
 import CubeLogoLivePlan from '../components/brand/CubeLogoLivePlan';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 
@@ -88,28 +89,62 @@ export default function OnboardingChoicePage() {
             </div>
           </div>
 
-          {/* Skip Option */}
+          {/* Manual Entry Option */}
           <div 
             onClick={handleSkip}
             className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
           >
             <div className="p-6">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-center mb-2">Skip for Now</h2>
+              <h2 className="text-xl font-semibold text-center mb-2">Manual Entry</h2>
               <p className="text-gray-600 text-center">
-                Start with a clean slate and add data manually
+                Enter your transactions manually as you go
               </p>
               <div className="mt-4 text-center">
-                <span className="inline-block px-4 py-2 bg-gray-50 text-gray-500 rounded-full text-sm font-medium">
-                  Manual Setup
+                <span className="inline-block px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                  Flexible Option
                 </span>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 mt-8">
+          <button
+            onClick={() => navigate('/basiq-config')}
+            className="flex items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all"
+          >
+            <div className="flex items-center">
+              <div className="bg-primary-100 p-3 rounded-full mr-4">
+                <Key className="h-6 w-6 text-primary-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold">Configure API Key</h3>
+                <p className="text-sm text-gray-600">Set up your Basiq API key first</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-gray-400 ml-4" />
+            </div>
+          </button>
+          
+          <button
+            onClick={() => navigate('/bank-onboarding')}
+            className="flex items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all"
+          >
+            <div className="flex items-center">
+              <div className="bg-primary-100 p-3 rounded-full mr-4">
+                <Building className="h-6 w-6 text-primary-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-semibold">Connect Bank Account</h3>
+                <p className="text-sm text-gray-600">Import your transactions automatically</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-gray-400 ml-4" />
+            </div>
+          </button>
         </div>
 
         <div className="bg-gray-50 p-6 rounded-lg mb-12">

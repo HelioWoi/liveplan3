@@ -35,12 +35,17 @@ export default function WeeklyBudget() {
   const getCurrentYear = () => new Date().getFullYear();
 
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
+  const [showMonths, setShowMonths] = useState(false);
+  const [showYears, setShowYears] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const { entries, currentYear, setCurrentYear } = useWeeklyBudgetStore();
 
   // Initialize with current year
   useEffect(() => {
     setCurrentYear(getCurrentYear());
+    // Reset show states on mount
+    setShowMonths(false);
+    setShowYears(false);
   }, []);
   
   // Anos fixos de 2022 a 2025
@@ -124,6 +129,11 @@ export default function WeeklyBudget() {
                 setSelectedPeriod(period);
                 if (period === 'Year') {
                   setSelectedMonth('');
+                  setShowYears(!showYears);
+                  setShowMonths(false);
+                } else if (period === 'Month') {
+                  setShowMonths(!showMonths);
+                  setShowYears(false);
                 }
               }}
               className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -137,14 +147,14 @@ export default function WeeklyBudget() {
           ))}
         </div>
 
-        {selectedPeriod === 'Year' ? (
+        {selectedPeriod === 'Year' && showYears && (
           <div className="flex gap-2">
             {years.map(year => (
               <button
                 key={year}
                 onClick={() => {
                   setCurrentYear(year);
-                  setSelectedPeriod('Month');
+                  setShowYears(false);
                 }}
                 className={`py-1.5 px-4 rounded-md text-sm font-medium transition-colors ${
                   currentYear === year
@@ -156,12 +166,16 @@ export default function WeeklyBudget() {
               </button>
             ))}
           </div>
-        ) : selectedPeriod === 'Month' && (
+        )}
+        {selectedPeriod === 'Month' && showMonths && (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-12">
             {months.map(month => (
               <button
                 key={month}
-                onClick={() => setSelectedMonth(month)}
+                onClick={() => {
+                  setSelectedMonth(month);
+                  setShowMonths(false);
+                }}
                 className={`py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
                   selectedMonth === month
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'

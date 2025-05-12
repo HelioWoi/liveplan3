@@ -38,6 +38,9 @@ import BillsPage from './pages/BillsPage';
 import BasiqTestPage from './pages/BasiqTestPage';
 import BankOnboardingPage from './pages/BankOnboardingPage';
 import OnboardingChoicePage from './pages/OnboardingChoicePage';
+import BasiqApiConfig from './pages/BasiqApiConfig';
+import BasiqDirectTest from './pages/BasiqDirectTest';
+import TestBasiq from './pages/TestBasiq';
 
 function AppContent() {
   const location = useLocation();
@@ -94,6 +97,28 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <BasiqTestPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/basiq-direct-test"
+            element={
+              <PrivateRoute>
+                <BasiqDirectTest />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/test-basiq"
+            element={
+              <TestBasiq />
+            }
+          />
+          <Route
+            path="/basiq-config"
+            element={
+              <PrivateRoute>
+                <BasiqApiConfig />
               </PrivateRoute>
             }
           />
