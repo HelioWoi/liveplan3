@@ -8,6 +8,7 @@ import QuickActions from './components/layout/QuickActions';
 import SwipeableView from './components/layout/SwipeableView';
 import { FeedbackProvider } from './components/feedback/FeedbackProvider';
 import { syncService } from './utils/syncService';
+import { clearOldBasiqApiKey } from './utils/basiqUtils';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/signup';
@@ -51,8 +52,12 @@ function AppContent() {
 
   // Função de atualização de dados removida pois não é mais necessária
 
-  // Inicializa o serviço de sincronização quando o componente montar
+  // Inicializa o serviço de sincronização e limpa a chave antiga da API Basiq quando o componente montar
   useEffect(() => {
+    // Limpar a chave antiga da API Basiq do localStorage
+    clearOldBasiqApiKey();
+    console.log('Chave antiga da API Basiq removida');
+    
     // Configura o serviço para tentar sincronizar transações pendentes a cada 5 minutos
     syncService.setupPeriodicSync(5);
   }, []);

@@ -8,16 +8,37 @@ const BASIQ_API_URL = 'https://au-api.basiq.io';
 
 // Função auxiliar para obter token
 async function getToken() {
-  const BASIQ_API_KEY = process.env.BASIQ_API_KEY;
+  // Tentar usar VITE_BASIQ_API_KEY primeiro, depois BASIQ_API_KEY como fallback
+  const BASIQ_API_KEY = process.env.VITE_BASIQ_API_KEY || process.env.BASIQ_API_KEY;
+  
+  console.log('Variáveis de ambiente disponíveis:', {
+    VITE_BASIQ_API_KEY: process.env.VITE_BASIQ_API_KEY ? 'Definida' : 'Não definida',
+    BASIQ_API_KEY: process.env.BASIQ_API_KEY ? 'Definida' : 'Não definida'
+  });
   
   if (!BASIQ_API_KEY) {
-    throw new Error('BASIQ_API_KEY não está definida nas variáveis de ambiente');
+    throw new Error('Nenhuma chave de API Basiq encontrada nas variáveis de ambiente (VITE_BASIQ_API_KEY ou BASIQ_API_KEY)');
   }
+  
+  // Verificar se a chave já está codificada em Base64
+  // A chave da API Basiq deve ser codificada em Base64 no formato "chave:" (com dois pontos no final)
+  let authHeader;
+  if (BASIQ_API_KEY.startsWith('Basic ')) {
+    // Já tem o prefixo 'Basic ', usar como está
+    authHeader = BASIQ_API_KEY;
+  } else {
+    // Codificar a chave em Base64 com o formato correto (chave:)
+    const keyWithColon = BASIQ_API_KEY.includes(':') ? BASIQ_API_KEY : `${BASIQ_API_KEY}:`;
+    const base64Key = Buffer.from(keyWithColon).toString('base64');
+    authHeader = `Basic ${base64Key}`;
+  }
+  
+  console.log('Usando header de autorização para obter token');
   
   const response = await fetch(`${BASIQ_API_URL}/token`, {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${BASIQ_API_KEY}`,
+      'Authorization': authHeader,
       'Content-Type': 'application/x-www-form-urlencoded',
       'basiq-version': '3.0'
     },

@@ -21,29 +21,43 @@ export const storeBasiqApiKey = (apiKey: string): void => {
 };
 
 /**
+ * Limpar a chave antiga da API Basiq do localStorage
+ * Esta função deve ser chamada uma vez para garantir que não há chaves antigas armazenadas
+ */
+export const clearOldBasiqApiKey = (): void => {
+  try {
+    localStorage.removeItem(BASIQ_API_KEY_STORAGE);
+    console.log('Antiga chave da API Basiq removida do localStorage');
+  } catch (error) {
+    console.error('Erro ao limpar a antiga chave da API Basiq:', error);
+  }
+};
+
+/**
  * Retrieve the Basiq API key
- * Checks both localStorage and environment variables
+ * Checks both environment variables and localStorage
  */
 export const getBasiqApiKey = (): string => {
   try {
-    // First check if we have a key in localStorage
-    const encodedKey = localStorage.getItem(BASIQ_API_KEY_STORAGE);
-    if (encodedKey) {
-      // Decode the key from localStorage
-      return atob(encodedKey);
-    }
-    
-    // If not in localStorage, check environment variables
-    const envApiKey = import.meta.env.VITE_BASIQ_API_KEY;
+    // Primeiro verificar as variáveis de ambiente (prioridade)
+    const envApiKey = import.meta.env.VITE_BASIQ_API_KEY || import.meta.env.BASIQ_API_KEY;
     if (envApiKey) {
-      console.log('Using Basiq API key from environment variables');
+      console.log('Usando chave da API Basiq das variáveis de ambiente');
       return envApiKey as string;
     }
     
-    // No API key found
+    // Se não estiver nas variáveis de ambiente, verificar o localStorage
+    const encodedKey = localStorage.getItem(BASIQ_API_KEY_STORAGE);
+    if (encodedKey) {
+      console.log('Usando chave da API Basiq do localStorage');
+      return atob(encodedKey);
+    }
+    
+    // Nenhuma chave da API encontrada
+    console.warn('Nenhuma chave da API Basiq encontrada');
     return '';
   } catch (error) {
-    console.error('Error retrieving Basiq API key:', error);
+    console.error('Erro ao recuperar a chave da API Basiq:', error);
     return '';
   }
 };

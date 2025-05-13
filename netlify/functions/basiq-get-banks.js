@@ -8,16 +8,37 @@ const BASIQ_API_URL = 'https://au-api.basiq.io';
 
 // Função auxiliar para obter token
 async function getToken() {
-  const BASIQ_API_KEY = process.env.BASIQ_API_KEY;
+  // Tentar obter a chave da API de ambas as variáveis de ambiente
+  const BASIQ_API_KEY = process.env.BASIQ_API_KEY || process.env.VITE_BASIQ_API_KEY;
+  
+  console.log('Variáveis de ambiente disponíveis:', {
+    VITE_BASIQ_API_KEY: process.env.VITE_BASIQ_API_KEY ? 'Definida' : 'Não definida',
+    BASIQ_API_KEY: process.env.BASIQ_API_KEY ? 'Definida' : 'Não definida'
+  });
   
   if (!BASIQ_API_KEY) {
-    throw new Error('BASIQ_API_KEY não está definida nas variáveis de ambiente');
+    throw new Error('Chave da API Basiq não está definida nas variáveis de ambiente (BASIQ_API_KEY ou VITE_BASIQ_API_KEY)');
   }
+  
+  // Verificar se a chave já está codificada em Base64
+  // A chave da API Basiq deve ser codificada em Base64 no formato "chave:" (com dois pontos no final)
+  let authHeader;
+  if (BASIQ_API_KEY.startsWith('Basic ')) {
+    // Já tem o prefixo 'Basic ', usar como está
+    authHeader = BASIQ_API_KEY;
+  } else {
+    // Codificar a chave em Base64 com o formato correto (chave:)
+    const keyWithColon = BASIQ_API_KEY.includes(':') ? BASIQ_API_KEY : `${BASIQ_API_KEY}:`;
+    const base64Key = Buffer.from(keyWithColon).toString('base64');
+    authHeader = `Basic ${base64Key}`;
+  }
+  
+  console.log('Usando header de autorização para obter token');
   
   const response = await fetch(`${BASIQ_API_URL}/token`, {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${BASIQ_API_KEY}`,
+      'Authorization': authHeader,
       'Content-Type': 'application/x-www-form-urlencoded',
       'basiq-version': '3.0'
     },
@@ -67,6 +88,7 @@ exports.handler = async function(event, context) {
     const token = await getToken();
     
     // Obter lista de bancos da API Basiq
+    console.log('Chamando API Basiq para obter instituições...');
     const getBanksResponse = await fetch(`${BASIQ_API_URL}/institutions`, {
       method: 'GET',
       headers: {
@@ -76,28 +98,76 @@ exports.handler = async function(event, context) {
       }
     });
 
+    console.log('Resposta recebida da API Basiq:', getBanksResponse.status, getBanksResponse.statusText);
+
     if (!getBanksResponse.ok) {
-      const errorData = await getBanksResponse.json();
-      console.error('Erro ao obter bancos:', errorData);
+      try {
+        const errorText = await getBanksResponse.text();
+        console.error('Erro ao obter bancos - Resposta:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          errorData = { message: errorText || 'Resposta não é JSON válido' };
+        }
+        
+        return {
+          statusCode: getBanksResponse.status,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Falha ao obter lista de bancos da API Basiq',
+            details: errorData
+          })
+        };
+      } catch (error) {
+        console.error('Erro ao processar resposta de erro:', error);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Falha ao processar resposta de erro da API Basiq',
+            message: error.message
+          })
+        };
+      }
+    }
+
+    try {
+      const responseText = await getBanksResponse.text();
+      console.log('Tamanho da resposta:', responseText.length);
+      
+      if (!responseText || responseText.trim() === '') {
+        console.error('Resposta vazia recebida da API Basiq');
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Resposta vazia recebida da API Basiq'
+          })
+        };
+      }
+      
+      const banksData = JSON.parse(responseText);
+      console.log(`Bancos obtidos com sucesso: ${banksData.data?.length || 0} bancos encontrados`);
+
+      // Retornar a lista de bancos para o frontend
       return {
-        statusCode: getBanksResponse.status,
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(banksData)
+      };
+    } catch (error) {
+      console.error('Erro ao processar resposta JSON:', error);
+      return {
+        statusCode: 500,
         headers,
         body: JSON.stringify({ 
-          error: 'Falha ao obter lista de bancos da API Basiq',
-          details: errorData
+          error: 'Falha ao processar resposta JSON da API Basiq',
+          message: error.message
         })
       };
     }
-
-    const banksData = await getBanksResponse.json();
-    console.log(`Bancos obtidos com sucesso: ${banksData.data?.length || 0} bancos encontrados`);
-
-    // Retornar a lista de bancos para o frontend
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(banksData)
-    };
   } catch (error) {
     console.error('Erro na função basiq-get-banks:', error);
     
