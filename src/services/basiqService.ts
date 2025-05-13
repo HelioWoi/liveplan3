@@ -598,92 +598,12 @@ class BasiqService {
   ): Promise<ConnectionResult> {
     try {
       console.log('Criando usuário no Basiq e obtendo link de conexão');
-      console.log('Ambiente:', import.meta.env.MODE);
-      console.log('Usando API real:', IS_PRODUCTION);
+      console.log('Ambiente de produção?', IS_PRODUCTION);
+      console.log('Usando API real?', USE_REAL_API);
       
-      // Verificar se estamos em ambiente de produção
-      if (IS_PRODUCTION) {
-        console.log('Ambiente de produção detectado, usando API real');
-        
-        // 1. Obter token de acesso
-        console.log('Obtendo token de acesso');
-        const token = await this.getToken();
-        
-        // 2. Criar usuário no Basiq (ou recuperar existente)
-        let userId: string | null = localStorage.getItem('basiq_user_id');
-        
-        if (!userId) {
-          console.log('Criando novo usuário no Basiq');
-          const createUserResponse = await fetch(`${CORS_PROXY_URL}${BASIQ_API_URL}${ENDPOINTS.USERS}`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-              'basiq-version': '3.0'
-            },
-            body: JSON.stringify({
-              email,
-              firstName,
-              lastName,
-              mobile: mobile || undefined
-            })
-          });
-
-          if (!createUserResponse.ok) {
-            const errorData = await createUserResponse.json();
-            console.error('Erro ao criar usuário:', errorData);
-            throw new Error(`Failed to create user: ${createUserResponse.status} ${createUserResponse.statusText}`);
-          }
-
-          const userData = await createUserResponse.json();
-          userId = userData.id;
-          
-          // Armazenar ID do usuário para uso futuro
-          localStorage.setItem('basiq_user_id', userId);
-          console.log('Novo usuário criado com ID:', userId);
-        } else {
-          console.log('Usando usuário existente com ID:', userId);
-        }
-        
-        // 3. Criar conexão para o usuário
-        console.log('Criando conexão bancária para o usuário');
-        // Garantir que userId não é nulo antes de usar
-        if (!userId) {
-          throw new Error('ID do usuário não encontrado');
-        }
-        
-        // Garantir que userId é uma string
-        const userIdString = userId as string;
-        const createConnectionResponse = await fetch(`${CORS_PROXY_URL}${BASIQ_API_URL}${ENDPOINTS.USERS}/${userIdString}/connections`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'basiq-version': '3.0'
-          },
-          body: JSON.stringify({
-            institution: {
-              id: 'AU00001' // ID da instituição financeira (ANZ Bank como exemplo)
-            }
-          })
-        });
-
-        if (!createConnectionResponse.ok) {
-          const errorData = await createConnectionResponse.json();
-          console.error('Erro ao criar conexão:', errorData);
-          throw new Error(`Failed to create connection: ${createConnectionResponse.status} ${createConnectionResponse.statusText}`);
-        }
-
-        const connectionData = await createConnectionResponse.json();
-        console.log('Conexão criada:', connectionData);
-        
-        return {
-          userId,
-          connectionData
-        };
-      } else {
-        // Modo de desenvolvimento - usar dados simulados
-        console.log('Ambiente de desenvolvimento detectado, usando dados simulados');
+      // Verificar se estamos em modo de desenvolvimento ou produção
+      if (!USE_REAL_API) {
+        console.log('Usando dados simulados para desenvolvimento');
         
         // Verificar se já existe um usuário armazenado localmente
         let userId: string | null = localStorage.getItem('basiq_user_id');
@@ -723,6 +643,86 @@ class BasiqService {
           }
         };
       }
+      
+      // Código para ambiente de produção - usar API real
+      console.log('Usando API real do Basiq em produção');
+      
+      // 1. Obter token de acesso
+      console.log('Obtendo token de acesso');
+      const token = await this.getToken();
+      
+      // 2. Criar usuário no Basiq (ou recuperar existente)
+      let userId: string | null = localStorage.getItem('basiq_user_id');
+      
+      if (!userId) {
+        console.log('Criando novo usuário no Basiq');
+        const createUserResponse = await fetch(`${CORS_PROXY_URL}${BASIQ_API_URL}${ENDPOINTS.USERS}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'basiq-version': '3.0'
+          },
+          body: JSON.stringify({
+            email,
+            firstName,
+            lastName,
+            mobile: mobile || undefined
+          })
+        });
+
+        if (!createUserResponse.ok) {
+          const errorData = await createUserResponse.json();
+          console.error('Erro ao criar usuário:', errorData);
+          throw new Error(`Failed to create user: ${createUserResponse.status} ${createUserResponse.statusText}`);
+        }
+
+        const userData = await createUserResponse.json();
+        userId = userData.id;
+        
+        // Armazenar ID do usuário para uso futuro
+        localStorage.setItem('basiq_user_id', userId);
+        console.log('Novo usuário criado com ID:', userId);
+      } else {
+        console.log('Usando usuário existente com ID:', userId);
+      }
+      
+      // 3. Criar conexão para o usuário
+      console.log('Criando conexão bancária para o usuário');
+      // Garantir que userId não é nulo antes de usar
+      if (!userId) {
+        throw new Error('ID do usuário não encontrado');
+      }
+      
+      // Garantir que userId seja uma string válida
+      const userIdString = userId as string;
+      const createConnectionResponse = await fetch(`${CORS_PROXY_URL}${BASIQ_API_URL}${ENDPOINTS.USERS}/${userIdString}/connections`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'basiq-version': '3.0'
+        },
+        body: JSON.stringify({
+          institution: {
+            id: 'AU00001' // ID da instituição financeira (ANZ Bank como exemplo)
+          }
+        })
+      });
+
+      if (!createConnectionResponse.ok) {
+        const errorData = await createConnectionResponse.json();
+        console.error('Erro ao criar conexão:', errorData);
+        throw new Error(`Failed to create connection: ${createConnectionResponse.status} ${createConnectionResponse.statusText}`);
+      }
+
+      const connectionData = await createConnectionResponse.json();
+      console.log('Conexão criada:', connectionData);
+      
+      return {
+        userId,
+        connectionData
+      };
     } catch (error) {
       console.error('Error creating user and getting connection link:', error);
       throw error;
