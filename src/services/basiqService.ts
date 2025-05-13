@@ -628,7 +628,8 @@ class BasiqService {
         }
         
         // Simular uma conexão bem-sucedida para desenvolvimento
-        const mockConnectionUrl = 'https://connect.basiq.io/consent?mock=true&user=' + encodeURIComponent(email);
+        // Usar o formato correto para o link de conexão, mesmo em modo simulado
+        const mockConnectionUrl = `https://connect.basiq.io/consent?mock=true&institution_id=AU00001&user_id=${encodeURIComponent(userId)}&email=${encodeURIComponent(email)}`;
         
         return {
           userId: userId,
@@ -754,7 +755,8 @@ class BasiqService {
         
         // Criar uma conexão simulada como fallback
         console.log('Criando conexão simulada como fallback');
-        const mockConnectionUrl = `https://connect.basiq.io/consent?user=${encodeURIComponent(email)}`;
+        // Garantir que o link tenha o formato correto para a API Basiq
+        const mockConnectionUrl = `https://connect.basiq.io/consent?institution_id=AU00001&user_id=${encodeURIComponent(userIdString)}&email=${encodeURIComponent(email)}`;
         
         return {
           userId: userIdString,
