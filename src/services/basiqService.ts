@@ -6,8 +6,8 @@ const BASIQ_API_URL = 'https://au-api.basiq.io';
 // Detectar automaticamente se estamos em ambiente de produção
 const IS_PRODUCTION = import.meta.env.MODE === 'production';
 
-// Usar o backend em produção e dados simulados em desenvolvimento
-const USE_BACKEND = IS_PRODUCTION;
+// Forçar o uso do backend em todos os ambientes
+const USE_BACKEND = true; // Alterado para sempre usar o backend
 
 // URLs do backend (funções Netlify)
 const API_BASE_URL = '/api';
