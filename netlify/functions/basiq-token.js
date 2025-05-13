@@ -3,15 +3,24 @@
 // Se estiver usando Node.js < 18, descomente a linha abaixo
 // const fetch = require('node-fetch');
 
+// Logs para depuração
+console.log('Módulo basiq-token carregado');
+
 // Constantes
 const BASIQ_API_URL = 'https://au-api.basiq.io';
 
 exports.handler = async function(event, context) {
+  console.log('Função basiq-token iniciada');
+  console.log('Variáveis de ambiente disponíveis:', {
+    VITE_BASIQ_API_KEY: process.env.VITE_BASIQ_API_KEY ? 'Definida' : 'Não definida',
+    BASIQ_API_KEY: process.env.BASIQ_API_KEY ? 'Definida' : 'Não definida'
+  });
+  
   // Configurar cabeçalhos CORS para permitir acesso do frontend
   const headers = {
     'Access-Control-Allow-Origin': '*', // Em produção, restrinja para seu domínio
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
 
   // Lidar com solicitações OPTIONS (preflight CORS)
@@ -25,11 +34,15 @@ exports.handler = async function(event, context) {
 
   try {
     // Obter a chave API do Basiq das variáveis de ambiente
-    const BASIQ_API_KEY = process.env.BASIQ_API_KEY;
+    // Tentar usar VITE_BASIQ_API_KEY primeiro, depois BASIQ_API_KEY como fallback
+    const BASIQ_API_KEY = process.env.VITE_BASIQ_API_KEY || process.env.BASIQ_API_KEY;
     
     if (!BASIQ_API_KEY) {
-      throw new Error('BASIQ_API_KEY não está definida nas variáveis de ambiente');
+      throw new Error('Nenhuma chave de API Basiq encontrada nas variáveis de ambiente (VITE_BASIQ_API_KEY ou BASIQ_API_KEY)');
     }
+    
+    // Verificar se a chave começa com "Basic " e remover se necessário
+    const apiKey = BASIQ_API_KEY.startsWith('Basic ') ? BASIQ_API_KEY.substring(6) : BASIQ_API_KEY;
 
     console.log('Obtendo token da API Basiq...');
     
@@ -37,12 +50,14 @@ exports.handler = async function(event, context) {
     const response = await fetch(`${BASIQ_API_URL}/token`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${BASIQ_API_KEY}`,
+        'Authorization': `Basic ${apiKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
         'basiq-version': '3.0'
       },
       body: 'scope=SERVER_ACCESS'
     });
+    
+    console.log('Resposta da API Basiq (status):', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();

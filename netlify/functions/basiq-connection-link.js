@@ -8,21 +8,28 @@ const BASIQ_API_URL = 'https://au-api.basiq.io';
 
 // Função auxiliar para obter token
 async function getToken() {
-  const BASIQ_API_KEY = process.env.BASIQ_API_KEY;
+  // Tentar usar VITE_BASIQ_API_KEY primeiro, depois BASIQ_API_KEY como fallback
+  const BASIQ_API_KEY = process.env.VITE_BASIQ_API_KEY || process.env.BASIQ_API_KEY;
   
   if (!BASIQ_API_KEY) {
-    throw new Error('BASIQ_API_KEY não está definida nas variáveis de ambiente');
+    throw new Error('Nenhuma chave de API Basiq encontrada nas variáveis de ambiente (VITE_BASIQ_API_KEY ou BASIQ_API_KEY)');
   }
+  
+  console.log('Obtendo token com a chave de API Basiq');
+  // Verificar se a chave começa com "Basic " e remover se necessário
+  const apiKey = BASIQ_API_KEY.startsWith('Basic ') ? BASIQ_API_KEY.substring(6) : BASIQ_API_KEY;
   
   const response = await fetch(`${BASIQ_API_URL}/token`, {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${BASIQ_API_KEY}`,
+      'Authorization': `Basic ${apiKey}`,
       'Content-Type': 'application/x-www-form-urlencoded',
       'basiq-version': '3.0'
     },
     body: 'scope=SERVER_ACCESS'
   });
+  
+  console.log('Resposta da API Basiq (status):', response.status);
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -110,6 +117,12 @@ async function createConnection(token, userId, institutionId) {
 }
 
 exports.handler = async function(event, context) {
+  console.log('Função basiq-connection-link iniciada');
+  console.log('Variáveis de ambiente disponíveis:', {
+    VITE_BASIQ_API_KEY: process.env.VITE_BASIQ_API_KEY ? 'Definida' : 'Não definida',
+    BASIQ_API_KEY: process.env.BASIQ_API_KEY ? 'Definida' : 'Não definida'
+  });
+  
   // Configurar cabeçalhos CORS
   const headers = {
     'Access-Control-Allow-Origin': '*', // Em produção, restrinja para seu domínio
