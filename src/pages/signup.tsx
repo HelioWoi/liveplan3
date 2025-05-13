@@ -25,10 +25,35 @@ export default function Signup() {
     }
 
     try {
+      console.log('Iniciando processo de cadastro...');
+      console.log('Email:', email);
+      
+      // Verificar a disponibilidade do Supabase através de logs
+      console.log('Verificando disponibilidade do Supabase...');
+      
+      // Adicionar logs para debug
+      try {
+        const supabaseTest = (window as any).supabase || 'Supabase não disponível globalmente';
+        console.log('Status do Supabase:', supabaseTest);
+      } catch (e) {
+        console.log('Erro ao verificar Supabase:', e);
+      }
+      
+      // Tentar cadastrar o usuário
       await signUp(email, password);
+      console.log('Cadastro realizado com sucesso!');
+      
+      // Redirecionar para a página de escolha de onboarding
       navigate('/onboarding-choice');
-    } catch (err) {
-      setError('Failed to create account. Please try again.');
+    } catch (err: any) {
+      console.error('Erro durante o cadastro:', err);
+      
+      // Exibir mensagem de erro mais específica se disponível
+      if (err?.message) {
+        setError(`Failed to create account: ${err.message}`);
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
