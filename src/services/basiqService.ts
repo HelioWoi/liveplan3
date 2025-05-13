@@ -613,9 +613,20 @@ class BasiqService {
       // Garantir que userId seja uma string válida
       const userIdString = userId as string;
       
-      // Simular uma conexão bem-sucedida para desenvolvimento
-      // Usar o formato correto para o link de conexão, mesmo em modo simulado
-      const mockConnectionUrl = `https://connect.basiq.io/consent?mock=true&institution_id=AU00001&user_id=${encodeURIComponent(userIdString)}&email=${encodeURIComponent(email)}`;
+      // Verificar se estamos em ambiente de produção
+      const isProduction = import.meta.env.VITE_APP_ENV === 'production';
+      console.log('Ambiente de produção?', isProduction);
+      
+      // Construir a URL de conexão
+      let connectionUrl = `https://connect.basiq.io/consent?institution_id=AU00001&user_id=${encodeURIComponent(userIdString)}&email=${encodeURIComponent(email)}`;
+      
+      // Adicionar o parâmetro mock apenas quando não estiver em produção
+      if (!isProduction) {
+        console.log('Adicionando parâmetro mock=true para ambiente de desenvolvimento');
+        connectionUrl += '&mock=true';
+      }
+      
+      console.log('URL de conexão gerada:', connectionUrl);
       
       return {
         userId: userIdString,
@@ -633,7 +644,7 @@ class BasiqService {
               status: 'pending',
               action: {
                 type: 'external',
-                url: mockConnectionUrl
+                url: connectionUrl
               }
             }
           ]

@@ -6,6 +6,7 @@
 [build.environment]
   NODE_VERSION = "18"
   SECRETS_SCAN_OMIT_KEYS = "VITE_BASIQ_API_KEY"
+  VITE_APP_ENV = "production"
 
 # Garantir que as funções Netlify tenham acesso à variável VITE_BASIQ_API_KEY
 [functions]

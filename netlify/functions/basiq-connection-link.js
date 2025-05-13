@@ -91,6 +91,25 @@ async function createOrGetUser(token, userData) {
 
 // Função para criar conexão bancária
 async function createConnection(token, userId, institutionId) {
+  // Verificar se estamos em ambiente de produção
+  const isProduction = process.env.VITE_APP_ENV === 'production';
+  console.log('Ambiente de produção?', isProduction);
+  
+  // Preparar o corpo da requisição
+  const requestBody = {
+    institution: {
+      id: institutionId
+    }
+  };
+  
+  // Adicionar o parâmetro mock apenas quando não estiver em produção
+  if (!isProduction) {
+    console.log('Adicionando parâmetro mock=true para ambiente de desenvolvimento');
+    requestBody.mock = true;
+  }
+  
+  console.log('Corpo da requisição para criar conexão:', JSON.stringify(requestBody));
+  
   const createConnectionResponse = await fetch(`${BASIQ_API_URL}/users/${userId}/connections`, {
     method: 'POST',
     headers: {
@@ -98,11 +117,7 @@ async function createConnection(token, userId, institutionId) {
       'Content-Type': 'application/json',
       'basiq-version': '3.0'
     },
-    body: JSON.stringify({
-      institution: {
-        id: institutionId
-      }
-    })
+    body: JSON.stringify(requestBody)
   });
 
   if (!createConnectionResponse.ok) {
@@ -120,8 +135,15 @@ exports.handler = async function(event, context) {
   console.log('Função basiq-connection-link iniciada');
   console.log('Variáveis de ambiente disponíveis:', {
     VITE_BASIQ_API_KEY: process.env.VITE_BASIQ_API_KEY ? 'Definida' : 'Não definida',
-    BASIQ_API_KEY: process.env.BASIQ_API_KEY ? 'Definida' : 'Não definida'
+    BASIQ_API_KEY: process.env.BASIQ_API_KEY ? 'Definida' : 'Não definida',
+    VITE_APP_ENV: process.env.VITE_APP_ENV || 'não definido'
   });
+  
+  // Se VITE_APP_ENV não estiver definido, assumir que não estamos em produção
+  if (!process.env.VITE_APP_ENV) {
+    process.env.VITE_APP_ENV = 'development';
+    console.log('VITE_APP_ENV não definido, assumindo "development"');
+  }
   
   // Configurar cabeçalhos CORS
   const headers = {
