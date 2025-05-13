@@ -91,24 +91,15 @@ async function createOrGetUser(token, userData) {
 
 // Função para criar conexão bancária
 async function createConnection(token, userId, institutionId) {
-  // Verificar se estamos em ambiente de produção
-  const isProduction = process.env.VITE_APP_ENV === 'production';
-  console.log('Ambiente de produção?', isProduction);
-  
-  // Preparar o corpo da requisição
+  // Forçar a remoção do parâmetro mock=true para todos os ambientes
+  // Preparar o corpo da requisição sem o parâmetro mock
   const requestBody = {
     institution: {
       id: institutionId
     }
   };
   
-  // Adicionar o parâmetro mock apenas quando não estiver em produção
-  if (!isProduction) {
-    console.log('Adicionando parâmetro mock=true para ambiente de desenvolvimento');
-    requestBody.mock = true;
-  }
-  
-  console.log('Corpo da requisição para criar conexão:', JSON.stringify(requestBody));
+  console.log('Corpo da requisição para criar conexão (sem mock):', JSON.stringify(requestBody));
   
   const createConnectionResponse = await fetch(`${BASIQ_API_URL}/users/${userId}/connections`, {
     method: 'POST',
