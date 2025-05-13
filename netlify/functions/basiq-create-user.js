@@ -1,6 +1,7 @@
 // Função Netlify para criar usuários na API Basiq
-// Importar node-fetch versão 2 (compatível com CommonJS)
-const fetch = require('node-fetch');
+// Usando a API fetch nativa do Node.js 18+
+// Se estiver usando Node.js < 18, descomente a linha abaixo
+// const fetch = require('node-fetch');
 
 // Constantes
 const BASIQ_API_URL = 'https://au-api.basiq.io';

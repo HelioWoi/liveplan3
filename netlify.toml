@@ -7,6 +7,9 @@
   NODE_VERSION = "18"
   SECRETS_SCAN_OMIT_KEYS = "VITE_BASIQ_API_KEY"
 
+[[plugins]]
+package = "@netlify/plugin-functions-install-core"
+
 # Redirecionar chamadas de API para as funções Netlify
 [[redirects]]
   from = "/api/*"
