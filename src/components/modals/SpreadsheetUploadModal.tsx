@@ -1,9 +1,9 @@
-import { useState } from 'react';
+// Componente de modal para upload de planilha
 import SpreadsheetUploader from '../spreadsheet/SpreadsheetUploader';
 
 interface SpreadsheetUploadModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (uploadCompleted?: boolean) => void;
 }
 
 export default function SpreadsheetUploadModal({ open, onClose }: SpreadsheetUploadModalProps) {

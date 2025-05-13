@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import basiqService from '../../services/basiqService';
 
 // Interface for available banks
 interface Bank {
@@ -77,17 +78,31 @@ export default function BankSelector({ onBankSelected, className = '' }: BankSel
     const fetchBanks = async () => {
       setLoading(true);
       try {
-        // TODO: Substituir por chamada real à API quando o backend estiver pronto
-        // const bankList = await basiqService.getBanks();
-        // setBanks(bankList);
+        console.log('Buscando lista de bancos...');
+        // Usar o serviço Basiq para buscar bancos reais
+        const bankList = await basiqService.getBanks();
         
-        // Por enquanto, usamos dados simulados
-        setTimeout(() => {
+        if (bankList && bankList.length > 0) {
+          console.log(`${bankList.length} bancos encontrados`);
+          // Mapear para o formato esperado pelo componente
+          const formattedBanks: Bank[] = bankList.map(bank => ({
+            id: bank.id,
+            name: bank.name,
+            logo: bank.logo || `https://cdn.basiq.io/bank-logos/${bank.id}.svg`,
+            country: bank.country
+          }));
+          setBanks(formattedBanks);
+        } else {
+          console.log('Nenhum banco encontrado, usando dados simulados');
           setBanks(mockBanks);
-          setLoading(false);
-        }, 500); // Simular tempo de carregamento
+        }
       } catch (err: any) {
+        console.error('Erro ao buscar bancos:', err);
         setError(err.message || 'Falha ao carregar bancos');
+        // Fallback para dados simulados em caso de erro
+        console.log('Usando dados simulados como fallback');
+        setBanks(mockBanks);
+      } finally {
         setLoading(false);
       }
     };
@@ -149,20 +164,21 @@ export default function BankSelector({ onBankSelected, className = '' }: BankSel
           <div 
             key={bank.id}
             onClick={() => handleBankClick(bank.id)}
-            className="border border-gray-200 rounded-lg p-4 flex flex-col items-center hover:border-[#1A1A40] hover:shadow-md cursor-pointer transition-all"
+            className="border border-gray-200 rounded-xl p-5 flex flex-col items-center hover:border-[#1A1A40] hover:shadow-lg hover:bg-blue-50 cursor-pointer transition-all duration-200 transform hover:-translate-y-1"
           >
-            <div className="w-16 h-16 flex items-center justify-center mb-3">
+            <div className="w-20 h-20 flex items-center justify-center mb-4 bg-gray-50 rounded-full p-3 border border-gray-100">
               <img 
                 src={bank.logo} 
                 alt={`${bank.name} logo`} 
                 className="max-w-full max-h-full object-contain"
                 onError={(e) => {
                   // Fallback for when the image fails to load
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/64?text=Bank';
+                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(bank.name)}&background=f0f9ff&color=3b82f6&bold=true&size=64`;
                 }}
               />
             </div>
-            <span className="text-center font-medium text-gray-800">{bank.name}</span>
+            <span className="text-center font-semibold text-gray-800 mt-1">{bank.name}</span>
+            <span className="text-xs text-gray-500 mt-1">{bank.country === 'AU' ? 'Australia' : bank.country}</span>
           </div>
         ))}
 

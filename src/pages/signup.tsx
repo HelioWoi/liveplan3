@@ -26,7 +26,7 @@ export default function Signup() {
 
     try {
       await signUp(email, password);
-      navigate('/home?fromLogin=true');
+      navigate('/onboarding-choice');
     } catch (err) {
       setError('Failed to create account. Please try again.');
     } finally {

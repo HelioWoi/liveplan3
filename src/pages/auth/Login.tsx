@@ -45,8 +45,8 @@ export default function Login() {
           throw new Error('Please verify your email before logging in. Check your inbox for the confirmation link.');
         }
 
-        // ✅ Redireciona para a home com parâmetro indicando que veio do login
-        navigate('/home?fromLogin=true');
+        // ✅ Redireciona para a página de escolha de onboarding
+        navigate('/onboarding-choice');
       }
     } catch (error: any) {
       setLoginError(error.message);

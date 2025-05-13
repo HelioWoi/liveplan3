@@ -9,7 +9,7 @@ import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
 
 interface SpreadsheetUploaderProps {
-  onClose: () => void;
+  onClose: (uploadCompleted?: boolean) => void;
 }
 
 export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProps) {
@@ -97,7 +97,8 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
       }
       // Fecha o modal e redireciona para a home page após 2 segundos
       setTimeout(() => {
-        onClose();
+        // Informar que o upload foi concluído com sucesso
+        onClose(true);
         // Set all refresh flags to ensure data is updated across the entire app
         setAllRefreshFlags();
         // Redirect to home page with cache-busting parameter
@@ -116,7 +117,7 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Import Transactions</h2>
           <button
-            onClick={onClose}
+            onClick={() => onClose(false)}
             className="text-gray-400 hover:text-gray-600"
           >
             <X className="h-6 w-6" />

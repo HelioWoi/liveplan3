@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
-import { ArrowRight, Upload, Key, Building, ChevronRight } from 'lucide-react';
 import CubeLogoLivePlan from '../components/brand/CubeLogoLivePlan';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 
@@ -19,10 +18,13 @@ export default function OnboardingChoicePage() {
     setShowSpreadsheetModal(true);
   };
 
-  const handleCloseSpreadsheetModal = () => {
+  const handleCloseSpreadsheetModal = (uploadCompleted: boolean = false) => {
     setShowSpreadsheetModal(false);
-    // Após fechar o modal, podemos redirecionar para a página inicial
-    navigate('/home');
+    // Redirecionar para a página inicial apenas se o upload foi completado
+    if (uploadCompleted) {
+      navigate('/home');
+    }
+    // Se não foi completado, permanece na página de escolha de onboarding
   };
 
   const handleSkip = () => {
@@ -113,39 +115,7 @@ export default function OnboardingChoicePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 mt-8">
-          <button
-            onClick={() => navigate('/basiq-config')}
-            className="flex items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all"
-          >
-            <div className="flex items-center">
-              <div className="bg-primary-100 p-3 rounded-full mr-4">
-                <Key className="h-6 w-6 text-primary-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold">Configure API Key</h3>
-                <p className="text-sm text-gray-600">Set up your Basiq API key first</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-gray-400 ml-4" />
-            </div>
-          </button>
-          
-          <button
-            onClick={() => navigate('/bank-onboarding')}
-            className="flex items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all"
-          >
-            <div className="flex items-center">
-              <div className="bg-primary-100 p-3 rounded-full mr-4">
-                <Building className="h-6 w-6 text-primary-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-lg font-semibold">Connect Bank Account</h3>
-                <p className="text-sm text-gray-600">Import your transactions automatically</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-gray-400 ml-4" />
-            </div>
-          </button>
-        </div>
+        {/* Botões adicionais removidos para simplificar a interface */}
 
         <div className="bg-gray-50 p-6 rounded-lg mb-12">
           <h3 className="font-medium text-gray-800 mb-2">Not ready to connect yet?</h3>
