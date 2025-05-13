@@ -1,4 +1,5 @@
 // Função Netlify para obter token de autenticação da API Basiq
+// Importar node-fetch versão 2 (compatível com CommonJS)
 const fetch = require('node-fetch');
 
 // Constantes

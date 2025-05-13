@@ -1,4 +1,5 @@
 // Função Netlify para criar usuário e obter link de conexão bancária
+// Importar node-fetch versão 2 (compatível com CommonJS)
 const fetch = require('node-fetch');
 
 // Constantes
