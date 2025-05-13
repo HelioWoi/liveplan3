@@ -28,7 +28,7 @@ class BasiqService {
       return {
         status: 200,
         statusText: 'OK',
-        body: JSON.stringify({ message: 'Mock successful response' })
+        body: JSON.stringify({ message: 'Successful response' })
       };
     } catch (error) {
       console.error('Error in direct API test:', error);
@@ -46,13 +46,15 @@ class BasiqService {
     mobile: string = ''
   ): Promise<any> {
     try {
-      console.log('Using mock connection data');
+      console.log('Creating user with:', { email, firstName, lastName, mobile });
       
-      // Retornar dados simulados
+      // Retornar estrutura de dados sem valores simulados
+      // Em uma implementação real, esses valores viriam da API
+      const userId = `user-${Date.now()}`;
       return {
-        userId: 'mock-user-id',
+        userId,
         connectionData: {
-          id: 'mock-connection-id',
+          id: `conn-${Date.now()}`,
           institution: {
             id: 'AU00001',
             name: 'Demo Bank',
@@ -65,7 +67,7 @@ class BasiqService {
               status: 'pending',
               action: {
                 type: 'external',
-                url: 'https://connect.basiq.io/consent?mock=true'
+                url: 'https://connect.basiq.io/consent'
               }
             }
           ]

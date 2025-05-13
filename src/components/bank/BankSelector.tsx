@@ -21,57 +21,8 @@ export default function BankSelector({ onBankSelected, className = '' }: BankSel
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Mock banks for development
-  const mockBanks: Bank[] = [
-    {
-      id: 'AU00000',
-      name: 'Commonwealth Bank',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00000.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00001',
-      name: 'ANZ Bank',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00001.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00002',
-      name: 'Westpac',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00002.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00003',
-      name: 'NAB',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00003.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00004',
-      name: 'St. George Bank',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00004.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00005',
-      name: 'Bank of Queensland',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00005.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00006',
-      name: 'Bendigo Bank',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00006.svg',
-      country: 'AU'
-    },
-    {
-      id: 'AU00007',
-      name: 'ING Direct',
-      logo: 'https://cdn.basiq.io/bank-logos/AU00007.svg',
-      country: 'AU'
-    }
-  ];
+  // Lista de bancos padrão vazia
+  const defaultBanks: Bank[] = [];
 
   // Carregar a lista de bancos
   useEffect(() => {
@@ -93,15 +44,15 @@ export default function BankSelector({ onBankSelected, className = '' }: BankSel
           }));
           setBanks(formattedBanks);
         } else {
-          console.log('Nenhum banco encontrado, usando dados simulados');
-          setBanks(mockBanks);
+          console.log('Nenhum banco encontrado, usando lista vazia');
+          setBanks(defaultBanks);
         }
       } catch (err: any) {
         console.error('Erro ao buscar bancos:', err);
         setError(err.message || 'Falha ao carregar bancos');
-        // Fallback para dados simulados em caso de erro
-        console.log('Usando dados simulados como fallback');
-        setBanks(mockBanks);
+        // Fallback para lista vazia em caso de erro
+        console.log('Usando lista vazia como fallback');
+        setBanks(defaultBanks);
       } finally {
         setLoading(false);
       }

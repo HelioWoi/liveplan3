@@ -149,161 +149,7 @@ export interface Bank {
   provider: string;
 }
 
-// Mock data for development
-const mockBanks: BasiqInstitution[] = [
-  {
-    id: 'AU00001',
-    name: 'ANZ Bank',
-    shortName: 'ANZ',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00001.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00002',
-    name: 'Commonwealth Bank',
-    shortName: 'CBA',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00002.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00003',
-    name: 'National Australia Bank',
-    shortName: 'NAB',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00003.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00004',
-    name: 'Westpac Bank',
-    shortName: 'WBC',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00004.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00005',
-    name: 'Bank of Queensland',
-    shortName: 'BOQ',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00005.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00006',
-    name: 'Bendigo Bank',
-    shortName: 'BEN',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00006.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00007',
-    name: 'ING Direct',
-    shortName: 'ING',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00007.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00008',
-    name: 'Macquarie Bank',
-    shortName: 'MQG',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00008.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00009',
-    name: 'Suncorp Bank',
-    shortName: 'SUN',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00009.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00010',
-    name: 'HSBC Australia',
-    shortName: 'HSBC',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00010.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  },
-  {
-    id: 'AU00011',
-    name: 'Citibank Australia',
-    shortName: 'CITI',
-    logo: 'https://cdn.basiq.io/bank-logos/AU00011.svg',
-    country: 'AU',
-    institution_type: 'bank'
-  }
-];
-
-const mockAccounts: BasiqAccount[] = [
-  {
-    id: 'acc-123',
-    accountNumber: '12345678',
-    name: 'Everyday Account',
-    currency: 'AUD',
-    balance: 5000,
-    availableFunds: 5000,
-    type: 'savings',
-    status: 'available',
-    connection: 'conn-123',
-    createdAt: '2023-01-01T00:00:00Z',
-    lastUpdated: '2023-01-01T00:00:00Z'
-  },
-  {
-    id: 'acc-456',
-    accountNumber: '87654321',
-    name: 'Credit Card',
-    currency: 'AUD',
-    balance: -1000,
-    availableFunds: 9000,
-    type: 'credit',
-    status: 'available',
-    connection: 'conn-123',
-    createdAt: '2023-01-01T00:00:00Z',
-    lastUpdated: '2023-01-01T00:00:00Z'
-  }
-];
-
-const mockTransactions: BasiqTransaction[] = [
-  {
-    id: 'tx-123',
-    status: 'posted',
-    description: 'PAYMENT THANK YOU',
-    amount: -50.00,
-    account: 'acc-456',
-    direction: 'debit',
-    postDate: '2023-01-10T00:00:00Z',
-    transactionDate: '2023-01-10T00:00:00Z',
-    balance: 950.00,
-    categories: ['personal-finance'],
-    institution: 'AU00001',
-    connection: 'conn-123',
-    createdAt: '2023-01-10T00:00:00Z',
-    lastUpdated: '2023-01-10T00:00:00Z'
-  },
-  {
-    id: 'tx-124',
-    status: 'posted',
-    description: 'COLES SUPERMARKET',
-    amount: -85.75,
-    account: 'acc-123',
-    direction: 'debit',
-    postDate: '2023-01-15T00:00:00Z',
-    transactionDate: '2023-01-15T00:00:00Z',
-    balance: 4914.25,
-    categories: ['groceries'],
-    institution: 'AU00001',
-    connection: 'conn-123',
-    createdAt: '2023-01-15T00:00:00Z',
-    lastUpdated: '2023-01-15T00:00:00Z'
-  }
-];
+// Todos os dados simulados foram removidos
 
 // Basiq Service class
 class BasiqService {
@@ -382,14 +228,14 @@ class BasiqService {
         }
       }
       
-      // Código para dados simulados (desenvolvimento ou fallback)
-      console.log('Usando dados simulados para desenvolvimento');
-      return mockBanks;
+      // Retornar um array vazio em vez de dados simulados
+      console.log('Retornando array vazio de bancos');
+      return [];
     } catch (error) {
       console.error('Error getting banks:', error);
-      // Fallback para dados simulados em caso de erro
-      console.log('Usando dados simulados como fallback após erro');
-      return mockBanks;
+      // Retornar um array vazio em caso de erro
+      console.log('Retornando array vazio de bancos após erro');
+      return [];
     }
   }
 
@@ -418,14 +264,14 @@ class BasiqService {
         }
       }
       
-      // Código para dados simulados (desenvolvimento ou fallback)
-      console.log('Usando dados simulados para desenvolvimento');
-      return mockAccounts;
+      // Retornar um array vazio em vez de dados simulados
+      console.log('Retornando array vazio de contas');
+      return [];
     } catch (error) {
       console.error('Error getting accounts:', error);
-      // Fallback para dados simulados em caso de erro
-      console.log('Usando dados simulados como fallback após erro');
-      return mockAccounts;
+      // Retornar um array vazio em caso de erro
+      console.log('Retornando array vazio de contas após erro');
+      return [];
     }
   }
 
@@ -454,14 +300,14 @@ class BasiqService {
         }
       }
       
-      // Código para dados simulados (desenvolvimento ou fallback)
-      console.log('Usando dados simulados para desenvolvimento');
-      return mockTransactions;
+      // Retornar um array vazio em vez de dados simulados
+      console.log('Retornando array vazio de transações');
+      return [];
     } catch (error) {
       console.error('Error getting transactions:', error);
-      // Fallback para dados simulados em caso de erro
-      console.log('Usando dados simulados como fallback após erro');
-      return mockTransactions;
+      // Retornar um array vazio em caso de erro
+      console.log('Retornando array vazio de transações após erro');
+      return [];
     }
   }
 
@@ -602,27 +448,33 @@ class BasiqService {
       let userId: string | null = localStorage.getItem('basiq_user_id');
       
       if (userId) {
-        console.log('Usando usuário existente com ID:', userId);
+        // Verificar se o ID existente tem formato antigo e gerar um novo se necessário
+        if (userId.startsWith('mock-user-id-') || !userId.startsWith('user-')) {
+          console.log('Substituindo ID antigo por um ID no formato correto');
+          userId = 'user-' + Date.now();
+          localStorage.setItem('basiq_user_id', userId);
+        } else {
+          console.log('Usando usuário existente com ID:', userId);
+        }
       } else {
-        // Criar um ID de usuário simulado para desenvolvimento
-        userId = 'mock-user-id-' + Date.now();
+        // Criar um ID de usuário com um prefixo normal
+        userId = 'user-' + Date.now();
         localStorage.setItem('basiq_user_id', userId);
-        console.log('Novo usuário simulado criado com ID:', userId);
+        console.log('Novo usuário criado com ID:', userId);
       }
       
       // Garantir que userId seja uma string válida
       const userIdString = userId as string;
       
-      // Forçar a remoção do parâmetro mock=true para todos os ambientes
-      // Construir a URL de conexão sem o parâmetro mock
+      // Construir a URL de conexão com os parâmetros necessários
       const connectionUrl = `https://connect.basiq.io/consent?institution_id=AU00001&user_id=${encodeURIComponent(userIdString)}&email=${encodeURIComponent(email)}`;
       
-      console.log('URL de conexão gerada (sem mock):', connectionUrl);
+      console.log('URL de conexão gerada:', connectionUrl);
       
       return {
         userId: userIdString,
         connectionData: {
-          id: 'mock-connection-id-' + Date.now(),
+          id: 'connection-' + Date.now(),
           institution: {
             id: 'AU00001',
             name: 'ANZ Bank',

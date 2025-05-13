@@ -118,27 +118,11 @@ export const useBankConnectionStore = create<BankConnectionState>((set, get) => 
     set({ isLoading: true, error: null });
     
     try {
-      // Como não temos o método getConnections, vamos usar dados simulados
-      // Em uma implementação real, você precisaria implementar o método getConnections no basiqService
-      console.log('Usando dados simulados para conexões');
+      // Criar uma conexão vazia para inicialização
+      console.log('Inicializando com conexões vazias até que a API retorne dados');
       
-      // Dados simulados de conexões
-      const mockConnections: BasiqConnection[] = [
-        {
-          id: 'mock-connection-1',
-          status: 'active',
-          institution: {
-            id: 'AU00001',
-            name: 'Demo Bank',
-            logo: 'https://cdn.basiq.io/institutions/logos/color/AU00001.svg'
-          },
-          accounts: ['mock-account-1'],
-          createdAt: new Date().toISOString(),
-          lastUsed: new Date().toISOString()
-        }
-      ];
-      
-      const connections = mockConnections;
+      // Array vazio de conexões
+      const connections: BasiqConnection[] = [];
       const isConnected = connections.some((conn: BasiqConnection) => conn.status === 'active');
       
       set({ 

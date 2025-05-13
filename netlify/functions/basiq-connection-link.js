@@ -91,15 +91,14 @@ async function createOrGetUser(token, userData) {
 
 // Função para criar conexão bancária
 async function createConnection(token, userId, institutionId) {
-  // Forçar a remoção do parâmetro mock=true para todos os ambientes
-  // Preparar o corpo da requisição sem o parâmetro mock
+  // Preparar o corpo da requisição com os parâmetros necessários
   const requestBody = {
     institution: {
       id: institutionId
     }
   };
   
-  console.log('Corpo da requisição para criar conexão (sem mock):', JSON.stringify(requestBody));
+  console.log('Corpo da requisição para criar conexão:', JSON.stringify(requestBody));
   
   const createConnectionResponse = await fetch(`${BASIQ_API_URL}/users/${userId}/connections`, {
     method: 'POST',
