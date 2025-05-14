@@ -19,6 +19,11 @@ export default function Login() {
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>();
   
+  // Verificar se o usuário está retornando após confirmar o email
+  const searchParams = new URLSearchParams(location.search);
+  const verified = searchParams.get('verified') === 'true';
+  
+  // Mensagem de estado (por exemplo, redirecionamento)
   const message = (location.state as any)?.message;
   
   const onSubmit = async (data: LoginFormValues) => {
@@ -62,6 +67,11 @@ export default function Login() {
         <div className="max-w-[400px] w-full mx-auto">
           <CubeLogoLivePlan className="mb-2 text-center mx-auto" />
           <p className="text-gray-500 text-center mb-6">Welcome back to your financial journey</p>
+          {verified && (
+            <div className="mb-4 text-green-600 text-sm text-center">
+              Email verified successfully! You can now log in to access your account.
+            </div>
+          )}
           {message && (
             <div className="mb-4 text-green-600 text-sm text-center">{message}</div>
           )}

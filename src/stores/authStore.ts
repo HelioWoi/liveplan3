@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User } from '@supabase/supabase-js';
+import { User, AuthResponse } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase/supabaseClient';
 
 interface AuthState {
@@ -7,7 +7,7 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<{user: User | null, session: any} | undefined>;
   signOut: () => Promise<void>;
   setUser: (user: User | null) => void;
 }
@@ -38,9 +38,23 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin + '/login?verified=true'
+        }
       });
+      
       if (error) throw error;
-      set({ user: data.user });
+      
+      // Não definimos o usuário aqui para forçar o login após confirmação de email
+      // set({ user: data.user });
+      
+      // Verificar se o email precisa ser confirmado
+      if (data.user && !data.user.email_confirmed_at) {
+        // Forçar logout para garantir que o usuário confirme o email
+        await supabase.auth.signOut();
+      }
+      
+      return data;
     } catch (error: any) {
       set({ error: error.message });
       throw error;

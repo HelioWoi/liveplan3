@@ -13,6 +13,9 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Estado para controlar se o email de confirmação foi enviado
+  const [emailSent, setEmailSent] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -26,25 +29,19 @@ export default function Signup() {
 
     try {
       console.log('Iniciando processo de cadastro...');
-      console.log('Email:', email);
-      
-      // Verificar a disponibilidade do Supabase através de logs
-      console.log('Verificando disponibilidade do Supabase...');
-      
-      // Adicionar logs para debug
-      try {
-        const supabaseTest = (window as any).supabase || 'Supabase não disponível globalmente';
-        console.log('Status do Supabase:', supabaseTest);
-      } catch (e) {
-        console.log('Erro ao verificar Supabase:', e);
-      }
       
       // Tentar cadastrar o usuário
-      await signUp(email, password);
+      const result = await signUp(email, password);
       console.log('Cadastro realizado com sucesso!');
       
-      // Redirecionar para a página de escolha de onboarding
-      navigate('/onboarding-choice');
+      // Verificar se o email precisa ser confirmado
+      if (result && result.user && !result.user.email_confirmed_at) {
+        // Mostrar mensagem de confirmação de email
+        setEmailSent(true);
+      } else {
+        // Se o email já estiver confirmado (raro, mas possível em ambientes de desenvolvimento)
+        navigate('/login?verified=true');
+      }
     } catch (err: any) {
       console.error('Erro durante o cadastro:', err);
       
@@ -58,6 +55,36 @@ export default function Signup() {
       setLoading(false);
     }
   };
+
+  // Se o email foi enviado, mostrar mensagem de confirmação
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Check Your Email</h2>
+          <p className="text-gray-600 mb-4">
+            We've sent a confirmation link to <span className="font-semibold">{email}</span>.
+            Please check your inbox and click the link to verify your account.
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            If you don't see the email, check your spam folder or
+            <button 
+              onClick={() => setEmailSent(false)} 
+              className="text-primary-600 hover:text-primary-700 ml-1 underline"
+            >
+              try again
+            </button>
+          </p>
+          <Link 
+            to="/login" 
+            className="inline-block py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
