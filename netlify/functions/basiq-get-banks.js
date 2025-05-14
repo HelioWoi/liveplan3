@@ -1,42 +1,60 @@
 const BASIQ_API_URL = 'https://au-api.basiq.io';
 
 async function getToken() {
-  const BASIQ_API_KEY = process.env.VITE_BASIQ_API_KEY;
+  try {
+    // Obter a chave da API das variáveis de ambiente
+    const BASIQ_API_KEY = process.env.BASIQ_API_KEY || process.env.VITE_BASIQ_API_KEY;
 
-  console.log("🔍 Chave recebida:", BASIQ_API_KEY ? "[DEFINIDA]" : "[NÃO DEFINIDA]");
+    console.log("🔍 Variáveis de ambiente:", {
+      VITE_BASIQ_API_KEY: process.env.VITE_BASIQ_API_KEY ? "[DEFINIDA]" : "[NÃO DEFINIDA]",
+      BASIQ_API_KEY: process.env.BASIQ_API_KEY ? "[DEFINIDA]" : "[NÃO DEFINIDA]"
+    });
 
-  if (!BASIQ_API_KEY) {
-    throw new Error('Variável VITE_BASIQ_API_KEY não está definida.');
+    if (!BASIQ_API_KEY) {
+      throw new Error('Chave da API Basiq não encontrada nas variáveis de ambiente.');
+    }
+
+    // Usar a chave exatamente como fornecida
+    console.log("🔐 Usando chave da API como fornecida");
+    
+    // Adicionar ':' no final da chave se não existir
+    const apiKey = BASIQ_API_KEY.trim();
+    
+    // Codificar a chave em Base64
+    const base64Key = Buffer.from(`${apiKey}:`).toString('base64');
+    
+    // Criar o header de autorização
+    const authHeader = `Basic ${base64Key}`;
+    
+    console.log("🔐 Header de autorização criado com sucesso");
+    
+    // Fazer a requisição para obter o token
+    const response = await fetch(`${BASIQ_API_URL}/token`, {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'basiq-version': '3.0'
+      },
+      body: 'scope=SERVER_ACCESS'
+    });
+
+    console.log("📱 Requisição feita para /token");
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("❌ Falha ao obter token:", err);
+      throw new Error(`Erro ao obter token: ${response.status} ${err}`);
+    }
+
+    const { access_token } = await response.json();
+    console.log("✅ Token obtido com sucesso");
+
+    return access_token;
+  } catch (error) {
+    console.error("💥 Erro ao processar a chave da API:", error.message);
+    throw error;
   }
-
-  const authHeader = BASIQ_API_KEY.includes(':')
-    ? `Basic ${Buffer.from(`${BASIQ_API_KEY}:`).toString('base64')}`
-    : `Basic ${BASIQ_API_KEY}`;
-
-  console.log("🔐 Header de autorização final:", authHeader.slice(0, 30) + "...");
-
-  const response = await fetch(`${BASIQ_API_URL}/token`, {
-    method: 'POST',
-    headers: {
-      Authorization: authHeader,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'basiq-version': '3.0',
-    },
-    body: 'scope=SERVER_ACCESS',
-  });
-
-  console.log("📡 Requisição feita para /token");
-
-  if (!response.ok) {
-    const err = await response.text();
-    console.error("❌ Falha ao obter token:", err);
-    throw new Error(`Erro ao obter token: ${response.status} ${err}`);
-  }
-
-  const { access_token } = await response.json();
-  console.log("✅ Token obtido com sucesso");
-
-  return access_token;
 }
 
 exports.handler = async function (event, context) {
