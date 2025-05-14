@@ -143,6 +143,7 @@ export default function Profile() {
                         <Receipt className="h-4 w-4 mr-2" />
                         Invoices
                       </span>
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full ">Coming Soon</span>
                     </Link>
                     <Link 
                       to="/tax"
@@ -170,6 +171,7 @@ export default function Profile() {
                         <Landmark className="h-4 w-4 mr-2" />
                         Connect Bank Account
                       </span>
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full ">Coming Soon</span>
                     </Link>
                     <button 
                       onClick={handleOpenSpreadsheetModal}

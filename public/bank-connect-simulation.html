@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulação de Conexão Bancária</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    .header {
+      margin-bottom: 30px;
+    }
+    .logo {
+      color: #8e2de2;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .button {
+      background: linear-gradient(to right, #8e2de2, #4a00e0);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .button:hover {
+      opacity: 0.9;
+    }
+    .success-message {
+      display: none;
+      background-color: #e6f7ef;
+      border: 1px solid #a8e6cf;
+      border-radius: 6px;
+      padding: 20px;
+      margin-top: 30px;
+      color: #2e7d32;
+    }
+    .bank-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">LivePlan<sup>3</sup></div>
+      <img src="https://cdn.basiq.io/bank-logos/AU00001.svg" alt="ANZ Bank" class="bank-logo">
+      <h1>Conectar ao ANZ Bank</h1>
+      <p>Por favor, insira suas credenciais bancárias para conectar sua conta. (Simulação)</p>
+    </div>
+    
+    <div class="form-group">
+      <label for="username">Nome de usuário</label>
+      <input type="text" id="username" placeholder="Digite seu nome de usuário">
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input type="password" id="password" placeholder="Digite sua senha">
+    </div>
+    
+    <button class="button" id="connect-button">Conectar</button>
+    
+    <div class="success-message" id="success-message">
+      <h2>Conexão bem-sucedida!</h2>
+      <p>Sua conta bancária foi conectada com sucesso. Você pode fechar esta janela e retornar ao LivePlan³.</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('connect-button').addEventListener('click', function() {
+      // Simular conexão bem-sucedida
+      document.getElementById('connect-button').innerText = 'Conectando...';
+      
+      setTimeout(function() {
+        document.getElementById('success-message').style.display = 'block';
+        document.getElementById('connect-button').style.display = 'none';
+      }, 2000);
+      
+      // Notificar a janela pai que a conexão foi bem-sucedida
+      setTimeout(function() {
+        if (window.opener) {
+          window.opener.postMessage('connection-success', '*');
+        }
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
