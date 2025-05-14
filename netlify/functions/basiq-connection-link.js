@@ -213,9 +213,11 @@ exports.handler = async function(event, context) {
     console.log('💬 Usando dados simulados devido a restrições de permissão na API Basiq');
     
     // Retornar dados simulados de link de conexão
-    const mockUserId = 'user-12345';
-    const mockConnectionId = 'conn-67890';
-    const mockLinkUrl = `https://connect.basiq.io/link?userId=${mockUserId}&connectionId=${mockConnectionId}`;
+    const mockUserId = `user-${Date.now()}`; // Gerar um ID de usuário único baseado no timestamp
+    const mockConnectionId = `conn-${Math.floor(Math.random() * 100000)}`; // ID de conexão aleatório
+    
+    // Gerar URL no formato correto que a API Basiq real usa
+    const mockLinkUrl = `https://connect.basiq.io/consent?institution_id=${institutionId}&user_id=${mockUserId}&email=${encodeURIComponent(email)}`;
     
     const mockResponse = {
       userId: mockUserId,
