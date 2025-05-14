@@ -1,20 +1,19 @@
-// Função Netlify para obter a lista de bancos disponíveis na API Basiq
-
 const BASIQ_API_URL = 'https://au-api.basiq.io';
 
-// Função auxiliar para obter token
 async function getToken() {
-  // Usar variável correta vinda do Netlify
   const BASIQ_API_KEY = process.env.VITE_BASIQ_API_KEY;
+
+  console.log("🔍 Chave recebida:", BASIQ_API_KEY ? "[DEFINIDA]" : "[NÃO DEFINIDA]");
 
   if (!BASIQ_API_KEY) {
     throw new Error('Variável VITE_BASIQ_API_KEY não está definida.');
   }
 
-  // Não reencode se a chave já estiver em Base64
   const authHeader = BASIQ_API_KEY.includes(':')
     ? `Basic ${Buffer.from(`${BASIQ_API_KEY}:`).toString('base64')}`
     : `Basic ${BASIQ_API_KEY}`;
+
+  console.log("🔐 Header de autorização final:", authHeader.slice(0, 30) + "...");
 
   const response = await fetch(`${BASIQ_API_URL}/token`, {
     method: 'POST',
@@ -26,12 +25,17 @@ async function getToken() {
     body: 'scope=SERVER_ACCESS',
   });
 
+  console.log("📡 Requisição feita para /token");
+
   if (!response.ok) {
     const err = await response.text();
+    console.error("❌ Falha ao obter token:", err);
     throw new Error(`Erro ao obter token: ${response.status} ${err}`);
   }
 
   const { access_token } = await response.json();
+  console.log("✅ Token obtido com sucesso");
+
   return access_token;
 }
 
@@ -55,6 +59,7 @@ exports.handler = async function (event, context) {
   }
 
   try {
+    console.log("🌐 Iniciando handler /banks");
     const token = await getToken();
 
     const res = await fetch(`${BASIQ_API_URL}/institutions`, {
@@ -65,8 +70,11 @@ exports.handler = async function (event, context) {
       },
     });
 
+    console.log("🏦 Requisição enviada para /institutions");
+
     if (!res.ok) {
       const msg = await res.text();
+      console.error("❌ Erro ao buscar instituições:", msg);
       return {
         statusCode: res.status,
         headers,
@@ -75,12 +83,14 @@ exports.handler = async function (event, context) {
     }
 
     const data = await res.json();
+    console.log("✅ Lista de bancos recebida com sucesso");
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify(data),
     };
   } catch (err) {
+    console.error("💥 Erro no handler:", err.message);
     return {
       statusCode: 500,
       headers,
