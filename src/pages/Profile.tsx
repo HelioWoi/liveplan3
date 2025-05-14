@@ -135,16 +135,14 @@ export default function Profile() {
                     </span>
                   </div>
                   <div className="border-t border-gray-100 mt-2 pt-2">
-                    <Link 
-                      to="/invoices"
-                      className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
-                    >
+                    {/* Link removido e transformado em elemento não clicável */}
+                    <div className="flex items-center justify-between py-2 text-sm text-primary-600">
                       <span className="flex items-center">
                         <Receipt className="h-4 w-4 mr-2" />
                         Invoices
                       </span>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full ">Coming Soon</span>
-                    </Link>
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Coming Soon</span>
+                    </div>
                     <Link 
                       to="/tax"
                       className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
@@ -163,16 +161,14 @@ export default function Profile() {
                         Help & Support
                       </span>
                     </Link>
-                    <Link 
-                      to="/bank-onboarding"
-                      className="flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"
-                    >
+                    {/* Link removido e transformado em elemento não clicável, mas com cor azul */}
+                    <div className="flex items-center justify-between py-2 text-sm text-primary-600">
                       <span className="flex items-center">
                         <Landmark className="h-4 w-4 mr-2" />
                         Connect Bank Account
                       </span>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full ">Coming Soon</span>
-                    </Link>
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Coming Soon</span>
+                    </div>
                     <button 
                       onClick={handleOpenSpreadsheetModal}
                       className="w-full flex items-center justify-between py-2 text-sm text-primary-600 hover:text-primary-700"

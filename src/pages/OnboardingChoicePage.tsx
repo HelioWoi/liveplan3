@@ -87,8 +87,8 @@ export default function OnboardingChoicePage() {
               onClick={handleBankConnection}
               className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1 border-2 border-blue-200 relative"
             >
-              {/* Badge "Coming Soon" com animação */}
-              <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+              {/* Badge "Coming Soon" com tamanho reduzido */}
+              <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full text-xs font-medium">
                 Coming Soon
               </div>
               
@@ -102,11 +102,7 @@ export default function OnboardingChoicePage() {
                 <p className="text-gray-600 text-center mb-4">
                   Automatically import transactions from your bank account
                 </p>
-                <div className="mt-4 text-center">
-                  <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                    Recommended
-                  </span>
-                </div>
+                {/* Botão Recommended removido */}
               </div>
             </div>
 
