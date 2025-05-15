@@ -76,9 +76,9 @@ export default function OnboardingChoicePage() {
           <div className="text-center mb-10 mt-4">
             <h2 className="text-2xl font-medium text-gray-800 mb-0">Welcome to</h2>
             <div className="-mt-2">
-              <CubeLogoLivePlan className="mx-auto" size="colossal" withSlogan={true} />
+              <CubeLogoLivePlan className="mx-auto" size="very-large" withSlogan={true} />
             </div>
-            <p className="text-base text-gray-600 max-w-3xl mx-auto -mt-4">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto -mt-4">
               Let's get started with your financial planning journey
             </p>
           </div>
@@ -168,30 +168,44 @@ export default function OnboardingChoicePage() {
                   No problem! You can always connect your bank account or import data later from your dashboard.
                 </p>
                 <div className="bg-white p-4 rounded-lg border border-blue-100">
-                  <p className="text-gray-700 mb-2">
-                    <span className="inline-flex items-center">
+                  <div className="grid grid-cols-12 gap-2 mb-2">
+                    <div className="col-span-1">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Go to your <span className="font-medium">Profile</span> and select <span className="font-medium">Connect Bank Account</span>
-                    </span>
-                  </p>
-                  <p className="text-gray-700 mb-2">
-                    <span className="inline-flex items-center">
+                    </div>
+                    <div className="col-span-11">
+                      <p className="text-gray-700">
+                        Go to your <span className="font-medium">Profile</span> and select <span className="font-medium">Connect Bank Account</span>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-12 gap-2 mb-2">
+                    <div className="col-span-1">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Click on <span className="font-medium">Import Data</span> from the dashboard
-                    </span>
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="inline-flex items-center">
+                    </div>
+                    <div className="col-span-11">
+                      <p className="text-gray-700">
+                        Click on <span className="font-medium">Import Data</span> from the dashboard
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-1">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Access <span className="font-medium">Settings</span> &rarr; <span className="font-medium">Data Sources</span>
-                    </span>
-                  </p>
+                    </div>
+                    <div className="col-span-11">
+                      <p className="text-gray-700">
+                        Access <span className="font-medium">Settings</span> &rarr; <span className="font-medium">Data Sources</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

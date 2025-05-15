@@ -2,7 +2,7 @@
 
 interface CubeLogoLivePlanProps {
   className?: string;
-  size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' | 'huge' | 'massive' | 'giant' | 'enormous' | 'colossal';
+  size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' | 'huge' | 'massive' | 'giant' | 'enormous' | 'very-large' | 'colossal';
   withSlogan?: boolean;
 }
 
@@ -22,6 +22,7 @@ export default function CubeLogoLivePlan({
     massive: 'h-40',
     giant: 'h-48',
     enormous: 'h-56',
+    'very-large': 'h-60',
     colossal: 'h-64'
   };
   
