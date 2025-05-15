@@ -25,7 +25,7 @@ export default function CubeLogoLivePlan({
     colossal: 'h-64'
   };
   
-  // Usa o arquivo SVG oficial do logo
+  // Usa o arquivo SVG oficial do logo atualizado
   const logoPath = withSlogan 
     ? '/logo/logo LivePlan3-slogan.svg'
     : '/logo/logo LivePlan3.svg';
