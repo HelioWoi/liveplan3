@@ -1,9 +1,19 @@
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 
+// Função para verificar se o aplicativo está sendo executado como PWA
+function isPWA(): boolean {
+  // Verifica se o aplicativo foi instalado (está em modo standalone ou fullscreen)
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         window.matchMedia('(display-mode: fullscreen)').matches || 
+         // Para iOS
+         (window.navigator as any).standalone === true;
+}
+
 export function usePWAUpdate(): void {
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    // Só mostra a notificação de atualização se estiver em modo PWA
+    if ('serviceWorker' in navigator && isPWA()) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
           if (registration.waiting) {
