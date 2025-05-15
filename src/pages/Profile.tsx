@@ -3,9 +3,10 @@ import { useAuthStore } from '../stores/authStore';
 import { useSupabase } from '../lib/supabase/SupabaseProvider';
 import { useForm } from 'react-hook-form';
 import { User, Shield, LogOut, Mail, HelpCircle, Receipt, Landmark, FileSpreadsheet } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
+import LogoutConfirmationModal from '../components/modals/LogoutConfirmationModal';
 
 interface ProfileFormValues {
   email: string;
@@ -22,11 +23,13 @@ interface PasswordFormValues {
 export default function Profile() {
   const { user } = useAuthStore();
   const { supabase } = useSupabase();
+  const navigate = useNavigate();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   
   const { register, handleSubmit, formState: { errors } } = useForm<ProfileFormValues>({
     defaultValues: {
@@ -45,8 +48,22 @@ export default function Profile() {
   
   const newPassword = watch('newPassword');
   
+  const handleOpenLogoutModal = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleCloseLogoutModal = () => {
+    setShowLogoutModal(false);
+  };
+  
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      // Redirecionar para a página de login após o logout
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
   
   const onSubmitProfile = async (_formData: ProfileFormValues) => {
@@ -100,6 +117,11 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <SpreadsheetUploadModal open={showSpreadsheetModal} onClose={handleCloseSpreadsheetModal} />
+      <LogoutConfirmationModal 
+        open={showLogoutModal} 
+        onClose={handleCloseLogoutModal} 
+        onConfirm={handleSignOut} 
+      />
       <div className="max-w-4xl mx-auto pb-24 px-4 pt-6">
         <h1 className="text-2xl font-bold sm:text-3xl mb-6">Your Profile</h1>
         
@@ -115,7 +137,7 @@ export default function Profile() {
                 <p className="text-gray-500 mb-4">{user?.email}</p>
                 <button 
                   className="btn btn-outline w-full"
-                  onClick={handleSignOut}
+                  onClick={handleOpenLogoutModal}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
