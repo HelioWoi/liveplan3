@@ -47,6 +47,7 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
   // Function to handle back button click
   const handleBack = () => {
     setEditMode(null);
+    onClose();
   };
   
   const startEditing = (mode: 'title' | 'description' | 'target' | 'current' | 'date') => {
