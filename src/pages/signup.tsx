@@ -34,6 +34,10 @@ export default function Signup() {
       const result = await signUp(email, password);
       console.log('Cadastro realizado com sucesso!');
       
+      // Importar o serviço de toast para mostrar notificação de cadastro bem-sucedido
+      const { showSuccessToast, ToastEvent } = await import('../utils/toastService');
+      showSuccessToast(ToastEvent.SIGNUP_SUCCESS);
+      
       // Verificar se o email precisa ser confirmado
       if (result && result.user && !result.user.email_confirmed_at) {
         // Mostrar mensagem de confirmação de email

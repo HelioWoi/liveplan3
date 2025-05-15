@@ -55,6 +55,9 @@ export default function Login() {
       }
     } catch (error: any) {
       setLoginError(error.message);
+      // Importar o serviço de toast para mostrar notificação de erro de login
+      const { showErrorToast, ToastEvent } = await import('../../utils/toastService');
+      showErrorToast(ToastEvent.LOGIN_ERROR);
     } finally {
       setIsLoading(false);
     }

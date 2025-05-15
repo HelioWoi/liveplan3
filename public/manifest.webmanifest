@@ -1,18 +1,112 @@
 {
-    "description": "A Clean and easy-to-use personal finance planner based on the 50/30/20 method. Track income, expenses, and smart financial goals with LivePlan3.",
     "name": "LivePlan³",
-    "theme_color": "#8e2de2",
-    "background_color": "#0a2647",
     "short_name": "LivePlan",
-    "id": "/liveplan3-pwa",
+    "description": "A clean and easy-to-use personal finance planner based on the 50/30/20 method. Track income, expenses, and smart financial goals with LivePlan3.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
     "display_override": [
       "standalone",
       "window-controls-overlay"
     ],
+    "orientation": "any",
+    "theme_color": "#8e2de2",
+    "background_color": "#0a2647",
+    "id": "/liveplan3-pwa",
     "categories": [
       "business",
       "education",
       "finance",
       "utilities"
-    ]
+    ],
+    "icons": [
+      {
+        "src": "/icons/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/icons/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ],
+    "shortcuts": [
+      {
+        "name": "Add Transaction",
+        "short_name": "Add",
+        "description": "Add a new transaction",
+        "url": "/transactions/new",
+        "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      },
+      {
+        "name": "Dashboard",
+        "short_name": "Dashboard",
+        "description": "View your financial dashboard",
+        "url": "/dashboard",
+        "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      }
+    ],
+    "screenshots": [
+      {
+        "src": "/screenshots/01.splash.jpeg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Splash screen of LivePlan3"
+      },
+      {
+        "src": "/screenshots/02.homepage.jpeg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Homepage view of LivePlan3"
+      },
+      {
+        "src": "/screenshots/02.login.jpeg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Login screen of LivePlan3"
+      },
+      {
+        "src": "/screenshots/03.expenses.jpeg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Expenses view of LivePlan3"
+      },
+      {
+        "src": "/screenshots/04.simulate.jpg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Simulation feature of LivePlan3"
+      },
+      {
+        "src": "/screenshots/05.simulate.jpg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Advanced simulation in LivePlan3"
+      },
+      {
+        "src": "/screenshots/06.dashboard.jpeg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Dashboard view of LivePlan3"
+      },
+      {
+        "src": "/screenshots/07 goals.jpeg",
+        "sizes": "1280x720",
+        "type": "image/jpeg",
+        "platform": "wide",
+        "label": "Financial goals in LivePlan3"
+      }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false
   }

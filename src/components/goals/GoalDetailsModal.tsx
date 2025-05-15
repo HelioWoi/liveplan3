@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Goal, useGoalsStore } from '../../stores/goalsStore';
 import { formatCurrency } from '../../utils/formatters';
 import { formatDistance } from 'date-fns';
@@ -17,6 +17,15 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
   const [editValue, setEditValue] = useState<string>('');
   const { updateGoal } = useGoalsStore();
   
+  // Reset editing state when modal is closed or goal changes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsEditing(false);
+      setEditMode(null);
+      setEditValue('');
+    }
+  }, [isOpen, goal]);
+  
   if (!goal) return null;
 
   const progress = (goal.current_amount / goal.target_amount) * 100;
@@ -26,9 +35,22 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
   const closeEditMode = () => {
     setIsEditing(false);
     setEditMode(null);
+    setEditValue('');
+  };
+  
+  // Function to handle cancel button click
+  const handleCancel = () => {
+    setEditMode(null);
+    setEditValue('');
+  };
+  
+  // Function to handle back button click
+  const handleBack = () => {
+    setEditMode(null);
   };
   
   const startEditing = (mode: 'title' | 'description' | 'target' | 'current' | 'date') => {
+    console.log('Starting edit mode:', mode);
     setEditMode(mode);
     switch (mode) {
       case 'title':
@@ -49,10 +71,12 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
         setEditValue(date.toISOString().split('T')[0]);
         break;
     }
+    // Ensure we're in editing mode
+    setIsEditing(true);
   };
   
   const saveEdit = async () => {
-    if (!editMode) return;
+    if (!editMode || !goal) return;
     
     try {
       const updates: Partial<Goal> = {};
@@ -75,13 +99,15 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
           break;
       }
       
+      console.log('Updating goal with:', updates);
       await updateGoal(goal.id, updates);
-      
-      // Show success message or visual feedback
-      alert('Goal updated successfully!');
       
       // Close the edit mode
       setEditMode(null);
+      setIsEditing(false);
+      
+      // Show success message
+      alert('Goal updated successfully!');
     } catch (error) {
       console.error('Failed to update goal:', error);
       alert('Failed to update goal. Please try again.');
@@ -231,7 +257,7 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
                                 </button>
                                 <button 
                                   className="btn btn-outline flex-1"
-                                  onClick={() => setEditMode(null)}
+                                  onClick={handleCancel}
                                 >
                                   Cancel
                                 </button>
@@ -243,7 +269,7 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
                         <div className="flex justify-end">
                           <button 
                             className="btn btn-outline"
-                            onClick={closeEditMode}
+                            onClick={handleBack}
                           >
                             Back
                           </button>
@@ -312,7 +338,14 @@ export default function GoalDetailsModal({ goal, isOpen, onClose }: GoalDetailsM
                       <button
                         type="button"
                         className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                        onClick={() => setIsEditing(true)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // Apenas ativar o modo de edição sem selecionar um campo específico
+                          setIsEditing(true);
+                          setEditMode(null);
+                          console.log('Edit mode activated');
+                        }}
                       >
                         <Edit2 className="h-4 w-4 mr-2" />
                         Edit

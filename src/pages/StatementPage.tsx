@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { ArrowLeft, Bell, Download, Filter, Search } from 'lucide-react';
+import { ArrowLeft, Bell, Download, Filter, Search, Settings } from 'lucide-react';
+import OpeningBalanceModal from '../components/statement/OpeningBalanceModal';
+import { showToast } from '../utils/toastService';
 import { format } from 'date-fns';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { formatCurrency } from '../utils/formatters';
@@ -16,10 +18,12 @@ type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July
 export default function StatementPage() {
   const navigate = useNavigate();
   const { transactions } = useTransactionStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Day');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
   const [selectedMonth, setSelectedMonth] = useState<Month>('April');
   const [selectedYear, setSelectedYear] = useState('2025');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpeningBalanceModalOpen, setIsOpeningBalanceModalOpen] = useState(false);
+  const [openingBalanceValue, setOpeningBalanceValue] = useState<number>(0);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -29,9 +33,17 @@ export default function StatementPage() {
     setIsDetailModalOpen(true);
   };
 
-  // Calcular saldo inicial, movimentação total e saldo final
+  // Calculate initial balance, total movement and final balance
   const calculateBalances = () => {
-    let openingBalance = 0;
+    // Use state value if available, otherwise get from localStorage
+    let openingBalance = openingBalanceValue;
+    
+    // If there's no value in state, try to get from localStorage
+    if (openingBalance === 0) {
+      const savedOpeningBalance = localStorage.getItem('openingBalance');
+      openingBalance = savedOpeningBalance ? parseFloat(savedOpeningBalance) : 0;
+    }
+    
     let totalMovement = 0;
     
     transactions.forEach(transaction => {
@@ -53,8 +65,21 @@ export default function StatementPage() {
   };
 
   const { openingBalance, totalMovement, closingBalance } = calculateBalances();
+  
+  // Update local state when initial balance is calculated
+  useEffect(() => {
+    setOpeningBalanceValue(openingBalance);
+  }, [openingBalance]);
+  
+  // Function to update the initial balance
+  const handleSaveOpeningBalance = (newBalance: number) => {
+    setOpeningBalanceValue(newBalance);
+    // We don't need to use the variables here, just force recalculation
+    calculateBalances();
+    showToast('success', 'Initial balance successfully updated');
+  };
 
-  // Calcular saldo acumulado para cada transação
+  // Calculate running balance for each transaction
   const calculateRunningBalance = (index: number): number => {
     let balance = openingBalance;
     for (let i = 0; i <= index; i++) {
@@ -80,20 +105,28 @@ export default function StatementPage() {
       <div className="bg-[#120B39] text-white">
         <div className="relative">
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-[#120B39] rounded-b-[40px]"></div>
-          <div className="relative px-4 pt-12 pb-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center">
               <button
                 onClick={() => navigate(-1)}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                className="mr-4 text-gray-600 hover:text-gray-900"
               >
-                <ArrowLeft className="h-6 w-6" />
+                <ArrowLeft size={24} />
               </button>
               <h1 className="text-2xl font-bold">Statement</h1>
-              <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
-                <Bell className="h-6 w-6" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
             </div>
+            <button
+              onClick={() => setIsOpeningBalanceModalOpen(true)}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+              title="Configure initial balance"
+            >
+              <Settings size={20} className="mr-1" />
+              <span className="text-sm">Initial Balance</span>
+            </button>
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+              <Bell className="h-6 w-6" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
           </div>
         </div>
       </div>
@@ -243,6 +276,12 @@ export default function StatementPage() {
         transaction={selectedTransaction}
         open={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+      />
+      {/* Modal de configuração do saldo inicial */}
+      <OpeningBalanceModal
+        isOpen={isOpeningBalanceModalOpen}
+        onClose={() => setIsOpeningBalanceModalOpen(false)}
+        onSave={handleSaveOpeningBalance}
       />
     </div>
   );

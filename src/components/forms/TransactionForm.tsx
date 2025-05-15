@@ -125,7 +125,14 @@ export default function TransactionForm({
         
         reset();
         setAmountValue('');
+        
+        // Mostrar toast com o sistema atual
         showToast('Transação salva com sucesso!', 'success');
+        
+        // Importar e usar o novo serviço de toast para notificação mais profissional
+        const { showSuccessToast, ToastEvent } = await import('../../utils/toastService');
+        showSuccessToast(ToastEvent.TRANSACTION_SAVED);
+        
         onSuccess?.();
         onClose?.();
       } catch (error) {

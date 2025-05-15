@@ -2,6 +2,8 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useSupabase, SupabaseProvider } from './lib/supabase/SupabaseProvider';
 import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { usePWAUpdate } from './hooks/usePWAUpdate';
 import BottomNavigation from './components/layout/BottomNavigation';
 import QuickActions from './components/layout/QuickActions';
@@ -272,6 +274,7 @@ function AppContent() {
 
         {showBottomNav && <BottomNavigation />}
         <Toaster />
+        <ToastContainer />
       </div>
     </SwipeableView>
   );

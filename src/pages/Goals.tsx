@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGoalsStore, Goal } from '../stores/goalsStore';
 import { formatDistance } from 'date-fns';
 import { PlusCircle, Target } from 'lucide-react';
+import { formatCurrency } from '../utils/formatters';
 import GoalForm from '../components/forms/GoalForm';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import GoalDetailsModal from '../components/goals/GoalDetailsModal';
@@ -116,8 +117,8 @@ export default function Goals() {
                 </div>
                 <p className="text-gray-600 mb-4 text-sm">{goal.description}</p>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>${goal.current_amount.toFixed(2)}</span>
-                  <span>${goal.target_amount.toFixed(2)}</span>
+                  <span>{formatCurrency(goal.current_amount)}</span>
+                  <span>{formatCurrency(goal.target_amount)}</span>
                 </div>
                 <div className="progress-bar mb-2">
                   <div 
@@ -134,14 +135,20 @@ export default function Goals() {
                 </div>
                 <div className="flex space-x-2">
                   {!isCompleted && (
-                    <button className="btn btn-primary flex-1" onClick={() => setContributingTo(goal)}>
+                    <button 
+                      className="btn btn-primary flex-1" 
+                      onClick={(e) => {
+                        e.stopPropagation(); // Impedir propagação para o card pai
+                        setContributingTo(goal);
+                      }}
+                    >
                       Contribute
                     </button>
                   )}
                   <button
                     className="btn btn-warning btn-sm"
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation(); // Impedir propagação para o card pai
                       setGoalToDelete(goal);
                       setShowDeleteConfirmation(true);
                     }}

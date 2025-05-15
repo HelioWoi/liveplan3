@@ -208,21 +208,26 @@ export default function ExpensesPage() {
     const totalExpensesAndInvestments = fixedExpenses + variableExpenses + investments;
     const targetTotal = Math.max(totalExpensesAndInvestments, 0);
   
+    // Garantir que todos os valores sejam positivos para cálculos percentuais
+    const safeFixedExpenses = Math.max(0, fixedExpenses);
+    const safeVariableExpenses = Math.max(0, variableExpenses);
+    const safeInvestments = Math.max(0, investments);
+    
     return {
       fixed: {
         current: fixedExpenses,
         target: targetTotal * 0.5,
-        percentage: targetTotal ? (fixedExpenses / targetTotal) * 100 : 0
+        percentage: targetTotal ? (safeFixedExpenses / targetTotal) * 100 : 0
       },
       variable: {
         current: variableExpenses,
         target: targetTotal * 0.3,
-        percentage: targetTotal ? (variableExpenses / targetTotal) * 100 : 0
+        percentage: targetTotal ? (safeVariableExpenses / targetTotal) * 100 : 0
       },
       investments: {
         current: investments,
         target: targetTotal * 0.2,
-        percentage: targetTotal ? (investments / targetTotal) * 100 : 0
+        percentage: targetTotal ? (safeInvestments / targetTotal) * 100 : 0
       }
     };
   };

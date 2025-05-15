@@ -106,12 +106,13 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
+      // Criar objeto de atualização que permite valores zero e strings vazias
       const updateData = {
-        ...(goal.title && { title: goal.title }),
-        ...(goal.description && { description: goal.description }),
-        ...(goal.target_amount && { target_amount: goal.target_amount }),
-        ...(goal.current_amount && { current_amount: goal.current_amount }),
-        ...(goal.target_date && { target_date: goal.target_date })
+        ...(goal.title !== undefined && { title: goal.title }),
+        ...(goal.description !== undefined && { description: goal.description }),
+        ...(goal.target_amount !== undefined && { target_amount: goal.target_amount }),
+        ...(goal.current_amount !== undefined && { current_amount: goal.current_amount }),
+        ...(goal.target_date !== undefined && { target_date: goal.target_date })
       };
 
       const { error } = await supabase

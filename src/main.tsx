@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 import { SupabaseProvider } from './lib/supabase/SupabaseProvider';
+import { registerServiceWorker } from './registerServiceWorker';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -14,3 +15,6 @@ createRoot(document.getElementById('root')!).render(
     </SupabaseProvider>
   </StrictMode>
 );
+
+// Registrar o service worker para funcionalidades offline e PWA
+registerServiceWorker();

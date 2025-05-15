@@ -1,13 +1,27 @@
+/**
+ * Formats a numeric value to Australian Dollar (AUD) with two decimal places
+ * @param value - Value to be formatted
+ * @returns String formatted as currency
+ */
 export const formatCurrency = (value: number): string => {
+  // Ensure the value is a valid number
+  const safeValue = isNaN(value) ? 0 : value;
+  
+  // Format with AUD and always with 2 decimal places
   return new Intl.NumberFormat('en-AU', {
     style: 'currency',
     currency: 'AUD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(safeValue);
 };
 
-const parseCurrencyInput = (value: string): string => {
+/**
+ * Processes text input for currency format
+ * @param value - Text value to be processed
+ * @returns Clean string for use in currency calculations
+ */
+export const parseCurrencyInput = (value: string): string => {
   // Remove currency symbol and any non-numeric characters except decimal point
   let cleanValue = value.replace(/[^0-9.]/g, '');
   
@@ -29,10 +43,20 @@ const parseCurrencyInput = (value: string): string => {
   return number.toFixed(2);
 };
 
-const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('en-AU').format(value);
+/**
+ * Formats a number for display with thousand separators
+ * @param value - Numeric value to be formatted
+ * @returns String formatted with thousand separators
+ */
+export const formatNumber = (value: number): string => {
+  return value.toLocaleString('en-AU');
 };
 
+/**
+ * Processes text input for numeric format
+ * @param value - Text value to be processed
+ * @returns Clean string for use in numeric calculations
+ */
 export const parseNumericInput = (value: string): string => {
   // Remove any non-numeric characters except decimal point
   const cleanValue = value.replace(/[^\d.]/g, '');

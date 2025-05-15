@@ -59,10 +59,16 @@ export default function Profile() {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
+      // Importar o serviço de toast para mostrar notificação de logout bem-sucedido
+      const { showSuccessToast, ToastEvent } = await import('../utils/toastService');
+      showSuccessToast(ToastEvent.LOGOUT_SUCCESS);
       // Redirecionar para a página de login após o logout
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
+      // Importar o serviço de toast para mostrar notificação de erro
+      const { showErrorToast } = await import('../utils/toastService');
+      showErrorToast('Erro ao fazer logout. Tente novamente.');
     }
   };
   
