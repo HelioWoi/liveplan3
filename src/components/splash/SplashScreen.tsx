@@ -49,7 +49,7 @@ export default function SplashScreen({
           <img 
             src="/logo/logo LivePlan3 white-slogan.svg" 
             alt="LivePlan³" 
-            className="h-64 md:h-80 lg:h-96 w-auto"
+            className="h-96 md:h-[30rem] lg:h-[36rem] w-auto"
           />
         </motion.div>
         
@@ -60,7 +60,7 @@ export default function SplashScreen({
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="mt-auto absolute bottom-20"
         >
-          <p className="text-white text-2xl font-light tracking-widest">Beta Version</p>
+          <p className="text-white text-xs font-light tracking-widest opacity-70">Beta Version</p>
         </motion.div>
       </div>
     </div>
