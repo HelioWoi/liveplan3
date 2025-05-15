@@ -143,11 +143,11 @@ export default function Home() {
                 <p className="text-gray-400 text-sm">Welcome Back</p>
                 <h1 className="text-2xl font-bold">{user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</h1>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="font-poppins font-semibold text-2xl tracking-tight text-white select-none">
-                  LivePlan<sup className="align-super text-xs ml-0.5">3</sup>
+              <div className="flex items-center">
+                <span className="font-poppins italic text-2xl tracking-tight text-white select-none mr-3">
+                  LivePlan<sup className="align-super text-xs ml-0.5 italic">3</sup>
                 </span>
-                <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative ml-2">
+                <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
                   <Bell className="h-6 w-6" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
