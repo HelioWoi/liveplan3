@@ -18,14 +18,44 @@ export function usePWAUpdate(): void {
         for (const registration of registrations) {
           if (registration.waiting) {
             // Create a toast notification with an update button
+            // Verificar se o usuário já viu esta atualização recentemente
+            try {
+              const lastPrompt = localStorage.getItem('lastUpdatePrompt');
+              if (lastPrompt) {
+                const lastPromptDate = new Date(lastPrompt);
+                const now = new Date();
+                // Se a última notificação foi há menos de 1 hora, não mostrar novamente
+                if (now.getTime() - lastPromptDate.getTime() < 3600000) {
+                  return;
+                }
+              }
+            } catch (e) {
+              console.error('Failed to check last update prompt', e);
+            }
+            
+            // Mostrar a notificação de atualização
             toast.custom((t) => (
               <div className="flex items-center bg-white p-4 rounded shadow-lg">
                 <p className="text-sm">New version available</p>
                 <button
                   onClick={() => {
-                    registration.waiting?.postMessage({ type: 'SKIP_WAITING' })
-                    toast.dismiss(t.id)
-                    window.location.reload()
+                    // Primeiro, descarta o toast para remover a notificação
+                    toast.dismiss(t.id);
+                    
+                    // Depois, envia a mensagem para o service worker atualizar
+                    registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+                    
+                    // Armazena no localStorage que o usuário já viu esta atualização
+                    try {
+                      localStorage.setItem('lastUpdatePrompt', new Date().toISOString());
+                    } catch (e) {
+                      console.error('Failed to save update prompt state', e);
+                    }
+                    
+                    // Recarrega a página após um pequeno delay para garantir que o toast foi removido
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 100);
                   }}
                   className="ml-4 px-2 py-1 text-white bg-[#4a00e0] rounded text-xs"
                 >
@@ -34,7 +64,8 @@ export function usePWAUpdate(): void {
               </div>
             ), {
               duration: Infinity, // Toast stays until dismissed
-              position: 'top-center'
+              position: 'top-center',
+              id: 'pwa-update-toast' // ID fixo para facilitar a referência
             })
           }
         }
