@@ -1,0 +1,43 @@
+{
+  "packageId": "com.liveplan3.app",
+  "host": "www.liveplan3.com",
+  "name": "começa com \"1.0.0\"",
+  "launcherName": "LivePlan",
+  "display": "standalone",
+  "themeColor": "#8E2DE2",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#0A2647",
+  "enableNotifications": true,
+  "startUrl": "Nome do aplicativo: Deve ser \"LivePlan³\" Your Personal Finance App",
+  "iconUrl": "https://liveplan3.netlify.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/Users/heliowoi/Documents/VS Code/keys/liveplan3.keystore",
+    "alias": "Android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://liveplan3.netlify.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://liveplan3.netlify.app/",
+  "minSdkVersion": 21,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "appVersion": "1"
+}

@@ -1,0 +1,53 @@
+{
+  "host": "liveplan3.netlify.app",
+  "name": "LivePlan3",
+  "launcherName": "LivePlan",
+  "startUrl": "/login",
+  "iconUrl": "https://liveplan3.netlify.app/icons/icon-512.png",
+  "maskableIconUrl": "",
+  "monochromeIconUrl": "",
+  "display": "standalone",
+  "themeColor": "#8e2de2",
+  "navigationColor": "#8e2de2",
+  "navigationColorDark": "#0a2647",
+  "navigationDividerColor": "#8e2de2",
+  "navigationDividerColorDark": "#0a2647",
+  "backgroundColor": "#0a2647",
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "signingKey": {
+    "path": "/Users/heliowoi/Documents/VS Code/keys/liveplan3.keystore",
+    "alias": "liveplan3"
+  },
+  "generatorApp": "LivePlan3",
+  "webManifestUrl": "https://liveplan3.netlify.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "enableNotifications": true,
+  "packageId": "com.liveplan3.app",
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "shortName": "Add",
+      "url": "/transactions/new",
+      "icon": {
+        "url": "https://liveplan3.netlify.app/icons/icon-192.png"
+      }
+    },
+    {
+      "name": "Dashboard",
+      "shortName": "Dashboard",
+      "url": "/dashboard",
+      "icon": {
+        "url": "https://liveplan3.netlify.app/icons/icon-192.png"
+      }
+    }
+  ]
+}
