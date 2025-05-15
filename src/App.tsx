@@ -42,11 +42,12 @@ import OnboardingChoicePage from './pages/OnboardingChoicePage';
 import BasiqApiConfig from './pages/BasiqApiConfig';
 import BasiqDirectTest from './pages/BasiqDirectTest';
 import TestBasiq from './pages/TestBasiq';
+import SplashPage from './pages/SplashPage';
 
 function AppContent() {
   const location = useLocation();
   const { session } = useSupabase();
-  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
+  const publicRoutes = ['/', '/splash', '/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
   const onboardingRoutes = ['/onboarding-choice', '/bank-onboarding', '/onboarding'];
   const showBottomNav = !publicRoutes.includes(location.pathname) && !onboardingRoutes.includes(location.pathname) && session?.user;
 
@@ -95,7 +96,8 @@ function AppContent() {
             }
           />
           <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<SplashPage />} />
+          <Route path="/splash" element={<SplashPage />} />
           <Route path="/test" element={<TestPage />} />
           <Route
             path="/basiq-test"

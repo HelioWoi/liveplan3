@@ -1,26 +1,42 @@
-// Componente de logo com símbolo ³ garantido
+// Componente de logo usando o arquivo SVG oficial
 
 interface CubeLogoLivePlanProps {
   className?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' | 'huge' | 'massive' | 'giant' | 'enormous' | 'colossal';
+  withSlogan?: boolean;
 }
 
-export default function CubeLogoLivePlan({ className = '', size = 'medium' }: CubeLogoLivePlanProps) {
+export default function CubeLogoLivePlan({ 
+  className = '', 
+  size = 'medium',
+  withSlogan = false
+}: CubeLogoLivePlanProps) {
   // Define tamanhos baseados na prop size
   const sizes = {
-    small: 'text-2xl',
-    medium: 'text-3xl',
-    large: 'text-4xl'
+    small: 'h-8',
+    medium: 'h-12',
+    large: 'h-16',
+    xlarge: 'h-20',
+    xxlarge: 'h-24',
+    huge: 'h-32',
+    massive: 'h-40',
+    giant: 'h-48',
+    enormous: 'h-56',
+    colossal: 'h-64'
   };
   
-  // Usando HTML direto para garantir que o símbolo ³ seja exibido corretamente
+  // Usa o arquivo SVG oficial do logo
+  const logoPath = withSlogan 
+    ? '/logo/logo LivePlan3-slogan.svg'
+    : '/logo/logo LivePlan3.svg';
+    
   return (
-    <div className={`font-bold ${sizes[size]} ${className} text-center`}>
-      <span 
-        className="bg-gradient-to-r from-purple-500 to-indigo-800 bg-clip-text text-transparent inline-block"
-      >
-        LivePlan<span style={{ verticalAlign: 'super', fontSize: '60%' }}>³</span>
-      </span>
+    <div className={`${className} text-center`}>
+      <img 
+        src={logoPath} 
+        alt="LivePlan³" 
+        className={`${sizes[size]} inline-block`} 
+      />
     </div>
   );
 }

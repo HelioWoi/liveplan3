@@ -65,7 +65,7 @@ export default function Login() {
       {/* Esquerda: Formulário de login */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center bg-white px-4 py-8">
         <div className="max-w-[400px] w-full mx-auto">
-          <CubeLogoLivePlan className="mb-2 text-center mx-auto" />
+          <CubeLogoLivePlan className="mb-6 text-center mx-auto" size="massive" withSlogan={true} />
           <p className="text-gray-500 text-center mb-6">Welcome back to your financial journey</p>
           {verified && (
             <div className="mb-4 text-green-600 text-sm text-center">
