@@ -76,7 +76,7 @@ export default function OnboardingChoicePage() {
           <div className="text-center mb-10 mt-4">
             <h2 className="text-2xl font-medium text-gray-800 mb-0">Welcome to</h2>
             <div className="-mt-2">
-              <CubeLogoLivePlan className="mx-auto" size="very-large" withSlogan={true} />
+              <CubeLogoLivePlan className="mx-auto" size="massive" withSlogan={true} />
             </div>
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto -mt-4">
               Let's get started with your financial planning journey
