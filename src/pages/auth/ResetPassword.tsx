@@ -26,11 +26,22 @@ export default function ResetPassword() {
         // First check URL hash for access token
         const hash = window.location.hash;
         let accessToken = '';
-
-        if (hash && hash.includes('type=recovery')) {
-          accessToken = hash.split('access_token=')[1]?.split('&')[0];
+        
+        console.log('URL hash:', hash); // Debug log
+        
+        if (hash) {
+          // Handle different hash formats
+          if (hash.includes('access_token=')) {
+            accessToken = hash.split('access_token=')[1]?.split('&')[0];
+          } else if (hash.includes('#')) {
+            // Sometimes the token might be the entire hash
+            accessToken = hash.substring(1); // Remove the # character
+          }
+          
           // Clean up URL
           window.history.replaceState(null, '', window.location.pathname);
+          
+          console.log('Extracted token:', accessToken ? 'Token found' : 'No token found'); // Debug log
         }
 
         // If no token in hash, check location state

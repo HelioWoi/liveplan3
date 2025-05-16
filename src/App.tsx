@@ -31,6 +31,7 @@ import TaxPage from './pages/TaxPage';
 import HelpPage from './pages/HelpPage';
 import { InvestmentsPage } from './pages/InvestmentsPage';
 import RequestPasswordReset from './pages/auth/RequestPasswordReset';
+import ResetPassword from './pages/auth/ResetPassword';
 import TermsOfService from './pages/legal/TermsOfService';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import Dashboard from './pages/Dashboard';
@@ -49,7 +50,7 @@ import SplashPage from './pages/SplashPage';
 function AppContent() {
   const location = useLocation();
   const { session } = useSupabase();
-  const publicRoutes = ['/', '/splash', '/login', '/signup', '/forgot-password', '/terms-of-service', '/privacy-policy'];
+  const publicRoutes = ['/', '/splash', '/login', '/signup', '/forgot-password', '/reset-password', '/terms-of-service', '/privacy-policy'];
   const onboardingRoutes = ['/onboarding-choice', '/bank-onboarding', '/onboarding'];
   const showBottomNav = !publicRoutes.includes(location.pathname) && !onboardingRoutes.includes(location.pathname) && session?.user;
 
@@ -77,6 +78,8 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<RequestPasswordReset />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password#:token" element={<ResetPassword />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 

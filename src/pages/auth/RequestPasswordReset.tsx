@@ -26,6 +26,8 @@ export default function RequestPasswordReset() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       
+      console.log('Reset password email sent to:', data.email, 'with redirect to:', `${window.location.origin}/reset-password`);
+      
       if (error) throw error;
       
       setResetSuccess(true);
