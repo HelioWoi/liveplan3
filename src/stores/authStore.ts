@@ -35,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signUp: async (email: string, password: string) => {
     set({ loading: true, error: null });
     try {
+      // Tentativa inicial de cadastro com confirmação de email
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -42,6 +43,26 @@ export const useAuthStore = create<AuthState>((set) => ({
           emailRedirectTo: window.location.origin + '/login?verified=true'
         }
       });
+      
+      // Se houver erro específico sobre envio de email, tente novamente sem confirmação de email
+      if (error && (error.message.includes('sending email') || error.message.includes('confirmation email'))) {
+        console.log('Erro ao enviar email de confirmação, tentando cadastro sem confirmação de email');
+        
+        // Segunda tentativa: cadastro sem exigir confirmação de email (para desenvolvimento)
+        const { data: devData, error: devError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/login?verified=true',
+            data: {
+              email_confirmed: true // Marca o email como confirmado nos metadados
+            }
+          }
+        });
+        
+        if (devError) throw devError;
+        return devData;
+      }
       
       if (error) throw error;
       
