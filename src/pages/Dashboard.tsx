@@ -76,6 +76,22 @@ export default function Dashboard() {
   useEffect(() => {
     fetchTransactions();
     fetchTotalIncome();
+    
+    // Listener para atualizações do Weekly Budget
+    const handleWeeklyBudgetUpdate = () => {
+      console.log('Dashboard detected weekly-budget-updated event');
+      fetchTransactions();
+      fetchTotalIncome();
+      setDataRefreshed(true);
+    };
+    
+    // Adicionar listener para o evento weekly-budget-updated
+    window.addEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
+    
+    // Remover listener quando o componente for desmontado
+    return () => {
+      window.removeEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
+    };
   }, [fetchTransactions, fetchTotalIncome]);
   
   // Recarregar dados quando o período, mês ou ano mudar

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { Download, Filter, Search, Settings } from 'lucide-react';
+import { ArrowLeft, Bell, Download, Filter, Search, Settings } from 'lucide-react';
 import OpeningBalanceModal from '../components/statement/OpeningBalanceModal';
-import PageHeader from '../components/layout/PageHeader';
 import { showToast } from '../utils/toastService';
 import { format } from 'date-fns';
 import BottomNavigation from '../components/layout/BottomNavigation';
@@ -21,7 +20,7 @@ export default function StatementPage() {
   const { transactions, fetchTransactions } = useTransactionStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
-  const [selectedMonth, setSelectedMonth] = useState<Month>('May');  // Alterado para o mês atual
+  const [selectedMonth, setSelectedMonth] = useState<Month>('April');
   const [selectedYear, setSelectedYear] = useState('2025');
   const [isOpeningBalanceModalOpen, setIsOpeningBalanceModalOpen] = useState(false);
   const [openingBalanceValue, setOpeningBalanceValue] = useState<number>(0);
@@ -121,7 +120,8 @@ export default function StatementPage() {
   // Function to update the initial balance
   const handleSaveOpeningBalance = (newBalance: number) => {
     setOpeningBalanceValue(newBalance);
-    localStorage.setItem('openingBalance', newBalance.toString());
+    // We don't need to use the variables here, just force recalculation
+    calculateBalances();
     showToast('success', 'Initial balance successfully updated');
   };
 
@@ -145,30 +145,36 @@ export default function StatementPage() {
     console.log('Exporting statement...');
   };
 
-  // Função para depurar transações locais
-  const debugLocalTransactions = () => {
-    const storedTransactions = localStorage.getItem('local_transactions');
-    console.log('Local Transactions:', storedTransactions ? JSON.parse(storedTransactions) : []);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
-      <PageHeader 
-        title="Statement" 
-        showBackButton={true}
-      />
-      
-      {/* Settings Button */}
-      <div className="flex justify-end px-4 -mt-2 mb-4">
-        <button
-          onClick={() => setIsOpeningBalanceModalOpen(true)}
-          className="flex items-center text-primary-600 hover:text-primary-700"
-          title="Configure initial balance"
-        >
-          <Settings size={20} className="mr-1" />
-          <span className="text-sm">Initial Balance</span>
-        </button>
+      <div className="bg-[#120B39] text-white">
+        <div className="relative">
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-[#120B39] rounded-b-[40px]"></div>
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate(-1)}
+                className="mr-4 text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft size={24} />
+              </button>
+              <h1 className="text-2xl font-bold">Statement</h1>
+            </div>
+            <button
+              onClick={() => setIsOpeningBalanceModalOpen(true)}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+              title="Configure initial balance"
+            >
+              <Settings size={20} className="mr-1" />
+              <span className="text-sm">Initial Balance</span>
+            </button>
+            <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+              <Bell className="h-6 w-6" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 space-y-6 mt-6">
@@ -212,11 +218,262 @@ export default function StatementPage() {
                 <Download className="h-5 w-5 mr-2" />
                 Export
               </button>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              {/* Add filter options here */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <select className="input">
+                  <option value="">All Types</option>
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                </select>
+                <select className="input">
+                  <option value="">All Categories</option>
+                  <option value="Fixed">Fixed</option>
+                  <option value="Variable">Variable</option>
+                  <option value="Extra">Extra</option>
+                </select>
+                <input type="date" className="input" placeholder="Start Date" />
+                <input type="date" className="input" placeholder="End Date" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Statement Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl p-6 shadow-card">
+            <h3 className="text-sm font-medium text-gray-500 mb-2">Opening Balance</h3>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(openingBalance)}</p>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-card">
+            <h3 className="text-sm font-medium text-gray-500 mb-2">Total Movement</h3>
+            <p className={`text-2xl font-bold ${totalMovement >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+              {totalMovement >= 0 ? '+' : ''}{formatCurrency(totalMovement)}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-card">
+
+return (
+<div className="min-h-screen bg-gray-50 pb-24">
+{/* Header */}
+<div className="bg-[#120B39] text-white">
+<div className="relative">
+<div className="absolute bottom-0 left-0 right-0 h-16 bg-[#120B39] rounded-b-[40px]"></div>
+<div className="flex justify-between items-center mb-6">
+<div className="flex items-center">
+<button
+onClick={() => navigate(-1)}
+className="mr-4 text-gray-600 hover:text-gray-900"
+>
+<ArrowLeft size={24} />
+</button>
+<h1 className="text-2xl font-bold">Statement</h1>
+</div>
+<button
+onClick={() => setIsOpeningBalanceModalOpen(true)}
+className="flex items-center text-gray-600 hover:text-gray-900"
+title="Configure initial balance"
+>
+<Settings size={20} className="mr-1" />
+<span className="text-sm">Initial Balance</span>
+</button>
+<button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+<Bell className="h-6 w-6" />
+<span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+</div>
+</div>
+</div>
+
+<div className="max-w-7xl mx-auto px-4 space-y-6 mt-6">
+{/* Period Selection */}
+<div className="flex flex-col gap-4">
+<PeriodSelector
+selectedPeriod={selectedPeriod}
+selectedMonth={selectedMonth}
+selectedYear={selectedYear}
+onPeriodChange={setSelectedPeriod}
+onMonthChange={setSelectedMonth}
+onYearChange={setSelectedYear}
+/>
+</div>
+
+{/* Search and Filters */}
+<div className="bg-white rounded-xl p-4 shadow-card">
+<div className="flex flex-col md:flex-row gap-4">
+<div className="flex-1 relative">
+<input
+type="text"
+className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+placeholder="Search transactions..."
+value={searchTerm}
+onChange={(e) => setSearchTerm(e.target.value)}
+/>
+<Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+</div>
+<div className="flex gap-2">
+<button
+onClick={() => setShowFilters(!showFilters)}
+className="btn btn-outline"
+>
+<Filter className="h-5 w-5 mr-2" />
+Filters
+</button>
+<button
+onClick={exportStatement}
+className="btn btn-primary"
+>
+<Download className="h-5 w-5 mr-2" />
+Export
+</button>
+</div>
+</div>
+
+{showFilters && (
+<div className="mt-4 pt-4 border-t border-gray-200">
+{/* Add filter options here */}
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+<select className="input">
+<option value="">All Types</option>
+<option value="income">Income</option>
+<option value="expense">Expense</option>
+</select>
+<select className="input">
+<option value="">All Categories</option>
+<option value="Fixed">Fixed</option>
+<option value="Variable">Variable</option>
+<option value="Extra">Extra</option>
+</select>
+<input type="date" className="input" placeholder="Start Date" />
+<input type="date" className="input" placeholder="End Date" />
+</div>
+</div>
+)}
+</div>
+
+{/* Statement Summary */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div className="bg-white rounded-xl p-6 shadow-card">
+<h3 className="text-sm font-medium text-gray-500 mb-2">Opening Balance</h3>
+<p className="text-2xl font-bold text-gray-900">{formatCurrency(openingBalance)}</p>
+</div>
+
+<div className="bg-white rounded-xl p-6 shadow-card">
+<h3 className="text-sm font-medium text-gray-500 mb-2">Total Movement</h3>
+<p className={`text-2xl font-bold ${totalMovement >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+{totalMovement >= 0 ? '+' : ''}{formatCurrency(totalMovement)}
+</p>
+</div>
+
+<div className="bg-white rounded-xl p-6 shadow-card">
+<h3 className="text-sm font-medium text-gray-500 mb-2">Closing Balance</h3>
+<p className={`text-2xl font-bold ${closingBalance >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+{formatCurrency(closingBalance)}
+</p>
+</div>
+</div>
+
+{/* Transaction List */}
+<div className="mt-6">
+<div className="overflow-x-auto">
+<table className="min-w-full divide-y divide-gray-200">
+<thead className="bg-gray-50">
+<tr>
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+</tr>
+</thead>
+<tbody className="bg-white divide-y divide-gray-200">
+{allTransactions
+.filter(transaction => {
+// Filter by search term
+if (searchTerm && !transaction.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
+return false;
+}
+
+// Filter by period
+const transactionDate = new Date(transaction.date);
+const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' }) as Month;
+const transactionYear = transactionDate.getFullYear().toString();
+
+if (selectedPeriod === 'Month' && (transactionMonth !== selectedMonth || transactionYear !== selectedYear)) {
+return false;
+}
+
+if (selectedPeriod === 'Year' && transactionYear !== selectedYear) {
+return false;
+}
+
+return true;
+})
+.map((transaction, index) => (
+<tr 
+key={transaction.id} 
+className="hover:bg-gray-50 cursor-pointer"
+onClick={() => handleTransactionClick(transaction)}
+>
+<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+{format(new Date(transaction.date), 'dd/MM/yyyy')}
+</td>
+<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+{transaction.description}
+{transaction.origin === 'Weekly Budget' && (
+<span className="ml-2 px-2 py-0.5 text-xs bg-purple-100 text-purple-800 rounded-full">
+Weekly Budget
+</span>
+)}
+</td>
+<td className={classNames(
+"px-6 py-4 whitespace-nowrap text-sm font-medium",
+transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+)}>
+{transaction.type === 'income' ? '+' : '-'}
+{formatCurrency(Math.abs(Number(transaction.amount) || 0))}
+</td>
+<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+{formatCurrency(calculateRunningBalance(index))}
+</td>
+</tr>
+))}
+</tbody>
+</table>
+</div>
+</div>
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl p-4 shadow-card">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                placeholder="Search transactions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+            <div className="flex gap-2">
               <button
-                onClick={debugLocalTransactions}
-                className="btn btn-secondary"
+                onClick={() => setShowFilters(!showFilters)}
+                className="btn btn-outline"
               >
-                Debug
+                <Filter className="h-5 w-5 mr-2" />
+                Filters
+              </button>
+              <button
+                onClick={exportStatement}
+                className="btn btn-primary"
+              >
+                <Download className="h-5 w-5 mr-2" />
+                Export
               </button>
             </div>
           </div>

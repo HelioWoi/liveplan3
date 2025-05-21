@@ -5,14 +5,7 @@ import { useAuthStore } from '../../stores/authStore';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Enhanced validation of Supabase credentials
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('⚠️ Supabase URL or Anonymous Key is missing!');
-  console.error('Please connect to Supabase using the "Connect to Supabase" button in the top right corner.');
-} else if (supabaseUrl === 'https://example.supabase.co' || supabaseAnonKey === 'dummy-key') {
-  console.error('⚠️ Supabase URL or Anonymous Key is using default values!');
-  console.error('Please connect to Supabase using the "Connect to Supabase" button in the top right corner.');
-}
+// Movemos a validação para dentro do componente para evitar erros de hooks
 
 type SupabaseContextType = {
   supabase: SupabaseClient;
@@ -24,8 +17,19 @@ type SupabaseContextType = {
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
+  // Validação de credenciais do Supabase movida para dentro do componente
+  useEffect(() => {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('⚠️ Supabase URL or Anonymous Key is missing!');
+      console.error('Please connect to Supabase using the "Connect to Supabase" button in the top right corner.');
+    } else if (supabaseUrl === 'https://example.supabase.co' || supabaseAnonKey === 'dummy-key') {
+      console.error('⚠️ Supabase URL or Anonymous Key is using default values!');
+      console.error('Please connect to Supabase using the "Connect to Supabase" button in the top right corner.');
+    }
+  }, []);
+  
   const [session, setSession] = useState<any | null>(null);
-  const [supabase] = useState(() => createClient(supabaseUrl, supabaseAnonKey, {
+  const [supabase] = useState(() => createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder-key', {
     auth: {
       autoRefreshToken: true,
       persistSession: true,

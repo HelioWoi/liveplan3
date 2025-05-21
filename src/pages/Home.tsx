@@ -46,6 +46,21 @@ export default function Home() {
   useEffect(() => {
     console.log('Home component mounted - Loading initial data');
     fetchTransactions();
+    
+    // Listener para atualizações do Weekly Budget
+    const handleWeeklyBudgetUpdate = () => {
+      console.log('Home detected weekly-budget-updated event');
+      fetchTransactions();
+      setDataRefreshed(true);
+    };
+    
+    // Adicionar listener para o evento weekly-budget-updated
+    window.addEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
+    
+    // Remover listener quando o componente for desmontado
+    return () => {
+      window.removeEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
+    };
   }, [fetchTransactions]);
 
   // Check for data refresh flags and reload data as needed
@@ -74,27 +89,107 @@ export default function Home() {
     localStorage.setItem('spreadsheet_imported', 'true');
   };
 
-  // Calculate totals
-  const totalIncome = transactions
-    .filter(t => t.category === 'Income')
+  // Obter transações locais do Weekly Budget
+  const [localTransactions, setLocalTransactions] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Carregar transações locais do localStorage
+    const storedTransactions = localStorage.getItem('local_transactions');
+    if (storedTransactions) {
+      setLocalTransactions(JSON.parse(storedTransactions));
+    }
+
+    // Adicionar listener para atualizar quando novas transações forem adicionadas
+    const handleLocalTransactionAdded = () => {
+      const updatedTransactions = localStorage.getItem('local_transactions');
+      if (updatedTransactions) {
+        setLocalTransactions(JSON.parse(updatedTransactions));
+      }
+    };
+
+    // Adicionar listener para atualizar quando transações forem deletadas
+    const handleTransactionDeleted = () => {
+      // Atualizar transações locais
+      const updatedTransactions = localStorage.getItem('local_transactions');
+      if (updatedTransactions) {
+        setLocalTransactions(JSON.parse(updatedTransactions));
+      }
+      // Atualizar transações do banco de dados
+      fetchTransactions();
+    };
+
+    window.addEventListener('local-transaction-added', handleLocalTransactionAdded);
+    window.addEventListener('transaction-deleted', handleTransactionDeleted);
+    window.addEventListener('weekly-budget-entry-deleted', handleTransactionDeleted);
+    
+    return () => {
+      window.removeEventListener('local-transaction-added', handleLocalTransactionAdded);
+      window.removeEventListener('transaction-deleted', handleTransactionDeleted);
+      window.removeEventListener('weekly-budget-entry-deleted', handleTransactionDeleted);
+    };
+  }, []);
+
+  // Limpar transações duplicadas e inconsistentes
+  const getCleanTransactions = (allTransactions: any[]) => {
+    // Primeiro, remover duplicatas por ID
+    const uniqueMap = new Map();
+    
+    // Processar as transações em ordem reversa (mais recentes primeiro)
+    // para garantir que fiquemos com as versões mais recentes
+    [...allTransactions].reverse().forEach(t => {
+      // Verificar se já existe uma transação com este ID ou com metadados relacionados
+      const isDuplicate = uniqueMap.has(t.id) || 
+        // Verificar se existe alguma transação com o mesmo sourceEntryId nos metadados
+        Array.from(uniqueMap.values()).some((existingT: any) => 
+          existingT.metadata && 
+          t.metadata && 
+          existingT.metadata.sourceEntryId === t.metadata.sourceEntryId
+        );
+      
+      if (!isDuplicate) {
+        // Normalizar a transação para garantir consistência
+        const normalizedTransaction = {
+          ...t,
+          // Garantir que o tipo seja consistente com a categoria
+          type: t.category === 'Income' ? 'income' : 'expense',
+          // Garantir que o valor seja positivo
+          amount: Math.abs(Number(t.amount || 0))
+        };
+        uniqueMap.set(t.id, normalizedTransaction);
+      }
+    });
+    
+    return Array.from(uniqueMap.values());
+  };
+
+  // Obter transações limpas e normalizadas
+  const cleanTransactions = getCleanTransactions([...transactions, ...localTransactions]);
+  
+  // Adicionar console.log para depuração
+  console.log('Transações limpas e normalizadas:', cleanTransactions);
+
+  // Cálculo do Total Income - APENAS entradas de receita (Income)
+  const totalIncome = cleanTransactions
+    .filter(t => t.type === 'income' && t.category === 'Income')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalExpenses = transactions
+  // Cálculo do Total Expenses - APENAS despesas (todas as categorias exceto Income)
+  const totalExpenses = cleanTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
     
   // Calculate formula3 data
-  const fixedExpenses = transactions
-    .filter(t => t.category === 'Fixed')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const fixedExpenses = cleanTransactions
+    .filter((t: any) => t.category === 'Fixed' && t.type === 'expense')
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
     
-  const variableExpenses = transactions
-    .filter(t => t.category === 'Variable')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const variableExpenses = cleanTransactions
+    .filter((t: any) => t.category === 'Variable' && t.type === 'expense')
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
     
-  const investments = transactions
-    .filter(t => t.category === 'Investment')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const investments = cleanTransactions
+    .filter((t: any) => t.category === 'Investment' && t.type === 'expense')
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
 
   // Usar o total de gastos como base para os targets
   const totalExpensesAndInvestments = fixedExpenses + variableExpenses + investments;

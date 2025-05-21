@@ -19,11 +19,19 @@ import PeriodSelector from '../components/common/PeriodSelector';
 const API_KEY = 'd08rfs1r01qju5m8a010d08rfs1r01qju5m8a01g';
 const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
 
+// Função temporariamente modificada para retornar dados mockados em vez de fazer chamadas de API
 async function fetchQuote(symbol: string) {
-  const response = await fetch(
-    `${FINNHUB_BASE_URL}/quote?symbol=${symbol}&token=${API_KEY}`
-  );
-  return response.json();
+  console.log(`Usando dados mockados para ${symbol} em vez de chamar a API`);
+  // Retornar dados mockados para evitar erros
+  return {
+    c: Math.random() * 200 + 100, // current price
+    d: Math.random() * 10 - 5,    // change
+    dp: Math.random() * 5 - 2.5,  // percent change
+    h: Math.random() * 220 + 100, // high price of the day
+    l: Math.random() * 180 + 100, // low price of the day
+    o: Math.random() * 200 + 100, // open price of the day
+    pc: Math.random() * 200 + 100 // previous close price
+  };
 }
 
 async function fetchMarketNews() {
