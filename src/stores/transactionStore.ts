@@ -84,6 +84,30 @@ export const useTransactionStore = create<TransactionState>((set) => ({
           transactions: [data, ...state.transactions],
           isLoading: false
         }));
+        
+        // Disparar evento para notificar outras partes do app (Weekly Budget e Homepage)
+        if (transaction.category === 'Income' || transaction.type === 'income') {
+          // Adicionar a transação ao localStorage para garantir sincronização com Weekly Budget
+          try {
+            const storedTransactions = localStorage.getItem('local_transactions');
+            const localTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+            
+            // Adicionar a nova transação ao array local
+            localTransactions.push({
+              ...data,
+              origin: 'Income Page'
+            });
+            
+            // Salvar de volta no localStorage
+            localStorage.setItem('local_transactions', JSON.stringify(localTransactions));
+            
+            // Disparar evento para notificar a homepage e o Weekly Budget
+            window.dispatchEvent(new CustomEvent('local-transaction-added', { detail: data }));
+            window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+          } catch (error) {
+            console.error('Erro ao sincronizar transação com localStorage:', error);
+          }
+        }
       }
     } catch (error: any) {
       console.error('Error adding transaction:', error);

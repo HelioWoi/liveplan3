@@ -4,6 +4,7 @@ import { useTransactionStore } from '../stores/transactionStore';
 import { ArrowLeft, MoreVertical, Minus, Plus, Check, DollarSign } from 'lucide-react';
 import classNames from 'classnames';
 import { format } from 'date-fns';
+import { TransactionCategory, TransactionType } from '../types/transaction';
 
 const AMOUNT_PRESETS = [1000, 5000, 10000, 25000, 50000, 75000, 100000];
 
@@ -64,14 +65,69 @@ export default function IncomePage() {
     }
 
     try {
-      await addTransaction({
+      // Obter a data atual para determinar a semana
+      const currentDate = new Date();
+      const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+      const currentYear = currentDate.getFullYear();
+      
+      // Determinar a semana atual (1-4) com base no dia do mês
+      const dayOfMonth = currentDate.getDate();
+      let currentWeek = 'Week 1';
+      
+      if (dayOfMonth > 21) {
+        currentWeek = 'Week 4';
+      } else if (dayOfMonth > 14) {
+        currentWeek = 'Week 3';
+      } else if (dayOfMonth > 7) {
+        currentWeek = 'Week 2';
+      }
+      
+      // Adicionar a transação
+      const newTransaction = {
         origin: origin.trim(),
         amount: parseFloat(amount),
-        category: 'Income',
-        type: 'income',
-        date: new Date().toISOString(),
+        category: 'Income' as TransactionCategory,
+        type: 'income' as TransactionType,
+        date: currentDate.toISOString(),
         user_id: 'current-user',
-      });
+        // Adicionar metadados para sincronização com Weekly Budget
+        metadata: {
+          sourceWeek: currentWeek,
+          sourceMonth: currentMonth,
+          sourceYear: currentYear
+        }
+      };
+      
+      await addTransaction(newTransaction);
+      
+      // Sincronizar com o Weekly Budget manualmente
+      try {
+        // Recuperar transações existentes do localStorage
+        const storedTransactions = localStorage.getItem('local_transactions');
+        const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+        
+        // Encontrar a transação recém-adicionada (a última com a origem e valor correspondentes)
+        const addedTransaction = transactions.find((t: { origin: string; amount: number; category: string; type: string }) => 
+          t.origin === origin.trim() && 
+          t.amount === parseFloat(amount) &&
+          t.category === 'Income' &&
+          t.type === 'income'
+        );
+        
+        if (addedTransaction) {
+          // Disparar evento para atualizar o Weekly Budget com a semana específica
+          window.dispatchEvent(new CustomEvent('income-added-to-week', { 
+            detail: {
+              transaction: addedTransaction,
+              week: currentWeek,
+              month: currentMonth,
+              year: currentYear
+            }
+          }));
+        }
+      } catch (syncError) {
+        console.error('Erro ao sincronizar com Weekly Budget:', syncError);
+      }
 
       setShowError(false);
       setShowSuccessModal(true);

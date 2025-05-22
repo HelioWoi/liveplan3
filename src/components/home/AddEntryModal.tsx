@@ -1,7 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
-import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
-import { WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
+import { useWeeklyBudgetStore, WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
 import { TransactionCategory } from '../../types/transaction';
 
 interface AddEntryModalProps {

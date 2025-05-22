@@ -162,8 +162,18 @@ export default function Home() {
     return Array.from(uniqueMap.values());
   };
 
+  // Combinar transações do banco de dados e locais
+  const [allTransactions, setAllTransactions] = useState<any[]>([]);
+  useEffect(() => {
+    const combined = [...transactions, ...localTransactions];
+    setAllTransactions(combined);
+    
+    // Disparar evento para notificar outros componentes que dependem das transações
+    window.dispatchEvent(new CustomEvent('transactions-updated'));
+  }, [transactions, localTransactions]);
+
   // Obter transações limpas e normalizadas
-  const cleanTransactions = getCleanTransactions([...transactions, ...localTransactions]);
+  const cleanTransactions = getCleanTransactions(allTransactions);
   
   // Adicionar console.log para depuração
   console.log('Transações limpas e normalizadas:', cleanTransactions);
