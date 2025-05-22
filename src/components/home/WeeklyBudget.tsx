@@ -258,18 +258,6 @@ export default function WeeklyBudget() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={handleManualSync}
-            className="px-2 py-0.5 text-xs text-green-600 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors mr-2"
-          >
-            Sync
-          </button>
-          <button
-            onClick={handleClearAll}
-            className="px-2 py-0.5 text-xs text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors mr-2"
-          >
-            Clear All
-          </button>
-          <button
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center justify-center p-0 text-purple-600 bg-transparent hover:text-purple-700 focus:outline-none"
           >

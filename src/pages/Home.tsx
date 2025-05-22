@@ -178,13 +178,54 @@ export default function Home() {
   // Adicionar console.log para depuração
   console.log('Transações limpas e normalizadas:', cleanTransactions);
 
-  // Cálculo do Total Income - APENAS entradas de receita (Income)
-  const totalIncome = cleanTransactions
+  // Converter nome do mês para número (0-11)
+  const getMonthNumber = (monthName: string): number => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                   'July', 'August', 'September', 'October', 'November', 'December'];
+    return months.indexOf(monthName);
+  };
+
+  // Filtrar transações com base no período selecionado
+  const filteredTransactionsByPeriod = cleanTransactions.filter(transaction => {
+    const transactionDate = new Date(transaction.date);
+    const today = new Date();
+    const selectedMonthIndex = getMonthNumber(selectedMonth);
+    const currentYear = today.getFullYear();
+    
+    switch (selectedPeriod) {
+      case 'Day':
+        // Filtrar apenas as transações do dia atual
+        return (
+          transactionDate.getDate() === today.getDate() &&
+          transactionDate.getMonth() === today.getMonth() &&
+          transactionDate.getFullYear() === today.getFullYear()
+        );
+      case 'Week':
+        // Transações dos últimos 7 dias
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(today.getDate() - 7);
+        return transactionDate >= oneWeekAgo;
+      case 'Month':
+        // Transações do mês selecionado no ano atual
+        return (
+          transactionDate.getMonth() === selectedMonthIndex &&
+          transactionDate.getFullYear() === currentYear
+        );
+      case 'Year':
+        // Transações do ano atual
+        return transactionDate.getFullYear() === currentYear;
+      default:
+        return true;
+    }
+  });
+
+  // Cálculo do Total Income - APENAS entradas de receita (Income) do período selecionado
+  const totalIncome = filteredTransactionsByPeriod
     .filter(t => t.type === 'income' && t.category === 'Income')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Cálculo do Total Expenses - APENAS despesas (todas as categorias exceto Income)
-  const totalExpenses = cleanTransactions
+  // Cálculo do Total Expenses - APENAS despesas (todas as categorias exceto Income) do período selecionado
+  const totalExpenses = filteredTransactionsByPeriod
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
     
