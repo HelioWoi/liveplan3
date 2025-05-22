@@ -60,9 +60,6 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
       // Adicionar a entrada ao Weekly Budget
       store.addEntry(newEntry);
       console.log('Weekly Budget: Added new entry from income transaction', newEntry);
-      
-      // Disparar evento para atualizar a UI
-      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
     } else {
       console.log('Weekly Budget: Entry already exists, skipping', existingEntry);
     }
@@ -115,9 +112,6 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
         // Adicionar a entrada ao Weekly Budget
         store.addEntry(newEntry);
         console.log('Weekly Budget: Added new entry from local transaction', newEntry);
-        
-        // Disparar evento para atualizar a UI
-        window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
       }
     }
   }) as EventListener);
@@ -134,6 +128,22 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     setCurrentYear: (year: number) => set({ currentYear: year }),
     entries: [],
     addEntry: (entry: WeeklyBudgetEntry) => {
+      // Verificar se já existe uma entrada com o mesmo valor e descrição na mesma semana
+      const state = useWeeklyBudgetStore.getState();
+      const existingEntry = state.entries.find(e => 
+        e.description === entry.description && 
+        e.amount === entry.amount && 
+        e.week === entry.week && 
+        e.month === entry.month && 
+        e.year === entry.year
+      );
+      
+      // Se já existir uma entrada idêntica, não adicionar novamente
+      if (existingEntry) {
+        console.log('Entrada já existe no Weekly Budget, ignorando duplicação:', existingEntry);
+        return;
+      }
+      
       // Add to weekly budget entries only - no automatic sync to transactions
       // This avoids foreign key constraint errors when there's no valid user
       set((state) => ({
@@ -141,55 +151,47 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       }));
       
       // Após adicionar uma entrada, cria automaticamente uma transação correspondente
-      const state = useWeeklyBudgetStore.getState();
-      state.createTransactionFromEntry(entry)
-        .then(success => {
-          if (success) {
-            console.log('Transação criada automaticamente a partir da nova entrada do orçamento');
-            // Atualiza o transactionStore
-            try {
-              const transactionStore = useTransactionStore.getState();
-              if (transactionStore && transactionStore.fetchTransactions) {
-                transactionStore.fetchTransactions();
+      // mas apenas se não for uma entrada de sincronização (para evitar loop)
+      if (!entry.id.startsWith('wb-')) {
+        const state = useWeeklyBudgetStore.getState();
+        state.createTransactionFromEntry(entry)
+          .then(success => {
+            if (success) {
+              console.log('Transação criada automaticamente a partir da nova entrada do orçamento');
+              // Atualiza o transactionStore
+              try {
+                const transactionStore = useTransactionStore.getState();
+                if (transactionStore && transactionStore.fetchTransactions) {
+                  transactionStore.fetchTransactions();
+                }
+              } catch (error) {
+                console.error('Erro ao atualizar o transactionStore:', error);
               }
-            } catch (error) {
-              console.error('Erro ao atualizar o transactionStore:', error);
             }
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao criar transação a partir da entrada do orçamento:', error);
-        });
+          })
+          .catch(error => {
+            console.error('Erro ao criar transação a partir da entrada do orçamento:', error);
+          });
+      }
     },
     
     // Versão local que não depende do banco de dados
-    createTransactionFromEntry: async (entry: WeeklyBudgetEntry) => {
+    createTransactionFromEntry: async (entry: WeeklyBudgetEntry): Promise<boolean> => {
       // Simula a criação de uma transação sem usar o banco de dados
-      // Isso evita erros de chave estrangeira
-      console.log('Simulando criação de transação a partir da entrada de orçamento:', entry);
-      
-      // Converte a semana para uma data real
-      const entryDate = weekToDate(entry.week, entry.month, entry.year);
-      
-      // Adiciona a entrada ao localStorage para simular persistência
       try {
-        // Recupera transações existentes do localStorage
-        const storedTransactions = localStorage.getItem('local_transactions');
-        const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+        // Converter a semana para uma data aproximada
+        const weekDate = weekToDate(entry.week, entry.month, entry.year);
         
-        // Cria uma nova transação local
+        // Criar uma nova transação local
         const newTransaction = {
-          id: Date.now().toString(),
-          date: entryDate.toISOString(),
-          amount: Math.abs(entry.amount), // Sempre armazena o valor absoluto
-          category: entry.category,
-          // Define o tipo baseado na categoria, não no valor
-          // Income é sempre 'income', outras categorias são sempre 'expense'
-          type: entry.category === 'Income' ? 'income' : 'expense',
-          description: entry.description,
+          id: `tx-${Date.now()}`,
           origin: 'Weekly Budget',
+          description: entry.description,
+          amount: entry.amount,
+          category: entry.category,
+          type: entry.category === 'Income' ? 'income' : 'expense',
+          date: weekDate.toISOString(),
           user_id: 'local-user',
-          // Adicionar metadados para facilitar a sincronização
           metadata: {
             sourceEntryId: entry.id,
             sourceWeek: entry.week,
@@ -198,48 +200,94 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           }
         };
         
-        // Adiciona à lista e salva de volta no localStorage
-        transactions.push(newTransaction);
-        localStorage.setItem('local_transactions', JSON.stringify(transactions));
-        
-        // Dispara um evento para notificar outras partes do app
-        window.dispatchEvent(new CustomEvent('local-transaction-added', { detail: newTransaction }));
-        
-        return true;
+        // Adicionar a transação ao localStorage
+        try {
+          const storedTransactions = localStorage.getItem('local_transactions');
+          const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+          
+          // Verificar se já existe uma transação idêntica
+          const existingTransaction = transactions.find((t: any) => 
+            t.description === newTransaction.description && 
+            t.amount === newTransaction.amount && 
+            t.origin === newTransaction.origin &&
+            t.metadata?.sourceEntryId === newTransaction.metadata.sourceEntryId
+          );
+          
+          if (!existingTransaction) {
+            // Adicionar a nova transação ao array
+            transactions.push(newTransaction);
+            
+            // Salvar de volta no localStorage
+            localStorage.setItem('local_transactions', JSON.stringify(transactions));
+            
+            // Disparar evento para notificar outras partes do app
+            window.dispatchEvent(new CustomEvent('transaction-added', { detail: newTransaction }));
+            
+            return true;
+          } else {
+            console.log('Transação já existe, ignorando duplicação:', existingTransaction);
+            return false;
+          }
+        } catch (error) {
+          console.error('Erro ao salvar transação no localStorage:', error);
+          return false;
+        }
       } catch (error) {
-        console.error('Erro ao criar transação local:', error);
+        console.error('Erro ao criar transação a partir da entrada:', error);
         return false;
       }
     },
     
     updateEntry: (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
       set((state) => ({
-        entries: state.entries.map((entry) =>
+        entries: state.entries.map(entry => 
           entry.id === id ? { ...entry, ...updatedEntry } : entry
-        ),
+        )
       }));
       
-      // Dispara um evento para notificar outras partes do app
-      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+      // Atualizar também a transação associada no localStorage
+      try {
+        const storedTransactions = localStorage.getItem('local_transactions');
+        if (storedTransactions) {
+          const transactions = JSON.parse(storedTransactions);
+          const updatedTransactions = transactions.map((t: any) => {
+            if (t.metadata && t.metadata.sourceEntryId === id) {
+              return { 
+                ...t, 
+                description: updatedEntry.description || t.description,
+                amount: updatedEntry.amount || t.amount,
+                metadata: { 
+                  ...t.metadata, 
+                  sourceWeek: updatedEntry.week || t.metadata.sourceWeek
+                }
+              };
+            }
+            return t;
+          });
+          localStorage.setItem('local_transactions', JSON.stringify(updatedTransactions));
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar transação associada:', error);
+      }
     },
     
     deleteEntry: (id: string) => {
-      // Primeiro, encontra a entrada que será excluída
+      // Obter a entrada antes de excluí-la para poder excluir a transação associada
       const entryToDelete = get().entries.find(entry => entry.id === id);
       
+      // Excluir a entrada do Weekly Budget
+      set((state) => ({
+        entries: state.entries.filter(entry => entry.id !== id)
+      }));
+      
+      // Se a entrada foi encontrada, excluir também a transação associada
       if (entryToDelete) {
-        // Remove a entrada do estado
-        set((state) => ({
-          entries: state.entries.filter((entry) => entry.id !== id),
-        }));
-        
-        // Agora, procura por transações associadas no localStorage
         try {
           const storedTransactions = localStorage.getItem('local_transactions');
           if (storedTransactions) {
             const transactions = JSON.parse(storedTransactions);
             
-            // Filtra as transações, removendo aquelas que têm o sourceEntryId igual ao id da entrada
+            // Filtrar as transações para remover a associada à entrada excluída
             const filteredTransactions = transactions.filter((t: any) => 
               !(t.metadata && t.metadata.sourceEntryId === id)
             );
@@ -301,116 +349,91 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     syncWithTransactions: () => {
-      // Recupera transações do localStorage
-      const storedTransactions = localStorage.getItem('local_transactions');
-      if (!storedTransactions) return;
-      
-      const transactions = JSON.parse(storedTransactions);
-      
-      // Agrupa transações por mês e semana
-      const transactionsByMonthAndWeek: Record<string, Record<string, any[]>> = {};
-      
-      transactions.forEach((transaction: any) => {
-        // Extrai o mês e ano da data da transação
-        const date = new Date(transaction.date);
-        const month = date.toLocaleString('default', { month: 'long' });
-        const year = date.getFullYear();
-        
-        // Determina a semana com base no dia do mês
-        const day = date.getDate();
-        let week = 'Week 1';
-        
-        if (day > 21) {
-          week = 'Week 4';
-        } else if (day > 14) {
-          week = 'Week 3';
-        } else if (day > 7) {
-          week = 'Week 2';
-        }
-        
-        // Inicializa o objeto para o mês se não existir
-        if (!transactionsByMonthAndWeek[`${month}-${year}`]) {
-          transactionsByMonthAndWeek[`${month}-${year}`] = {};
-        }
-        
-        // Inicializa o array para a semana se não existir
-        if (!transactionsByMonthAndWeek[`${month}-${year}`][week]) {
-          transactionsByMonthAndWeek[`${month}-${year}`][week] = [];
-        }
-        
-        // Adiciona a transação ao array da semana correspondente
-        transactionsByMonthAndWeek[`${month}-${year}`][week].push(transaction);
-      });
-      
-      // Recupera as entradas existentes do Weekly Budget
-      const existingEntries = get().entries;
-      
-      // Para cada mês e semana, verifica se há transações que não estão no Weekly Budget
-      Object.entries(transactionsByMonthAndWeek).forEach(([monthYear, weekData]) => {
-        const [month, yearStr] = monthYear.split('-');
-        const year = parseInt(yearStr);
-        
-        Object.entries(weekData).forEach(([week, transactions]) => {
-          transactions.forEach((transaction: any) => {
-            // Verifica se já existe uma entrada correspondente
-            const existingEntry = existingEntries.find(entry => 
-              (entry.description === transaction.description &&
-               entry.amount === transaction.amount &&
-               entry.week === week &&
-               entry.month === month &&
-               entry.year === year) ||
-              (transaction.metadata && transaction.metadata.sourceEntryId === entry.id)
-            );
-            
-            // Se não existir uma entrada correspondente, cria uma
-            if (!existingEntry) {
-              // Verifica se a categoria é válida para o Weekly Budget
-              let category = transaction.category;
-              if (!['Income', 'Fixed', 'Variable', 'Extra', 'Additional'].includes(category)) {
-                // Se a transação for do tipo 'income', coloca na categoria 'Income'
-                if (transaction.type === 'income' || transaction.amount > 0) {
-                  category = 'Income';
-                } else {
-                  // Se for despesa, coloca em 'Variable' por padrão
-                  category = 'Variable';
-                }
-              }
-              
-              const newEntry: WeeklyBudgetEntry = {
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
-                description: transaction.description,
-                amount: transaction.amount,
-                category: category,
-                month,
-                year
-              };
-              
-              // Adiciona a nova entrada ao estado
-              set((state) => ({
-                entries: [...state.entries, newEntry]
-              }));
-              
-              console.log(`Entrada de orçamento criada para a transação: ${transaction.description}`);
-            }
-          });
-        });
-      });
-      
-      // Atualiza o transactionStore para refletir as mudanças
+      // Obter transações do localStorage
       try {
-        // Tenta acessar o método fetchTransactions do transactionStore
-        const transactionStore = useTransactionStore.getState();
-        if (transactionStore && transactionStore.fetchTransactions) {
-          transactionStore.fetchTransactions();
-          console.log('TransactionStore atualizado com sucesso após sincronização do Weekly Budget');
+        const storedTransactions = localStorage.getItem('local_transactions');
+        if (!storedTransactions) {
+          console.log('Nenhuma transação local encontrada para sincronização');
+          return;
         }
+        
+        const transactions = JSON.parse(storedTransactions);
+        
+        // Filtrar apenas transações de income
+        const incomeTransactions = transactions.filter((t: any) => 
+          (t.category === 'Income' || t.type === 'income')
+        );
+        
+        if (incomeTransactions.length === 0) {
+          console.log('Nenhuma transação de income encontrada para sincronização');
+          return;
+        }
+        
+        console.log(`Encontradas ${incomeTransactions.length} transações de income para sincronização`);
+        
+        // Obter entradas existentes
+        const existingEntries = get().entries;
+        
+        // Para cada transação de income, verificar se já existe uma entrada correspondente
+        incomeTransactions.forEach((transaction: any) => {
+          // Determinar a semana com base na data da transação ou nos metadados
+          let week = 'Week 1';
+          let month = '';
+          let year = 0;
+          
+          if (transaction.metadata && transaction.metadata.sourceWeek) {
+            // Se a transação tem metadados de semana, usar esses valores
+            week = transaction.metadata.sourceWeek;
+            month = transaction.metadata.sourceMonth || '';
+            year = transaction.metadata.sourceYear || 0;
+          } else {
+            // Caso contrário, determinar com base na data da transação
+            const transactionDate = new Date(transaction.date);
+            const dayOfMonth = transactionDate.getDate();
+            month = transactionDate.toLocaleString('default', { month: 'long' });
+            year = transactionDate.getFullYear();
+            
+            if (dayOfMonth > 21) {
+              week = 'Week 4';
+            } else if (dayOfMonth > 14) {
+              week = 'Week 3';
+            } else if (dayOfMonth > 7) {
+              week = 'Week 2';
+            }
+          }
+          
+          // Verificar se já existe uma entrada com a mesma descrição, valor e semana
+          const existingEntry = existingEntries.find(entry => 
+            entry.description === (transaction.description || transaction.origin) && 
+            entry.amount === transaction.amount && 
+            entry.week === week && 
+            entry.month === month && 
+            entry.year === year
+          );
+          
+          if (!existingEntry) {
+            // Criar uma nova entrada no Weekly Budget
+            const newEntry: WeeklyBudgetEntry = {
+              id: `wb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+              description: transaction.description || transaction.origin,
+              amount: transaction.amount,
+              category: 'Income',
+              month: month,
+              year: year
+            };
+            
+            // Adicionar a entrada ao Weekly Budget (sem criar uma nova transação)
+            set((state) => ({
+              entries: [...state.entries, newEntry]
+            }));
+            
+            console.log('Adicionada nova entrada ao Weekly Budget a partir de transação:', newEntry);
+          }
+        });
       } catch (error) {
-        console.error('Erro ao atualizar o transactionStore:', error);
+        console.error('Erro ao sincronizar com transações:', error);
       }
-      
-      // Dispara um evento para notificar outras partes do app
-      window.dispatchEvent(new CustomEvent('local-transactions-updated'));
     }
   };
 });

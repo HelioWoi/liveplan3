@@ -96,8 +96,7 @@ export default function IncomePage() {
       // Adicionar a transação ao store
       await addTransaction(newTransaction);
       
-      // Disparar evento para sincronizar com o Weekly Budget
-      // Este evento será capturado pelo weeklyBudgetStore
+      // Disparar um único evento para sincronizar com o Weekly Budget
       window.dispatchEvent(new CustomEvent('income-added-to-week', { 
         detail: { 
           transaction: {
@@ -109,42 +108,6 @@ export default function IncomePage() {
           year: currentYear 
         }
       }));
-      
-      console.log('Income Page: Dispatched income-added-to-week event', {
-        transaction: newTransaction,
-        week: currentWeek,
-        month: currentMonth,
-        year: currentYear
-      });
-      
-      // Sincronizar com o Weekly Budget manualmente
-      try {
-        // Recuperar transações existentes do localStorage
-        const storedTransactions = localStorage.getItem('local_transactions');
-        const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-        
-        // Encontrar a transação recém-adicionada (a última com a origem e valor correspondentes)
-        const addedTransaction = transactions.find((t: { origin: string; amount: number; category: string; type: string }) => 
-          t.origin === origin.trim() && 
-          t.amount === parseFloat(amount) &&
-          t.category === 'Income' &&
-          t.type === 'income'
-        );
-        
-        if (addedTransaction) {
-          // Disparar evento para atualizar o Weekly Budget com a semana específica
-          window.dispatchEvent(new CustomEvent('income-added-to-week', { 
-            detail: {
-              transaction: addedTransaction,
-              week: currentWeek,
-              month: currentMonth,
-              year: currentYear
-            }
-          }));
-        }
-      } catch (syncError) {
-        console.error('Erro ao sincronizar com Weekly Budget:', syncError);
-      }
 
       setShowError(false);
       setShowSuccessModal(true);
