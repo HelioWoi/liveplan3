@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Transaction, TaxType } from '../types/transaction';
 import { supabase } from '../lib/supabase/supabaseClient';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface TaxEntry {
   id: string;
@@ -90,9 +91,12 @@ export const useTransactionStore = create<TransactionState>((set) => ({
 
         if (user) {
           // Se o usuário estiver autenticado, salvar no banco de dados
+          // Remover o campo metadata para evitar erro, já que essa coluna não existe no banco
+          const { metadata, ...transactionWithoutMetadata } = transaction;
+          
           const { data: dbData, error } = await supabase
             .from('transactions')
-            .insert([{ ...transaction, user_id: user.id }])
+            .insert([{ ...transactionWithoutMetadata, user_id: user.id }])
             .select()
             .single();
 
@@ -126,25 +130,15 @@ export const useTransactionStore = create<TransactionState>((set) => ({
       
       // Disparar evento para notificar outras partes do app (Weekly Budget e Homepage)
       if (transaction.category === 'Income' || transaction.type === 'income') {
-        // Adicionar a transação ao localStorage para garantir sincronização com Weekly Budget
+        // Apenas disparar eventos para notificar a homepage e o Weekly Budget
+        // Não precisa adicionar ao localStorage novamente, pois já está no estado
         try {
-          const storedTransactions = localStorage.getItem('local_transactions');
-          const localTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-          
-          // Adicionar a nova transação ao array local
-          localTransactions.push({
-            ...data,
-            origin: data.origin || 'Income Page'
-          });
-          
-          // Salvar de volta no localStorage
-          localStorage.setItem('local_transactions', JSON.stringify(localTransactions));
-          
           // Disparar evento para notificar a homepage e o Weekly Budget
           window.dispatchEvent(new CustomEvent('local-transaction-added', { detail: data }));
           window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+          console.log('Eventos disparados para sincronização de income:', data);
         } catch (error) {
-          console.error('Erro ao sincronizar transação com localStorage:', error);
+          console.error('Erro ao sincronizar transação com eventos:', error);
         }
       }
     } catch (error: any) {

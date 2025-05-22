@@ -38,8 +38,7 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
     // Verificar se já existe uma entrada com o mesmo ID de transação
     const entries = store.entries;
     const existingEntry = entries.find(entry => 
-      entry.id === `wb-${transaction.id}` || 
-      (entry.description === transaction.description && 
+      (entry.description === (transaction.description || transaction.origin) && 
        entry.amount === transaction.amount && 
        entry.week === week && 
        entry.month === month && 
@@ -49,20 +48,77 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
     if (!existingEntry) {
       // Criar uma nova entrada no Weekly Budget para a semana específica
       const newEntry: WeeklyBudgetEntry = {
-        id: `wb-${transaction.id}`,
+        id: `wb-${Date.now()}`, // Usar timestamp para garantir ID único
         week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
         description: transaction.description || transaction.origin,
         amount: transaction.amount,
         category: 'Income',
         month: month,
-        year: parseInt(year)
+        year: typeof year === 'string' ? parseInt(year) : year
       };
       
       // Adicionar a entrada ao Weekly Budget
       store.addEntry(newEntry);
       console.log('Weekly Budget: Added new entry from income transaction', newEntry);
+      
+      // Disparar evento para atualizar a UI
+      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
     } else {
       console.log('Weekly Budget: Entry already exists, skipping', existingEntry);
+    }
+  }) as EventListener);
+  
+  // Listener para transações adicionadas localmente
+  window.addEventListener('local-transaction-added', ((event: CustomEvent) => {
+    const transaction = event.detail;
+    console.log('Weekly Budget: Detected local-transaction-added event', transaction);
+    
+    // Verificar se é uma transação de income
+    if (transaction.category === 'Income' || transaction.type === 'income') {
+      // Determinar a semana atual (1-4) com base no dia do mês
+      const transactionDate = new Date(transaction.date);
+      const dayOfMonth = transactionDate.getDate();
+      const month = transactionDate.toLocaleString('default', { month: 'long' });
+      const year = transactionDate.getFullYear();
+      
+      let week = 'Week 1';
+      if (dayOfMonth > 21) {
+        week = 'Week 4';
+      } else if (dayOfMonth > 14) {
+        week = 'Week 3';
+      } else if (dayOfMonth > 7) {
+        week = 'Week 2';
+      }
+      
+      // Verificar se já existe uma entrada com a mesma descrição e valor
+      const entries = store.entries;
+      const existingEntry = entries.find(entry => 
+        (entry.description === (transaction.description || transaction.origin) && 
+         entry.amount === transaction.amount && 
+         entry.week === week && 
+         entry.month === month && 
+         entry.year === year)
+      );
+      
+      if (!existingEntry) {
+        // Criar uma nova entrada no Weekly Budget para a semana específica
+        const newEntry: WeeklyBudgetEntry = {
+          id: `wb-${Date.now()}`, // Usar timestamp para garantir ID único
+          week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+          description: transaction.description || transaction.origin,
+          amount: transaction.amount,
+          category: 'Income',
+          month: month,
+          year: year
+        };
+        
+        // Adicionar a entrada ao Weekly Budget
+        store.addEntry(newEntry);
+        console.log('Weekly Budget: Added new entry from local transaction', newEntry);
+        
+        // Disparar evento para atualizar a UI
+        window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+      }
     }
   }) as EventListener);
 };

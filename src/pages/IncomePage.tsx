@@ -90,15 +90,32 @@ export default function IncomePage() {
         type: 'income' as TransactionType,
         date: currentDate.toISOString(),
         user_id: 'current-user',
-        // Adicionar metadados para sincronização com Weekly Budget
-        metadata: {
-          sourceWeek: currentWeek,
-          sourceMonth: currentMonth,
-          sourceYear: currentYear
-        }
+        description: origin.trim() // Adicionar descrição para sincronização
       };
       
+      // Adicionar a transação ao store
       await addTransaction(newTransaction);
+      
+      // Disparar evento para sincronizar com o Weekly Budget
+      // Este evento será capturado pelo weeklyBudgetStore
+      window.dispatchEvent(new CustomEvent('income-added-to-week', { 
+        detail: { 
+          transaction: {
+            ...newTransaction,
+            id: Date.now().toString() // Gerar um ID temporário para a transação
+          }, 
+          week: currentWeek,
+          month: currentMonth, 
+          year: currentYear 
+        }
+      }));
+      
+      console.log('Income Page: Dispatched income-added-to-week event', {
+        transaction: newTransaction,
+        week: currentWeek,
+        month: currentMonth,
+        year: currentYear
+      });
       
       // Sincronizar com o Weekly Budget manualmente
       try {
