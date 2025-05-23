@@ -73,7 +73,7 @@ export default function Formula3({ data }: Props) {
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-2">Formula³ – 50/30/20</h2>
         <p className="text-sm text-gray-600 leading-relaxed">
-          A healthy and purposeful way to manage your income
+          Simple rules to guide your money with purpose.
           <span className="block mt-2 text-xs text-gray-500">
             • 50% for essential needs
             • 30% for flexible spending
@@ -90,7 +90,7 @@ export default function Formula3({ data }: Props) {
               <span className="font-medium text-gray-700 cursor-help border-b border-dotted border-gray-400">Fixed Expenses (50%)</span>
             </Tooltip>
             <span className="text-gray-900">
-              You've used {data.fixed.percentage.toFixed(1)}% of your income • Recommended: 50%
+              Recommended: 50%
             </span>
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
@@ -130,7 +130,7 @@ export default function Formula3({ data }: Props) {
               <span className="font-medium text-gray-700 cursor-help border-b border-dotted border-gray-400">Variable Expenses (30%)</span>
             </Tooltip>
             <span className="text-gray-900">
-              You've used {data.variable.percentage.toFixed(1)}% of your income • Recommended: 30%
+              Recommended: 30%
             </span>
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
@@ -170,7 +170,7 @@ export default function Formula3({ data }: Props) {
               <span className="font-medium text-gray-700 cursor-help border-b border-dotted border-gray-400">Investments (20%)</span>
             </Tooltip>
             <span className="text-gray-900">
-              You've used {data.investments.percentage.toFixed(1)}% of your income • Recommended: 20%
+              Recommended: 20%
             </span>
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">

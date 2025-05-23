@@ -470,9 +470,9 @@ export default function ExpensesPage() {
                 No transactions found
               </div>
             ) : (
-              filteredExpenses.map((transaction) => (
+              filteredExpenses.map((transaction, index) => (
                 <div 
-                  key={transaction.id} 
+                  key={`${transaction.id}-${index}`} 
                   className="p-4 hover:bg-gray-50 cursor-pointer"
                   onClick={() => {
                     setSelectedTransaction(transaction);

@@ -309,7 +309,7 @@ export default function StatementPage() {
                     })
                     .map((transaction, index) => (
                       <tr 
-                        key={transaction.id} 
+                        key={`${transaction.id}-${index}`} 
                         className="hover:bg-gray-50 cursor-pointer"
                         onClick={() => handleTransactionClick(transaction)}
                       >
