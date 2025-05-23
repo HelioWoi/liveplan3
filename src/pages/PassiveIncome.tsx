@@ -281,7 +281,7 @@ export function PassiveIncome() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      <PageHeader title="Passive Income Simulator" />
+      <PageHeader title="Passive Income Calculator" />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl p-6 shadow-card mb-6">

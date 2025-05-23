@@ -31,6 +31,7 @@ import InvoicesPage from './pages/InvoicesPage';
 import TaxPage from './pages/TaxPage';
 import HelpPage from './pages/HelpPage';
 import { InvestmentsPage } from './pages/InvestmentsPage';
+import NotificationsPage from './pages/NotificationsPage';
 import RequestPasswordReset from './pages/auth/RequestPasswordReset';
 import ResetPassword from './pages/auth/ResetPassword';
 import TermsOfService from './pages/legal/TermsOfService';
@@ -271,6 +272,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <Goals />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <PrivateRoute>
+                <NotificationsPage />
               </PrivateRoute>
             }
           />

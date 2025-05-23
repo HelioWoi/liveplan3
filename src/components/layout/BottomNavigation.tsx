@@ -30,7 +30,7 @@ export default function BottomNavigation() {
             className={`flex flex-col items-center ${isActive('/simulator') ? 'text-[#1A1A40]' : 'text-gray-400 hover:text-[#2A2A50]'}`}
           >
             <Calculator className="h-6 w-6" />
-            <span className="text-xs mt-1">Simulator</span>
+            <span className="text-xs mt-1">Calculator</span>
           </Link>
           
           <Link 

@@ -1,7 +1,10 @@
-import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumbs from './Breadcrumbs';
 import ContextMenu from './ContextMenu';
+import NotificationModal from '../notifications/NotificationModal';
+import { useNotificationStore } from '../../stores/notificationStore';
 
 interface PageHeaderProps {
   title: string;
@@ -15,6 +18,8 @@ export function PageHeader({
   showMoreOptions = false
 }: PageHeaderProps) {
   const navigate = useNavigate();
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const { unreadCount } = useNotificationStore();
 
   return (
     <div className="bg-[#1A1A40] text-white">
@@ -36,7 +41,25 @@ export function PageHeader({
             
             <h1 className="text-2xl font-bold">{title}</h1>
             
-            {showMoreOptions ? <ContextMenu /> : <div className="w-10" />}
+            <div className="flex items-center">
+              <button 
+                onClick={() => setIsNotificationModalOpen(true)}
+                className="relative block p-2 rounded-full hover:bg-white/20 focus:outline-none"
+                aria-label="Notificações"
+              >
+                <Bell className="h-6 w-6 text-white" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center text-xs text-white bg-red-500 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              {showMoreOptions && <ContextMenu />}
+              <NotificationModal 
+                isOpen={isNotificationModalOpen} 
+                onClose={() => setIsNotificationModalOpen(false)} 
+              />
+            </div>
           </div>
         </div>
       </div>
