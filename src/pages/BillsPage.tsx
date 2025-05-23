@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
 import { ArrowLeft, Calendar, X, Download, CheckCircle2, AlertCircle, Bell } from 'lucide-react';
@@ -43,35 +43,29 @@ export default function BillsPage() {
     category: ''
   });
 
-  const upcomingBills = transactions.filter(t => 
-    t.category === 'Fixed' && 
-    !t.origin.startsWith('PAID:')
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const upcomingBills = useMemo(() => {
+    // Primeiro, remover transações duplicadas com o mesmo ID
+    const uniqueTransactions = Array.from(
+      new Map(transactions.map(t => [t.id, t])).values()
+    );
+    
+    return uniqueTransactions
+      .filter(t => t.category === 'Fixed' && !t.origin.includes('PAID:'))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [transactions]);
 
-  const paidBills = transactions.filter(t => 
-    t.category === 'Fixed' && 
-    t.origin.startsWith('PAID:')
-  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const paidBills = useMemo(() => {
+    // Primeiro, remover transações duplicadas com o mesmo ID
+    const uniqueTransactions = Array.from(
+      new Map(transactions.map(t => [t.id, t])).values()
+    );
+    
+    return uniqueTransactions
+      .filter(t => t.category === 'Fixed' && t.origin.includes('PAID:'))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [transactions]);
 
-  const getDueDateStatus = (dueDate: string) => {
-    const days = Math.floor((new Date(dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    if (days > 7) return 'success';
-    if (days > 3) return 'warning';
-    return 'error';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'success':
-        return 'bg-success-50 border-l-success-500 text-success-700';
-      case 'warning':
-        return 'bg-warning-50 border-l-warning-500 text-warning-700';
-      case 'error':
-        return 'bg-error-50 border-l-error-500 text-error-700';
-      default:
-        return 'bg-gray-50 border-l-gray-500 text-gray-700';
-    }
-  };
+  // Estas funções foram removidas pois não estavam sendo utilizadas
 
   const handleAddBill = async () => {
     if (!newBill.name || !newBill.amount || !newBill.category || !newBill.dueDate) {
@@ -110,9 +104,37 @@ export default function BillsPage() {
     if (!billToMarkAsPaid) return;
     
     try {
-      await updateTransaction(billToMarkAsPaid.id, {
-        origin: `PAID: ${billToMarkAsPaid.origin} (${new Date().toLocaleDateString()})`
-      });
+      // Verificar se é uma transação local (ID começa com 'tx-')
+      if (billToMarkAsPaid.id.startsWith('tx-')) {
+        // Tratar transação local manualmente
+        const updatedBill = {
+          ...billToMarkAsPaid,
+          origin: `PAID: ${billToMarkAsPaid.origin} (${new Date().toLocaleDateString()})`
+        };
+        
+        // Atualizar no localStorage
+        const storedTransactions = localStorage.getItem('local_transactions');
+        if (storedTransactions) {
+          const transactions = JSON.parse(storedTransactions);
+          const updatedTransactions = transactions.map((t: any) => 
+            t.id === billToMarkAsPaid.id ? updatedBill : t
+          );
+          localStorage.setItem('local_transactions', JSON.stringify(updatedTransactions));
+        }
+        
+        // Atualizar no estado global
+        const { transactions } = useTransactionStore.getState();
+        const updatedTransactions = transactions.map(t => 
+          t.id === billToMarkAsPaid.id ? updatedBill : t
+        );
+        useTransactionStore.setState({ transactions: updatedTransactions });
+      } else {
+        // Transação normal do banco de dados
+        await updateTransaction(billToMarkAsPaid.id, {
+          origin: `PAID: ${billToMarkAsPaid.origin} (${new Date().toLocaleDateString()})`
+        });
+      }
+      
       setBillToMarkAsPaid(null);
     } catch (error) {
       console.error('Error marking bill as paid:', error);
@@ -204,7 +226,7 @@ export default function BillsPage() {
                           billDate.getFullYear() === now.getFullYear()
                         );
                       })
-                      .reduce((sum, bill) => sum + bill.amount, 0)
+                      .reduce((sum: number, bill: Transaction) => sum + bill.amount, 0)
                   )}
                 </p>
               </div>
@@ -220,7 +242,7 @@ export default function BillsPage() {
                 <p className="text-sm text-gray-500">Total Paid</p>
                 <p className="text-2xl font-bold">
                   {formatCurrency(
-                    paidBills.reduce((sum, bill) => sum + bill.amount, 0)
+                    paidBills.reduce((sum: number, bill: Transaction) => sum + bill.amount, 0)
                   )}
                 </p>
               </div>
@@ -273,7 +295,7 @@ export default function BillsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {upcomingBills.map((bill) => (
+                  {upcomingBills.map((bill: Transaction) => (
                     <div
                       key={bill.id}
                       className="relative flex items-center justify-between py-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -317,7 +339,7 @@ export default function BillsPage() {
               <p className="text-gray-500 text-center py-4">No paid bills</p>
             ) : (
               <div className="space-y-4">
-                {paidBills.slice(0, 5).map((bill) => {
+                {paidBills.slice(0, 5).map((bill: Transaction) => {
                   const originalName = bill.origin.replace('PAID: ', '').split(' (')[0];
                   const paidDate = bill.origin.split('(')[1]?.replace(')', '');
                   

@@ -306,8 +306,8 @@ export default function Home() {
                 to="/income" 
                 className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5 transition-colors"
               >
-                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
-                  <HomeIcon className="h-6 w-6" />
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src="/icon income.png" alt="Income" className="h-6 w-6 object-contain" />
                 </div>
                 <span className="text-sm">Income</span>
               </Link>

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { weekToDate } from '../utils/dateUtils';
-import { TransactionCategory } from '../types/transaction';
+import { TransactionCategory, TransactionType } from '../types/transaction';
 import { useTransactionStore } from './transactionStore';
 
 export interface WeeklyBudgetEntry {
@@ -185,7 +185,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         // Criar uma nova transação local
         const newTransaction = {
           id: `tx-${Date.now()}`,
-          origin: 'Weekly Budget',
+          origin: entry.category === 'Fixed' ? entry.description : 'Weekly Budget',
           description: entry.description,
           amount: entry.amount,
           category: entry.category,
@@ -199,6 +199,82 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             sourceYear: entry.year
           }
         };
+        
+        // Se for uma entrada da categoria Fixed, criar duas contas futuras adicionais
+        if (entry.category === 'Fixed') {
+          // Criar primeira conta futura (próximo mês)
+          const nextMonthDate = new Date(weekDate);
+          nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
+          
+          const nextMonthTransaction = {
+            id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 10)}-next1`,
+            origin: entry.description,
+            description: entry.description,
+            amount: entry.amount,
+            category: 'Fixed' as TransactionCategory,
+            type: 'expense' as TransactionType,
+            date: nextMonthDate.toISOString(),
+            user_id: 'local-user',
+            metadata: {
+              isFutureBill: true,
+              sourceEntryId: entry.id
+            }
+          };
+          
+          // Criar segunda conta futura (dois meses depois)
+          const nextTwoMonthDate = new Date(weekDate);
+          nextTwoMonthDate.setMonth(nextTwoMonthDate.getMonth() + 2);
+          
+          const nextTwoMonthTransaction = {
+            id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 10)}-next2`,
+            origin: entry.description,
+            description: entry.description,
+            amount: entry.amount,
+            category: 'Fixed' as TransactionCategory,
+            type: 'expense' as TransactionType,
+            date: nextTwoMonthDate.toISOString(),
+            user_id: 'local-user',
+            metadata: {
+              isFutureBill: true,
+              sourceEntryId: entry.id
+            }
+          };
+          
+          // Adicionar as contas futuras apenas localmente
+          try {
+            // Salvar no localStorage para persistir entre sessões
+            const storedTransactions = localStorage.getItem('local_transactions');
+            const existingTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+            
+            const futureBill1 = {
+              ...nextMonthTransaction,
+              user_id: 'local-user'
+            };
+            
+            const futureBill2 = {
+              ...nextTwoMonthTransaction,
+              user_id: 'local-user'
+            };
+            
+            const updatedTransactions = [
+              futureBill1,
+              futureBill2,
+              ...existingTransactions
+            ];
+            
+            localStorage.setItem('local_transactions', JSON.stringify(updatedTransactions));
+            
+            // Atualizar o estado global manualmente
+            const currentTransactions = useTransactionStore.getState().transactions;
+            useTransactionStore.setState({
+              transactions: [futureBill1, futureBill2, ...currentTransactions]
+            });
+            
+            console.log('Contas futuras criadas com sucesso para', entry.description);
+          } catch (error) {
+            console.error('Erro ao salvar contas futuras no localStorage:', error);
+          }
+        }
         
         // Adicionar a transação ao localStorage
         try {

@@ -151,6 +151,35 @@ export const useTransactionStore = create<TransactionState>((set) => ({
     set({ isLoading: true, error: null });
     
     try {
+      // Verificar se é uma transação local (ID começa com 'tx-')
+      if (id.startsWith('tx-')) {
+        // Atualizar transação local
+        set(state => {
+          const updatedTransactions = state.transactions.map(t => 
+            t.id === id ? { ...t, ...transaction } : t
+          );
+          
+          // Atualizar no localStorage se existir
+          try {
+            const storedTransactions = localStorage.getItem('local_transactions');
+            if (storedTransactions) {
+              const localTransactions = JSON.parse(storedTransactions);
+              const updatedLocalTransactions = localTransactions.map((t: any) => 
+                t.id === id ? { ...t, ...transaction } : t
+              );
+              localStorage.setItem('local_transactions', JSON.stringify(updatedLocalTransactions));
+            }
+          } catch (e) {
+            console.error('Erro ao atualizar transação local no localStorage:', e);
+          }
+          
+          return { isLoading: false, transactions: updatedTransactions, error: null };
+        });
+        
+        return;
+      }
+      
+      // Para transações normais do banco de dados
       const { data: sessionData } = await supabase.auth.getSession();
       const user = sessionData.session?.user;
 
