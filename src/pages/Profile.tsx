@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 import LogoutConfirmationModal from '../components/modals/LogoutConfirmationModal';
+import { PageHeader } from '../components/layout/PageHeader';
 
 interface ProfileFormValues {
   email: string;
@@ -128,8 +129,8 @@ export default function Profile() {
         onClose={handleCloseLogoutModal} 
         onConfirm={handleSignOut} 
       />
+      <PageHeader title="Your Profile" />
       <div className="max-w-4xl mx-auto pb-24 px-4 pt-6">
-        <h1 className="text-2xl font-bold sm:text-3xl mb-6">Your Profile</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar */}
@@ -159,7 +160,7 @@ export default function Profile() {
                   <div className="flex items-center justify-between py-2">
                     <span className="text-sm text-gray-500">Account Type</span>
                     <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800">
-                      PRO
+                      BETA
                     </span>
                   </div>
                   <div className="border-t border-gray-100 mt-2 pt-2">
