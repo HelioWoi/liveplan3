@@ -18,6 +18,11 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [syncToTransactions, setSyncToTransactions] = useState(true);
+  const [repeatOption, setRepeatOption] = useState('Does not repeat');
+  const [weeklyDay, setWeeklyDay] = useState('Monday');
+  const [monthlyWeek, setMonthlyWeek] = useState('First');
+  const [monthlyDay, setMonthlyDay] = useState('Monday');
+  const [annualDate, setAnnualDate] = useState('');
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -26,6 +31,166 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
 
   const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
   const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
+  
+  const repeatOptions = [
+    'Does not repeat',
+    'Daily',
+    'Weekly',
+    'Monthly',
+    'Annually',
+    'Every weekday'
+  ];
+  
+  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const monthlyWeeks = ['First', 'Second', 'Third', 'Fourth', 'Last'];
+
+  // Função para gerar entradas recorrentes com base na opção selecionada
+  const generateRecurringEntries = (baseEntry: WeeklyBudgetEntry) => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const futureEntries: WeeklyBudgetEntry[] = [];
+    
+    // Determinar quantas entradas futuras gerar com base na opção de repetição
+    switch (repeatOption) {
+      case 'Daily':
+        // Gerar entradas para os próximos 30 dias
+        for (let i = 1; i <= 30; i++) {
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + i);
+          
+          const futureMonth = futureDate.toLocaleString('default', { month: 'long' });
+          const futureYear = futureDate.getFullYear();
+          const dayOfMonth = futureDate.getDate();
+          
+          // Determinar a semana com base no dia do mês
+          let futureWeek = 'Week 1';
+          if (dayOfMonth > 21) {
+            futureWeek = 'Week 4';
+          } else if (dayOfMonth > 14) {
+            futureWeek = 'Week 3';
+          } else if (dayOfMonth > 7) {
+            futureWeek = 'Week 2';
+          }
+          
+          futureEntries.push({
+            ...baseEntry,
+            id: `${baseEntry.id}-daily-${i}`,
+            week: futureWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+            month: futureMonth,
+            year: futureYear
+          });
+        }
+        break;
+        
+      case 'Weekly':
+        // Gerar entradas para as próximas 12 semanas
+        for (let i = 1; i <= 12; i++) {
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + (i * 7));
+          
+          const futureMonth = futureDate.toLocaleString('default', { month: 'long' });
+          const futureYear = futureDate.getFullYear();
+          const dayOfMonth = futureDate.getDate();
+          
+          // Determinar a semana com base no dia do mês
+          let futureWeek = 'Week 1';
+          if (dayOfMonth > 21) {
+            futureWeek = 'Week 4';
+          } else if (dayOfMonth > 14) {
+            futureWeek = 'Week 3';
+          } else if (dayOfMonth > 7) {
+            futureWeek = 'Week 2';
+          }
+          
+          futureEntries.push({
+            ...baseEntry,
+            id: `${baseEntry.id}-weekly-${i}`,
+            week: futureWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+            month: futureMonth,
+            year: futureYear
+          });
+        }
+        break;
+        
+      case 'Monthly':
+        // Gerar entradas para os próximos 12 meses
+        for (let i = 1; i <= 12; i++) {
+          const futureDate = new Date();
+          futureDate.setMonth(futureDate.getMonth() + i);
+          
+          const futureMonth = futureDate.toLocaleString('default', { month: 'long' });
+          const futureYear = futureDate.getFullYear();
+          
+          futureEntries.push({
+            ...baseEntry,
+            id: `${baseEntry.id}-monthly-${i}`,
+            month: futureMonth,
+            year: futureYear
+          });
+        }
+        break;
+        
+      case 'Annually':
+        // Gerar entradas para os próximos 5 anos
+        for (let i = 1; i <= 5; i++) {
+          const futureYear = currentYear + i;
+          
+          futureEntries.push({
+            ...baseEntry,
+            id: `${baseEntry.id}-annual-${i}`,
+            year: futureYear
+          });
+        }
+        break;
+        
+      case 'Every weekday':
+        // Gerar entradas para os próximos 30 dias úteis (seg-sex)
+        let daysAdded = 0;
+        let dayCounter = 1;
+        
+        while (daysAdded < 30) {
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + dayCounter);
+          dayCounter++;
+          
+          // Verificar se é dia útil (1-5 são seg-sex, 0 e 6 são dom e sáb)
+          const dayOfWeek = futureDate.getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+          
+          daysAdded++;
+          
+          const futureMonth = futureDate.toLocaleString('default', { month: 'long' });
+          const futureYear = futureDate.getFullYear();
+          const dayOfMonth = futureDate.getDate();
+          
+          // Determinar a semana com base no dia do mês
+          let futureWeek = 'Week 1';
+          if (dayOfMonth > 21) {
+            futureWeek = 'Week 4';
+          } else if (dayOfMonth > 14) {
+            futureWeek = 'Week 3';
+          } else if (dayOfMonth > 7) {
+            futureWeek = 'Week 2';
+          }
+          
+          futureEntries.push({
+            ...baseEntry,
+            id: `${baseEntry.id}-weekday-${daysAdded}`,
+            week: futureWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+            month: futureMonth,
+            year: futureYear
+          });
+        }
+        break;
+    }
+    
+    // Adicionar todas as entradas futuras geradas
+    futureEntries.forEach(entry => {
+      addEntry(entry);
+    });
+    
+    console.log(`Geradas ${futureEntries.length} entradas recorrentes para ${repeatOption}`);
+  };
 
   const handleSubmit = async () => {
     if (!description || !amount) {
@@ -44,6 +209,11 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
 
     // Adiciona a entrada ao orçamento semanal
     addEntry(entry);
+    
+    // Se a opção de repetição for diferente de 'Does not repeat', gerar entradas futuras
+    if (repeatOption !== 'Does not repeat') {
+      generateRecurringEntries(entry);
+    }
     
     // Não precisamos criar a transação aqui, pois o weeklyBudgetStore já faz isso
     // A criação duplicada estava causando problemas de cálculo
@@ -173,6 +343,97 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
                       />
                     </div>
                   </div>
+                  
+                  {/* Repeat Options */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Repeat
+                    </label>
+                    <select
+                      value={repeatOption}
+                      onChange={(e) => setRepeatOption(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
+                    >
+                      {repeatOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Weekly Options - Show when Weekly is selected */}
+                  {repeatOption === 'Weekly' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Day of week
+                      </label>
+                      <select
+                        value={weeklyDay}
+                        onChange={(e) => setWeeklyDay(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
+                      >
+                        {weekDays.map((day) => (
+                          <option key={day} value={day}>
+                            {day}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  
+                  {/* Monthly Options - Show when Monthly is selected */}
+                  {repeatOption === 'Monthly' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Week of month
+                        </label>
+                        <select
+                          value={monthlyWeek}
+                          onChange={(e) => setMonthlyWeek(e.target.value)}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
+                        >
+                          {monthlyWeeks.map((week) => (
+                            <option key={week} value={week}>
+                              {week}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Day of week
+                        </label>
+                        <select
+                          value={monthlyDay}
+                          onChange={(e) => setMonthlyDay(e.target.value)}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
+                        >
+                          {weekDays.map((day) => (
+                            <option key={day} value={day}>
+                              {day}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Annual Options - Show when Annually is selected */}
+                  {repeatOption === 'Annually' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={annualDate}
+                        onChange={(e) => setAnnualDate(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 mb-4">
