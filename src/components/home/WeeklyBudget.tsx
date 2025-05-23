@@ -376,7 +376,8 @@ export default function WeeklyBudget() {
                                   onClick={() => handleSelectEntry(weekEntries[0].id)}
                                   className={`mb-1 p-1 rounded cursor-pointer 
                                     ${selectedEntry === weekEntries[0].id ? 'bg-blue-100 shadow-lg' : 'hover:bg-gray-100'} 
-                                    ${weekEntries[0].amount > 0 ? 'text-green-600' : 'text-red-600'}`}
+                                    ${(category === 'Fixed' || category === 'Variable' || category === 'Extra' || category === 'Additional') ? 'text-yellow-600' : 
+                                      weekEntries[0].amount > 0 ? 'text-green-600' : 'text-red-600'}`}
                                 >
                                   {formatCurrency(weekEntries[0].amount)}
                                 </div>
@@ -406,7 +407,8 @@ export default function WeeklyBudget() {
                               <div className="relative">
                                 <div 
                                   className={`mb-1 p-1 rounded cursor-pointer hover:bg-gray-100 flex items-center justify-between
-                                    ${weekEntries.reduce((total, entry) => total + entry.amount, 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
+                                    ${(category === 'Fixed' || category === 'Variable' || category === 'Extra' || category === 'Additional') ? 'text-yellow-600' : 
+                                      weekEntries.reduce((total, entry) => total + entry.amount, 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
                                   onClick={() => {
                                     setDetailsData({
                                       category,
