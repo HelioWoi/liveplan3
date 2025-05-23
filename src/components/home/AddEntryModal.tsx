@@ -30,7 +30,7 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
   ];
 
   const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-  const categories = ['Income', 'Investment', 'Fixed', 'Variable', 'Extra', 'Additional'];
+  const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
   
   const repeatOptions = [
     'Does not repeat',
