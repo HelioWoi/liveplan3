@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSupabase, SupabaseProvider } from './lib/supabase/SupabaseProvider';
 import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from 'react-toastify';
@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { usePWAUpdate } from './hooks/usePWAUpdate';
 import BottomNavigation from './components/layout/BottomNavigation';
 import QuickActions from './components/layout/QuickActions';
+import AddEntryModal from './components/home/AddEntryModal';
 import SwipeableView from './components/layout/SwipeableView';
 import { FeedbackProvider } from './components/feedback/FeedbackProvider';
 import { syncService } from './utils/syncService';
@@ -54,7 +55,18 @@ function AppContent() {
   const onboardingRoutes = ['/onboarding-choice', '/bank-onboarding', '/onboarding'];
   const showBottomNav = !publicRoutes.includes(location.pathname) && !onboardingRoutes.includes(location.pathname) && session?.user;
 
-  // Função de atualização de dados removida pois não é mais necessária
+  // Estado para controlar o modal Add New Entry
+  const [isAddEntryModalOpen, setIsAddEntryModalOpen] = useState(false);
+  
+  // Função para abrir o modal Add New Entry
+  const handleOpenAddEntryModal = () => {
+    setIsAddEntryModalOpen(true);
+  };
+  
+  // Função para fechar o modal Add New Entry
+  const handleCloseAddEntryModal = () => {
+    setIsAddEntryModalOpen(false);
+  };
 
   // Inicializa o serviço de sincronização e limpa a chave antiga da API Basiq quando o componente montar
   useEffect(() => {
@@ -69,7 +81,15 @@ function AppContent() {
   return (
     <SwipeableView>
       <div className="min-h-screen bg-gray-50">
-        {showBottomNav && <QuickActions />}
+        {/* Modal Add New Entry global */}
+        <AddEntryModal 
+          isOpen={isAddEntryModalOpen} 
+          onClose={handleCloseAddEntryModal} 
+          selectedMonth={new Date().toLocaleString('default', { month: 'long' })} 
+          selectedYear={new Date().getFullYear()}
+        />
+        
+        {showBottomNav && <QuickActions onOpenAddEntryModal={handleOpenAddEntryModal} />}
         <Routes>
           {/* Página de teste para diagnóstico */}
           <Route path="/test" element={<TestPage />} />
