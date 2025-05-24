@@ -8,6 +8,7 @@ import BottomNavigation from '../components/layout/BottomNavigation';
 import GoalDetailsModal from '../components/goals/GoalDetailsModal';
 import DeleteGoalConfirmation from '../components/goals/DeleteGoalConfirmation';
 import PageHeader from '../components/layout/PageHeader';
+import EmergencyFund from '../components/goals/EmergencyFund';
 
 export default function Goals() {
   const { goals, deleteGoal, contributeToGoal, fetchGoals } = useGoalsStore();
@@ -73,6 +74,9 @@ export default function Goals() {
       <PageHeader title="Goals" />
       
       <div className="max-w-7xl mx-auto px-4 mt-6">
+        {/* Emergency Fund Section */}
+        <EmergencyFund setShowForm={setShowForm} />
+        
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Your Financial Goals</h2>
           <button className="btn btn-primary" onClick={() => setShowForm(true)}>
