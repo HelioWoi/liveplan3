@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
-import { Bell, HomeIcon, Clock, Target, FileText } from 'lucide-react';
+import { Bell, Clock, Target, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import WeeklyBudget from '../components/home/WeeklyBudget';
@@ -170,13 +170,21 @@ export default function Home() {
     
     // Disparar evento para notificar outros componentes que dependem das transações
     window.dispatchEvent(new CustomEvent('transactions-updated'));
+    
+    // Forçar atualização dos cálculos no dashboard
+    setRefreshKey(prev => prev + 1);
   }, [transactions, localTransactions]);
+  
+  // Chave para forçar re-render quando necessário
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Obter transações limpas e normalizadas
   const cleanTransactions = getCleanTransactions(allTransactions);
   
-  // Adicionar console.log para depuração
-  console.log('Transações limpas e normalizadas:', cleanTransactions);
+  // Usar refreshKey para garantir que os cálculos sejam atualizados
+  useEffect(() => {
+    console.log('Dashboard atualizado com novas transações:', cleanTransactions.length);
+  }, [refreshKey, cleanTransactions.length]);
 
   // Converter nome do mês para número (0-11)
   const getMonthNumber = (monthName: string): number => {

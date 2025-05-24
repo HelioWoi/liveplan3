@@ -47,7 +47,26 @@ export default function WeeklyBudget() {
   const [showMonths, setShowMonths] = useState(true); // Show months by default
   const [showYears, setShowYears] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
-  const { entries, currentYear, setCurrentYear, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions, clearAllEntries } = useWeeklyBudgetStore();
+  const { entries, currentYear, setCurrentYear, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
+  
+  // Forçar atualização quando novas transações forem adicionadas
+  useEffect(() => {
+    // Função para sincronizar com transações quando eventos forem disparados
+    const handleTransactionsUpdated = () => {
+      console.log('WeeklyBudget: Detectada atualização de transações');
+      syncWithTransactions();
+    };
+    
+    // Adicionar listeners para eventos de atualização de transações
+    window.addEventListener('transactions-updated', handleTransactionsUpdated);
+    window.addEventListener('transaction-added', handleTransactionsUpdated);
+    
+    // Limpar listeners ao desmontar o componente
+    return () => {
+      window.removeEventListener('transactions-updated', handleTransactionsUpdated);
+      window.removeEventListener('transaction-added', handleTransactionsUpdated);
+    };
+  }, [syncWithTransactions]);
   
   // Estado para controlar a entrada selecionada para movimentação
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
@@ -127,19 +146,8 @@ export default function WeeklyBudget() {
     }
   };
   
-  // Função para sincronizar manualmente
-  const handleManualSync = () => {
-    syncWithTransactions();
-    window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-  };
-  
-  // Função para limpar todos os dados
-  const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to clear all budget entries? This action cannot be undone.')) {
-      clearAllEntries();
-      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-    }
-  };
+  // Nota: As funções de sincronização manual e limpeza foram removidas
+  // pois agora a sincronização é feita automaticamente via eventos
 
   // Initialize with current year and sync with transactions
   useEffect(() => {

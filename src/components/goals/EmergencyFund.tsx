@@ -16,7 +16,7 @@ interface EmergencyFundContribution {
 
 export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boolean) => void }) {
   const { totalIncome, fetchTotalIncome } = useIncomeStore();
-  const { goals, addGoal, updateGoal, contributeToGoal } = useGoalsStore();
+  const { goals, addGoal, updateGoal, contributeToGoal, deleteGoal } = useGoalsStore();
   const { user } = useAuthStore();
   
   const [multiplier, setMultiplier] = useState<number>(6);
@@ -30,6 +30,8 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
   const [isEditingIncome, setIsEditingIncome] = useState<boolean>(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState<boolean>(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState<boolean>(false);
+  const [showIncomeUpdateDialog, setShowIncomeUpdateDialog] = useState<boolean>(false);
+  const [pendingIncomeUpdate, setPendingIncomeUpdate] = useState<number | null>(null);
 
   // Fetch income data when component mounts
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
 
   // Generate contributions table
   const generateContributionsTable = (target: number, current: number) => {
-    const monthlyContribution = totalIncome * 0.1; // Suggest saving 10% of monthly income
+    const monthlyContribution = effectiveIncome * 0.1; // Suggest saving 10% of monthly income
     const months = [];
     let accumulated = current;
     const monthNames = [
@@ -151,8 +153,14 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
   const updateMultiplier = async () => {
     if (!emergencyFundGoal) return;
     
-    // Show update dialog instead of updating directly
-    setShowUpdateDialog(true);
+    // If we just updated the income, don't show the dialog again
+    if (pendingIncomeUpdate !== null) {
+      // Just update directly
+      performUpdate();
+    } else {
+      // Show update dialog
+      setShowUpdateDialog(true);
+    }
   };
   
   // Actually update the emergency fund goal
@@ -218,7 +226,7 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
     }
     
     const remaining = emergencyFundGoal.target_amount - emergencyFundGoal.current_amount;
-    const monthlyContribution = totalIncome * 0.1; // Assuming 10% of income
+    const monthlyContribution = effectiveIncome * 0.1; // Assuming 10% of income
     
     if (monthlyContribution <= 0) return 0;
     
@@ -230,7 +238,7 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
   return (
     <>
     <div className="bg-[#1A1A40]/5 rounded-xl shadow-card p-6 mb-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Emergency Fund</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">Emergency Fund Calculator</h2>
       <p className="text-gray-600 mb-6">Start by building an emergency reserve that covers 6 months of your earnings.</p>
       
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -240,29 +248,32 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
             {isEditingIncome ? (
               <div className="flex items-center">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   min="0"
                   step="0.01"
-                  value={customIncome !== null ? customIncome : totalIncome}
-                  onChange={handleIncomeChange}
+                  value={(customIncome !== null ? customIncome : totalIncome).toString().replace(/^0+/, '')}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      // Always update the income directly for immediate feedback
+                      setCustomIncome(value);
+                    }
+                  }}
                   className="p-1 border border-gray-300 rounded-md mr-2 w-32"
                   autoFocus
                 />
                 <button 
                   className="text-primary-600 hover:text-primary-800 text-sm font-medium"
                   onClick={() => {
-                    if (customIncomeInput) {
-                      const incomeValue = parseFloat(customIncomeInput);
-                      if (!isNaN(incomeValue)) {
-                        setCustomIncome(incomeValue);
-                        // Update contributions table with new income if there's an existing goal
-                        if (emergencyFundGoal) {
-                          const newTargetAmount = incomeValue * multiplier;
-                          generateContributionsTable(newTargetAmount, emergencyFundGoal.current_amount);
-                        }
-                      }
+                    // If we have an emergency fund goal and income has changed, show confirmation dialog
+                    if (emergencyFundGoal && customIncome !== null && customIncome !== totalIncome) {
+                      setPendingIncomeUpdate(customIncome);
+                      setShowIncomeUpdateDialog(true);
+                    } else {
+                      // Otherwise just close the editing mode
+                      setIsEditingIncome(false);
                     }
-                    setIsEditingIncome(false);
                   }}
                 >
                   Save
@@ -304,14 +315,7 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
           </div>
         </div>
         
-        {emergencyFundGoal ? (
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={updateMultiplier}
-          >
-            Update Goal Multiplier
-          </button>
-        ) : (
+        {!emergencyFundGoal && (
           <button
             className="btn btn-primary"
             onClick={createEmergencyFundGoal}
@@ -508,7 +512,7 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
     {showUpdateDialog && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-xl p-6 max-w-md w-full animate-slide-up">
-          <h2 className="text-xl font-bold mb-4">Update Emergency Fund</h2>
+          <h2 className="text-xl font-bold mb-4">Update Emergency Fund Calculator</h2>
           <p className="text-gray-600 mb-6">
             What would you like to do with your emergency fund goal?
           </p>
@@ -528,6 +532,76 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
             <button 
               className="mt-4 w-full py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
               onClick={() => setShowUpdateDialog(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    
+    {/* Income Update Dialog */}
+    {showIncomeUpdateDialog && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl p-6 max-w-md w-full animate-slide-up">
+          <h2 className="text-xl font-bold mb-4">Update Monthly Income</h2>
+          <p className="text-gray-600 mb-6">
+            Are you sure you want to change your monthly income? This will affect your Emergency Fund goal.
+          </p>
+          <div className="space-y-3">
+            <button 
+              className="btn btn-primary w-full"
+              onClick={() => {
+                if (pendingIncomeUpdate !== null && emergencyFundGoal) {
+                  // Update the emergency fund goal directly without showing the Update Emergency Fund modal
+                  const newTargetAmount = pendingIncomeUpdate * multiplier;
+                  updateGoal(emergencyFundGoal.id, {
+                    description: "Your safety net for unexpected expenses. Recommended to be " + multiplier + "x your monthly income.",
+                    target_amount: newTargetAmount
+                  });
+                  
+                  // Force update the contributions table with the new income value
+                  setTimeout(() => {
+                    generateContributionsTable(newTargetAmount, emergencyFundGoal.current_amount);
+                  }, 100);
+                  
+                  setPendingIncomeUpdate(null);
+                  setShowIncomeUpdateDialog(false);
+                  setIsEditingIncome(false);
+                  // Don't show the update dialog
+                  setShowUpdateDialog(false);
+                }
+              }}
+            >
+              Update Existing Goal
+            </button>
+            <button 
+              className="btn btn-warning w-full"
+              onClick={() => {
+                if (pendingIncomeUpdate !== null) {
+                  // Delete the existing emergency fund
+                  if (emergencyFundGoal) {
+                    deleteGoal(emergencyFundGoal.id);
+                  }
+                  
+                  // Set the new income
+                  setCustomIncome(pendingIncomeUpdate);
+                  
+                  // Reset states
+                  setPendingIncomeUpdate(null);
+                  setShowIncomeUpdateDialog(false);
+                  setIsEditingIncome(false);
+                }
+              }}
+            >
+              Delete and Create New
+            </button>
+            <button 
+              className="mt-4 w-full py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              onClick={() => {
+                setPendingIncomeUpdate(null);
+                setShowIncomeUpdateDialog(false);
+              }}
             >
               Cancel
             </button>

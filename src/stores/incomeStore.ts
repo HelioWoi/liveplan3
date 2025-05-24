@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase/supabaseClient';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { Transaction } from '../types/transaction';
 
 interface IncomeState {
   totalIncome: number;
@@ -18,6 +20,22 @@ const initializeEventListeners = (fetchTotalIncome: () => Promise<void>) => {
   
   window.addEventListener('weekly-budget-updated', () => {
     console.log('Income Store: Detected weekly-budget-updated event');
+    fetchTotalIncome();
+  });
+  
+  // Adicionar listener para o evento transactions-updated
+  window.addEventListener('transactions-updated', () => {
+    console.log('Income Store: Detected transactions-updated event');
+    fetchTotalIncome();
+  });
+  
+  // Adicionar listener para o evento transaction-added
+  window.addEventListener('transaction-added', (event: any) => {
+    console.log('Income Store: Detected transaction-added event');
+    // Verificar se a transação adicionada é do tipo income
+    if (event.detail && (event.detail.category === 'Income' || event.detail.type === 'income')) {
+      console.log('Income Store: Income transaction detected, updating total');
+    }
     fetchTotalIncome();
   });
 };
@@ -53,7 +71,9 @@ export const useIncomeStore = create<IncomeState>((set, get) => {
 
             if (error) throw error;
 
-            dbTotal = data?.reduce((sum, transaction) => sum + transaction.amount, 0) || 0;
+            if (data && data.length > 0) {
+              dbTotal = data.reduce((sum: number, transaction: { amount: number }) => sum + transaction.amount, 0);
+            }
           }
         } catch (dbError) {
           console.error('Error fetching income from database:', dbError);

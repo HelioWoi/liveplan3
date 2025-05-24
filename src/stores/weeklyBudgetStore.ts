@@ -175,21 +175,22 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       }
     },
     
-    // Versão local que não depende do banco de dados
+    // Cria uma transação a partir de uma entrada do Weekly Budget
     createTransactionFromEntry: async (entry: WeeklyBudgetEntry): Promise<boolean> => {
-      // Simula a criação de uma transação sem usar o banco de dados
       try {
+        // Obter o store de transações
+        const transactionStore = useTransactionStore.getState();
+        
         // Converter a semana para uma data aproximada
         const weekDate = weekToDate(entry.week, entry.month, entry.year);
         
-        // Criar uma nova transação local
+        // Criar uma nova transação
         const newTransaction = {
-          id: `tx-${Date.now()}`,
-          origin: entry.category === 'Fixed' ? entry.description : 'Weekly Budget',
+          origin: entry.description,
           description: entry.description,
           amount: entry.amount,
           category: entry.category,
-          type: entry.category === 'Income' ? 'income' : 'expense',
+          type: entry.category === 'Income' ? 'income' as TransactionType : 'expense' as TransactionType,
           date: weekDate.toISOString(),
           user_id: 'local-user',
           metadata: {
@@ -240,74 +241,38 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             }
           };
           
-          // Adicionar as contas futuras apenas localmente
+          // Adicionar as contas futuras usando o transactionStore
           try {
-            // Salvar no localStorage para persistir entre sessões
-            const storedTransactions = localStorage.getItem('local_transactions');
-            const existingTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-            
-            const futureBill1 = {
+            // Adicionar as transações futuras ao store
+            await transactionStore.addTransaction({
               ...nextMonthTransaction,
               user_id: 'local-user'
-            };
-            
-            const futureBill2 = {
-              ...nextTwoMonthTransaction,
-              user_id: 'local-user'
-            };
-            
-            const updatedTransactions = [
-              futureBill1,
-              futureBill2,
-              ...existingTransactions
-            ];
-            
-            localStorage.setItem('local_transactions', JSON.stringify(updatedTransactions));
-            
-            // Atualizar o estado global manualmente
-            const currentTransactions = useTransactionStore.getState().transactions;
-            useTransactionStore.setState({
-              transactions: [futureBill1, futureBill2, ...currentTransactions]
             });
             
-            console.log('Contas futuras criadas com sucesso para', entry.description);
+            await transactionStore.addTransaction({
+              ...nextTwoMonthTransaction,
+              user_id: 'local-user'
+            });
+            
+            // Disparar evento para atualizar a UI
+            window.dispatchEvent(new CustomEvent('transactions-updated'));
           } catch (error) {
-            console.error('Erro ao salvar contas futuras no localStorage:', error);
+            console.error('Erro ao salvar contas futuras:', error);
           }
         }
         
-        // Adicionar a transação ao localStorage
-        try {
-          const storedTransactions = localStorage.getItem('local_transactions');
-          const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-          
-          // Verificar se já existe uma transação idêntica
-          const existingTransaction = transactions.find((t: any) => 
-            t.description === newTransaction.description && 
-            t.amount === newTransaction.amount && 
-            t.origin === newTransaction.origin &&
-            t.metadata?.sourceEntryId === newTransaction.metadata.sourceEntryId
-          );
-          
-          if (!existingTransaction) {
-            // Adicionar a nova transação ao array
-            transactions.push(newTransaction);
-            
-            // Salvar de volta no localStorage
-            localStorage.setItem('local_transactions', JSON.stringify(transactions));
-            
-            // Disparar evento para notificar outras partes do app
-            window.dispatchEvent(new CustomEvent('transaction-added', { detail: newTransaction }));
-            
-            return true;
-          } else {
-            console.log('Transação já existe, ignorando duplicação:', existingTransaction);
-            return false;
-          }
-        } catch (error) {
-          console.error('Erro ao salvar transação no localStorage:', error);
-          return false;
-        }
+        // Adicionar a transação usando o transactionStore
+        await transactionStore.addTransaction(newTransaction);
+        
+        // Disparar eventos para atualizar a UI
+        window.dispatchEvent(new CustomEvent('transactions-updated'));
+        window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+        
+        // Definir flag de atualização para garantir que a Home seja atualizada
+        localStorage.setItem('data_refresh_all', 'true');
+        localStorage.setItem('data_refresh_transactions', 'true');
+        
+        return true;
       } catch (error) {
         console.error('Erro ao criar transação a partir da entrada:', error);
         return false;
