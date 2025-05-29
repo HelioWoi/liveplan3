@@ -3,6 +3,11 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    target: 'es2018', // ou o mais adequado ao seu público
+    minify: 'terser', // ou 'esbuild', dependendo do nível de compressão desejado
+    sourcemap: false, // ative se quiser mapear erros em produção
+  },
   plugins: [
     react(),
     VitePWA({
