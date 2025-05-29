@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
+
 import { formatCurrency } from '../../utils/formatters';
-import { TransactionCategory, TRANSACTION_CATEGORIES } from '../../types/transaction';
+import { TransactionCategory } from '../../types/transaction';
 
 interface ColumnMapping {
   date: string;
@@ -64,6 +63,7 @@ export default function SmartSpreadsheetConverter({ file, onClose, onSuccess }: 
         });
       } else if (file.name.match(/\.xlsx?$/)) {
         const data = await file.arrayBuffer();
+        const XLSX = await import('xlsx');
         const workbook = XLSX.read(data);
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const headers = Object.keys(worksheet)
@@ -132,6 +132,7 @@ export default function SmartSpreadsheetConverter({ file, onClose, onSuccess }: 
       });
     } else if (file.name.match(/\.xlsx?$/)) {
       const data = await file.arrayBuffer();
+      const XLSX = await import('xlsx');
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<PreviewData>(worksheet);
