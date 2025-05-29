@@ -1,6 +1,5 @@
 import { Transaction, TransactionCategory, TransactionType } from '../types/transaction';
 import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
 
 interface SpreadsheetRow {
   Date: string;
@@ -36,6 +35,7 @@ export const validateSpreadsheetFormat = async (file: File): Promise<boolean> =>
       });
     } else if (file.name.match(/\.xlsx?$/)) {
       const data = await file.arrayBuffer();
+      const XLSX = await import('xlsx');
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const headers = Object.keys(worksheet)
@@ -74,6 +74,7 @@ export const parseSpreadsheet = async (file: File): Promise<Partial<Transaction>
       });
     } else if (file.name.match(/\.xlsx?$/)) {
       const data = await file.arrayBuffer();
+      const XLSX = await import('xlsx');
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<SpreadsheetRow>(worksheet);
