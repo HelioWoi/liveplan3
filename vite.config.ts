@@ -13,7 +13,10 @@ export default defineConfig({
         'basiq-sdk-nodejs',
         'node-fetch'
       ]
-    }
+    },
+    target: 'es2018', // ou o mais adequado ao seu público
+    minify: 'terser', // ou 'esbuild', dependendo do nível de compressão desejado
+    sourcemap: false, // ative se quiser mapear erros em produção
   },
   plugins: [
     react(),
