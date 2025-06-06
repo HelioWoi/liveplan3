@@ -16,11 +16,21 @@ import PeriodSelector from '../components/common/PeriodSelector';
 import AnimatedCard from '../components/common/AnimatedCard';
 import { motion } from 'framer-motion';
 
+
+function Skeleton({ height = 24, width = '50%', className = '' }) {
+  return (
+    <div
+      className={`bg-gray-200 animate-pulse rounded ${className}`}
+      style={{ height, width }}
+    />
+  );
+}
+
 export default function Home() {
   const { user } = useAuthStore();
-  const { transactions, fetchTransactions } = useTransactionStore();
+  const { transactions, fetchTransactions, isLoading } = useTransactionStore();
   const [dataRefreshed, setDataRefreshed] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Day');
+  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Week');
   const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
@@ -42,17 +52,17 @@ export default function Home() {
     }
   }, [user]);
   
+  // Listener para atualizações do Weekly Budget
+  const handleWeeklyBudgetUpdate = () => {
+    console.log('Home detected weekly-budget-updated event');
+    fetchTransactions();
+    setDataRefreshed(true);
+  };
+
   // Carrega os dados na montagem inicial do componente
   useEffect(() => {
     console.log('Home component mounted - Loading initial data');
     fetchTransactions();
-    
-    // Listener para atualizações do Weekly Budget
-    const handleWeeklyBudgetUpdate = () => {
-      console.log('Home detected weekly-budget-updated event');
-      fetchTransactions();
-      setDataRefreshed(true);
-    };
     
     // Adicionar listener para o evento weekly-budget-updated
     window.addEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
@@ -61,7 +71,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
     };
-  }, [fetchTransactions]);
+  }, []);
 
   // Check for data refresh flags and reload data as needed
   useEffect(() => {
@@ -164,6 +174,7 @@ export default function Home() {
 
   // Combinar transações do banco de dados e locais
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
+
   useEffect(() => {
     const combined = [...transactions, ...localTransactions];
     setAllTransactions(combined);
@@ -364,13 +375,25 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Total Income</h3>
-              <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+
+              {isLoading ? (
+                <Skeleton height={28} />
+              ) : (
+                <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+              )}
+              
               <p className="text-xs text-gray-500">All income in the period</p>
             </div>
 
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Total Expenses</h3>
-              <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+
+              {isLoading ? (
+                <Skeleton height={28} />
+              ) : (
+                <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+              )}
+
               <p className="text-xs text-gray-500">All expenses in the period</p>
             </div>
           </div>
