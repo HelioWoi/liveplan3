@@ -136,8 +136,7 @@ const mapCategory = (category: string): TransactionCategory => {
   const categoryMap: Record<string, TransactionCategory> = {
     'income': 'Income',
     'salary': 'Income',
-    'investimento': 'Investimento',
-    'investment': 'Investimento',
+    'investment': 'Investment',
     'fixed': 'Fixed',
     'variable': 'Variable',
     'extra': 'Extra',
@@ -148,8 +147,7 @@ const mapCategory = (category: string): TransactionCategory => {
     'goal': 'Goal',
     'rent': 'Fixed',
     'groceries': 'Variable',
-    'gift': 'Extra',
-    'invoice': 'Invoices'
+    'gift': 'Extra'
   };
 
   const mappedCategory = categoryMap[normalizedCategory];
@@ -169,13 +167,11 @@ const determineType = (type: string): TransactionType => {
 export const generateTemplateFile = (): string => {
   const headers = ['Date', 'Month', 'Type', 'Category', 'Description', 'Amount', 'Frequency'];
   const sampleData = [
-    ['2024-01-01', 'January', 'income', 'Income', 'Monthly salary', '5000.00', 'Monthly'],
-    ['2024-01-15', 'January', 'expense', 'Fixed', 'Apartment rent', '1500.00', 'Monthly'],
-    ['2024-01-05', 'January', 'expense', 'Variable', 'Supermarket', '300.00', 'Weekly'],
-    ['2024-01-20', 'January', 'expense', 'Investment', 'Investment deposit', '1000.00', 'Monthly'],
-    ['2024-01-31', 'January', 'income', 'Income', 'Year-end bonus', '2000.00', 'Yearly'],
-    ['2024-01-10', 'January', 'expense', 'Extra', 'Birthday gift', '100.00', 'Once'],
-    ['2024-01-25', 'January', 'expense', 'Tax', 'Income tax', '800.00', 'Monthly']
+    ['2025-06-01', 'June', 'income', 'Income', 'Monthly salary', '5000.00', 'Monthly'],
+    ['2025-06-15', 'June', 'salary', 'Fixed', 'Apartment rent', '1500.00', 'Monthly'],
+    ['2025-06-05', 'June', 'expense', 'Variable', 'Supermarket', '300.00', 'Weekly'],
+    ['2025-06-10', 'June', 'bonus', 'Extra', 'Birthday gift', '100.00', 'Once'],
+    ['2025-06-25', 'June', 'invoices', 'Additional', 'Additional', '800.00', 'Yearly']
   ];
 
   return [
