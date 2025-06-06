@@ -172,7 +172,7 @@ export const generateTemplateFile = (): string => {
     ['2024-01-01', 'January', 'income', 'Income', 'Monthly salary', '5000.00', 'Monthly'],
     ['2024-01-15', 'January', 'expense', 'Fixed', 'Apartment rent', '1500.00', 'Monthly'],
     ['2024-01-05', 'January', 'expense', 'Variable', 'Supermarket', '300.00', 'Weekly'],
-    ['2024-01-20', 'January', 'expense', 'Investimento', 'Investment deposit', '1000.00', 'Monthly'],
+    ['2024-01-20', 'January', 'expense', 'Investment', 'Investment deposit', '1000.00', 'Monthly'],
     ['2024-01-31', 'January', 'income', 'Income', 'Year-end bonus', '2000.00', 'Yearly'],
     ['2024-01-10', 'January', 'expense', 'Extra', 'Birthday gift', '100.00', 'Once'],
     ['2024-01-25', 'January', 'expense', 'Tax', 'Income tax', '800.00', 'Monthly']
