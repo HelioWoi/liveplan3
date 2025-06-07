@@ -117,6 +117,24 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
   }) as EventListener);
 };
 
+function loadEntriesFromStorage(): WeeklyBudgetEntry[] {
+  try {
+    const stored = localStorage.getItem('weekly_budget_entries');
+    if (stored) return JSON.parse(stored);
+  } catch (e) {
+    console.error('Error loading weekly budget entries:', e);
+  }
+  return [];
+}
+
+function saveEntriesToStorage(entries: WeeklyBudgetEntry[]) {
+  try {
+    localStorage.setItem('weekly_budget_entries', JSON.stringify(entries));
+  } catch (e) {
+    console.error('Error saving weekly budget entries:', e);
+  }
+}
+
 export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
   // Inicializar listeners após a criação do store
   setTimeout(() => {
@@ -126,7 +144,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
   return {
     currentYear,
     setCurrentYear: (year: number) => set({ currentYear: year }),
-    entries: [],
+    entries: loadEntriesFromStorage(),
     addEntry: (entry: WeeklyBudgetEntry) => {
       // Verificar se já existe uma entrada com o mesmo valor e descrição na mesma semana
       const state = useWeeklyBudgetStore.getState();
@@ -146,9 +164,11 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       
       // Add to weekly budget entries only - no automatic sync to transactions
       // This avoids foreign key constraint errors when there's no valid user
-      set((state) => ({
-        entries: [...state.entries, entry]
-      }));
+      set((state) => {
+        const newEntries = [...state.entries, entry];
+        saveEntriesToStorage(newEntries); // <-- salva sempre que altera
+        return { entries: newEntries };
+      });
       
       // Após adicionar uma entrada, cria automaticamente uma transação correspondente
       // mas apenas se não for uma entrada de sincronização (para evitar loop)
@@ -280,11 +300,13 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     updateEntry: (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
-      set((state) => ({
-        entries: state.entries.map(entry => 
+      set((state) => {
+        const newEntries = state.entries.map(entry =>
           entry.id === id ? { ...entry, ...updatedEntry } : entry
-        )
-      }));
+        );
+        saveEntriesToStorage(newEntries); // Salva após atualizar
+        return { entries: newEntries };
+      });
       
       // Atualizar também a transação associada no localStorage
       try {
@@ -317,9 +339,11 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       const entryToDelete = get().entries.find(entry => entry.id === id);
       
       // Excluir a entrada do Weekly Budget
-      set((state) => ({
-        entries: state.entries.filter(entry => entry.id !== id)
-      }));
+      set((state) => {
+        const newEntries = state.entries.filter(entry => entry.id !== id);
+        saveEntriesToStorage(newEntries); // Salva após deletar
+        return { entries: newEntries };
+      });
       
       // Se a entrada foi encontrada, excluir também a transação associada
       if (entryToDelete) {
@@ -347,13 +371,15 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     moveEntryToWeek: (entryId: string, targetWeek: string) => {
-      set((state) => ({
-        entries: state.entries.map((entry) =>
+      set((state) => {
+        const newEntries = state.entries.map((entry) =>
           entry.id === entryId
             ? { ...entry, week: targetWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4' }
             : entry
-        ),
-      }));
+        );
+        saveEntriesToStorage(newEntries); // Salva após mover
+        return { entries: newEntries };
+      });
       
       // Atualiza também a transação associada no localStorage
       try {
@@ -375,6 +401,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     
     clearAllEntries: () => {
       set({ entries: [] });
+      saveEntriesToStorage([]); 
       
       // Limpa também as transações locais associadas ao Weekly Budget
       try {

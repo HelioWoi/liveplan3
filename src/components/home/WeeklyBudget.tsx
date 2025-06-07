@@ -28,12 +28,27 @@ const years = [2022, 2023, 2024, 2025];
 
 const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
 
-const months = [
+const monthsShort = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ];
 
-const getCurrentMonth = () => months[new Date().getMonth()];
+const months = [
+  { full: 'January', short: 'Jan' },
+  { full: 'February', short: 'Feb' },
+  { full: 'March', short: 'Mar' },
+  { full: 'April', short: 'Apr' },
+  { full: 'May', short: 'May' },
+  { full: 'June', short: 'Jun' },
+  { full: 'July', short: 'Jul' },
+  { full: 'August', short: 'Aug' },
+  { full: 'September', short: 'Sep' },
+  { full: 'October', short: 'Oct' },
+  { full: 'November', short: 'Nov' },
+  { full: 'December', short: 'Dec' }
+];
+
+const getCurrentMonth = () => monthsShort[new Date().getMonth()];
 const getCurrentYear = () => new Date().getFullYear();
 
 const getCurrentWeek = () => {
@@ -224,11 +239,15 @@ export default function WeeklyBudget() {
   
   const getWeekBalance = (week: string) => {
     // Filtrar entradas para a semana, mês e ano atual
-    const weekEntries = entries.filter(entry => 
-      entry.week === week && 
-      entry.month === selectedMonth &&
+    const weekEntries = entries.filter(entry => {
+      const month = months.find(month => month.short === selectedMonth);
+
+      return entry.week === week && 
+      entry.month === month?.full &&
       entry.year === currentYear
-    );
+    });
+
+     
     
     // Calcular o Income (receita) - sempre positivo
     const income = weekEntries
@@ -298,20 +317,19 @@ export default function WeeklyBudget() {
 
         {selectedPeriod === 'Month' && showMonths && (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-12">
-            {months.map(month => (
+            {months.map(({ full, short }) => (
               <button
-                key={month}
+                key={short}
                 onClick={() => {
-                  setSelectedMonth(month);
-                  setShowMonths(false);
+                  setSelectedMonth(short);
                 }}
                 className={`py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                  selectedMonth === month
+                  selectedMonth === short
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'
                     : 'border border-gray-200 text-gray-700 hover:border-purple-200'
                 }`}
               >
-                {month}
+                {short}
               </button>
             ))}
           </div>
@@ -359,11 +377,14 @@ export default function WeeklyBudget() {
                     const isCurrentWeek = week === getCurrentWeek();
                     
                     // Encontrar todas as entradas desta categoria e semana
-                    const weekEntries = entries.filter(entry => 
-                      entry.week === week && 
-                      entry.category === category && 
-                      entry.month === selectedMonth &&
-                      entry.year === currentYear
+                    const weekEntries = entries.filter(entry => {
+                      const month = months.find(month => month.short === selectedMonth);
+                    
+                      return entry.week === week && 
+                        entry.category === category && 
+                        entry.month === month?.full &&
+                        entry.year === currentYear
+                      }
                     );
                     
                     return (
@@ -461,7 +482,7 @@ export default function WeeklyBudget() {
         </div>
         {/* Removed the bottom panel as requested */}
       </div>
-      
+
       {/* Edit Modal */}
       {isEditModalOpen && entryToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
