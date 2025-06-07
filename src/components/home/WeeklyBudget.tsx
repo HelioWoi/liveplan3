@@ -491,7 +491,7 @@ export default function WeeklyBudget() {
         </div>
         {/* Removed the bottom panel as requested */}
       </div>
-
+      
       {/* Edit Modal */}
       {isEditModalOpen && entryToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
