@@ -2,6 +2,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
 import { useWeeklyBudgetStore, WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
 import { TransactionCategory } from '../../types/transaction';
+import { useAuthStore } from '../../stores/authStore';
 
 interface AddEntryModalProps {
   isOpen: boolean;
@@ -9,6 +10,36 @@ interface AddEntryModalProps {
   selectedMonth?: string;
   selectedYear?: number;
 }
+
+const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
+
+const repeatOptions = [
+  'Does not repeat',
+  'Daily',
+  'Weekly',
+  'Monthly',
+  'Annually',
+  'Every weekday'
+];
+
+const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const monthlyWeeks = ['First', 'Second', 'Third', 'Fourth', 'Last'];
+
+const months = [
+  { full: 'January', short: 'Jan' },
+  { full: 'February', short: 'Feb' },
+  { full: 'March', short: 'Mar' },
+  { full: 'April', short: 'Apr' },
+  { full: 'May', short: 'May' },
+  { full: 'June', short: 'Jun' },
+  { full: 'July', short: 'Jul' },
+  { full: 'August', short: 'Aug' },
+  { full: 'September', short: 'Sep' },
+  { full: 'October', short: 'Oct' },
+  { full: 'November', short: 'Nov' },
+  { full: 'December', short: 'Dec' }
+];
 
 export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April', selectedYear }: AddEntryModalProps) {
   const { addEntry } = useWeeklyBudgetStore();
@@ -24,25 +55,7 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
   const [monthlyDay, setMonthlyDay] = useState('Monday');
   const [annualDate, setAnnualDate] = useState('');
 
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-  const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
-  
-  const repeatOptions = [
-    'Does not repeat',
-    'Daily',
-    'Weekly',
-    'Monthly',
-    'Annually',
-    'Every weekday'
-  ];
-  
-  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const monthlyWeeks = ['First', 'Second', 'Third', 'Fourth', 'Last'];
+  const user_id = useAuthStore((state) => state.user?.id)?.toString() || '';
 
   // Função para gerar entradas recorrentes com base na opção selecionada
   const generateRecurringEntries = (baseEntry: WeeklyBudgetEntry) => {
@@ -198,12 +211,12 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
     }
 
     const entry: WeeklyBudgetEntry = {
-      id: Date.now().toString(),
+      id: user_id,
       description,
       amount: parseFloat(amount),
       category: category as TransactionCategory,
       week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
-      month,
+      month: months.find(m => m.short === month)?.short || month,
       year: selectedYear || new Date().getFullYear()
     };
 
@@ -268,8 +281,8 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
                       className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
                     >
                       {months.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
+                        <option key={m.full} value={m.short}>
+                          {m.full}
                         </option>
                       ))}
                     </select>

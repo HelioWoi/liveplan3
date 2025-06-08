@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
+import { useAuthStore } from '../../stores/authStore';
 // Removemos a dependência de react-beautiful-dnd para evitar erros de hooks
 
 type Period = 'Month' | 'Year';
@@ -87,8 +88,16 @@ export default function WeeklyBudget() {
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState(false);
   
-  const { entries, currentYear, setCurrentYear, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
-  
+  const { entries, currentYear, setCurrentYear, fetchEntries, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
+
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchEntries(user.id);
+    }
+  }, [user?.id]);
+
   // Forçar atualização quando novas transações forem adicionadas
   useEffect(() => {
     // Função para sincronizar com transações quando eventos forem disparados
@@ -243,7 +252,7 @@ export default function WeeklyBudget() {
       const month = months.find(month => month.short === selectedMonth);
 
       return entry.week === week && 
-      entry.month === month?.full &&
+      entry.month === month?.short &&
       entry.year === currentYear
     });
 
@@ -382,7 +391,7 @@ export default function WeeklyBudget() {
                     
                       return entry.week === week && 
                         entry.category === category && 
-                        entry.month === month?.full &&
+                        entry.month === month?.short &&
                         entry.year === currentYear
                       }
                     );

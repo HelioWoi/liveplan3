@@ -1,7 +1,10 @@
 import { create } from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
+
 import { weekToDate } from '../utils/dateUtils';
 import { TransactionCategory, TransactionType } from '../types/transaction';
 import { useTransactionStore } from './transactionStore';
+import { supabase } from '../lib/supabase';
 
 export interface WeeklyBudgetEntry {
   id: string;
@@ -24,6 +27,7 @@ interface WeeklyBudgetState {
   setCurrentYear: (year: number) => void;
   syncWithTransactions: () => void;
   clearAllEntries: () => void;
+  fetchEntries: (userId: string) => Promise<void>;
 }
 
 const currentYear = 2025;
@@ -117,22 +121,55 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
   }) as EventListener);
 };
 
-function loadEntriesFromStorage(): WeeklyBudgetEntry[] {
-  try {
-    const stored = localStorage.getItem('weekly_budget_entries');
-    if (stored) return JSON.parse(stored);
-  } catch (e) {
-    console.error('Error loading weekly budget entries:', e);
-  }
-  return [];
-}
-
 function saveEntriesToStorage(entries: WeeklyBudgetEntry[]) {
   try {
     localStorage.setItem('weekly_budget_entries', JSON.stringify(entries));
   } catch (e) {
     console.error('Error saving weekly budget entries:', e);
   }
+}
+
+async function fetchWeeklyBudgetEntries(userId: string) {
+  const { data, error } = await supabase
+    .from('weekly_budget_entries')
+    .select('*')
+    .eq('user_id', userId);
+  if (error) throw error;
+  return data;
+}
+
+export async function addWeeklyBudgetEntry(entry: any) {
+  console.log('WeeklyBudget: Fetching entries for user', entry);
+  const { data, error } = await supabase
+    .from('weekly_budget_entries')
+    .insert([
+      { ...entry,
+        id: uuidv4(),
+        user_id: entry.id,
+        week: entry.week.replace(/[^\d.-]+/g, '')
+      }
+    ])
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateWeeklyBudgetEntry(id: string, updates: any) {
+  const { data, error } = await supabase
+    .from('weekly_budget_entries')
+    .update(updates)
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteWeeklyBudgetEntry(id: string) {
+  const { error } = await supabase
+    .from('weekly_budget_entries')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
 }
 
 export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
@@ -144,8 +181,9 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
   return {
     currentYear,
     setCurrentYear: (year: number) => set({ currentYear: year }),
-    entries: loadEntriesFromStorage(),
-    addEntry: (entry: WeeklyBudgetEntry) => {
+    entries: [],
+    
+    addEntry: async (entry: WeeklyBudgetEntry) => {
       // Verificar se já existe uma entrada com o mesmo valor e descrição na mesma semana
       const state = useWeeklyBudgetStore.getState();
       const existingEntry = state.entries.find(e => 
@@ -161,12 +199,23 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         console.log('Entrada já existe no Weekly Budget, ignorando duplicação:', existingEntry);
         return;
       }
+
+      // Salva no supabase (ou ignora erro)
+      try {
+        entry.week = entry.week.replace(/[^\d.-]+/g, '') as any; // Remove caracteres não numéricos
+
+        await addWeeklyBudgetEntry(entry);
+      } catch (e) {
+        console.error('Erro ao adicionar entrada no Supabase:', e);
+      }
       
       // Add to weekly budget entries only - no automatic sync to transactions
       // This avoids foreign key constraint errors when there's no valid user
       set((state) => {
+        entry.week = `Week ${entry.week}` as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4';
         const newEntries = [...state.entries, entry];
         saveEntriesToStorage(newEntries); // <-- salva sempre que altera
+
         return { entries: newEntries };
       });
       
@@ -299,7 +348,15 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       }
     },
     
-    updateEntry: (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
+    updateEntry: async (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
+      try {
+        // Atualizar a entrada no Supabase
+        await updateWeeklyBudgetEntry(id, updatedEntry);
+      } catch (error) {
+        console.error('Erro ao atualizar entrada no Supabase:', error);
+        return;
+      }
+      
       set((state) => {
         const newEntries = state.entries.map(entry =>
           entry.id === id ? { ...entry, ...updatedEntry } : entry
@@ -333,10 +390,30 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         console.error('Erro ao atualizar transação associada:', error);
       }
     },
+
+    fetchEntries: async (userId: string) => {
+      const data = await fetchWeeklyBudgetEntries(userId);
+
+      const entry = data.map(entry => ({
+        ...entry,
+        week: `Week ${entry.week}`
+      }));
+      
+      saveEntriesToStorage([...entry]);
+
+      set({ entries: [...entry] });
+    },
     
-    deleteEntry: (id: string) => {
+    deleteEntry: async (id: string) => {
       // Obter a entrada antes de excluí-la para poder excluir a transação associada
       const entryToDelete = get().entries.find(entry => entry.id === id);
+
+      try {
+        await deleteWeeklyBudgetEntry(id);
+      } catch (error) {
+        console.error('Erro ao excluir entrada no Supabase:', error);
+        return;
+      }
       
       // Excluir a entrada do Weekly Budget
       set((state) => {
