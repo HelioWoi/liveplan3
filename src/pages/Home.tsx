@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Bell, Clock, Target, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+
 import { useAuthStore } from '../stores/authStore';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
-import { Bell, Clock, Target, FileText } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import WeeklyBudget from '../components/home/WeeklyBudget';
 import Formula3 from '../components/home/Formula3';
@@ -14,8 +16,6 @@ import { useTransactionStore } from '../stores/transactionStore';
 import { formatCurrency } from '../utils/formatters';
 import PeriodSelector from '../components/common/PeriodSelector';
 import AnimatedCard from '../components/common/AnimatedCard';
-import { motion } from 'framer-motion';
-
 
 function Skeleton({ height = 24, width = '50%', className = '' }) {
   return (
@@ -34,6 +34,12 @@ export default function Home() {
   const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
+  // Obter transações locais do Weekly Budget
+  const [localTransactions, setLocalTransactions] = useState<any[]>([]);
+  // Combinar transações do banco de dados e locais
+  const [allTransactions, setAllTransactions] = useState<any[]>([]);
+  // Chave para forçar re-render quando necessário
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     // Verificar se o usuário já fez upload da planilha
@@ -98,9 +104,6 @@ export default function Home() {
     setShowSpreadsheetModal(false);
     localStorage.setItem('spreadsheet_imported', 'true');
   };
-
-  // Obter transações locais do Weekly Budget
-  const [localTransactions, setLocalTransactions] = useState<any[]>([]);
 
   useEffect(() => {
     // Carregar transações locais do localStorage
@@ -172,9 +175,6 @@ export default function Home() {
     return Array.from(uniqueMap.values());
   };
 
-  // Combinar transações do banco de dados e locais
-  const [allTransactions, setAllTransactions] = useState<any[]>([]);
-
   useEffect(() => {
     const combined = [...transactions, ...localTransactions];
     setAllTransactions(combined);
@@ -185,9 +185,6 @@ export default function Home() {
     // Forçar atualização dos cálculos no dashboard
     setRefreshKey(prev => prev + 1);
   }, [transactions, localTransactions]);
-  
-  // Chave para forçar re-render quando necessário
-  const [refreshKey, setRefreshKey] = useState(0);
 
   // Obter transações limpas e normalizadas
   const cleanTransactions = getCleanTransactions(allTransactions);

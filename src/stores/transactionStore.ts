@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { Transaction, TaxType } from '../types/transaction';
 import { supabase } from '../lib/supabase/supabaseClient';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 interface TaxEntry {
   id: string;
