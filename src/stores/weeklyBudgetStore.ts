@@ -1,7 +1,10 @@
 import { create } from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
+
 import { weekToDate } from '../utils/dateUtils';
 import { TransactionCategory, TransactionType } from '../types/transaction';
 import { useTransactionStore } from './transactionStore';
+import { supabase } from '../lib/supabase';
 
 export interface WeeklyBudgetEntry {
   id: string;
@@ -24,6 +27,7 @@ interface WeeklyBudgetState {
   setCurrentYear: (year: number) => void;
   syncWithTransactions: () => void;
   clearAllEntries: () => void;
+  fetchEntries: (userId: string) => Promise<void>;
 }
 
 const currentYear = 2025;
@@ -117,6 +121,57 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
   }) as EventListener);
 };
 
+function saveEntriesToStorage(entries: WeeklyBudgetEntry[]) {
+  try {
+    localStorage.setItem('weekly_budget_entries', JSON.stringify(entries));
+  } catch (e) {
+    console.error('Error saving weekly budget entries:', e);
+  }
+}
+
+async function fetchWeeklyBudgetEntries(userId: string) {
+  const { data, error } = await supabase
+    .from('weekly_budget_entries')
+    .select('*')
+    .eq('user_id', userId);
+  if (error) throw error;
+  return data;
+}
+
+export async function addWeeklyBudgetEntry(entry: any) {
+  console.log('WeeklyBudget: Fetching entries for user', entry);
+  const { data, error } = await supabase
+    .from('weekly_budget_entries')
+    .insert([
+      { ...entry,
+        id: uuidv4(),
+        user_id: entry.id,
+        week: entry.week.replace(/[^\d.-]+/g, '')
+      }
+    ])
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateWeeklyBudgetEntry(id: string, updates: any) {
+  const { data, error } = await supabase
+    .from('weekly_budget_entries')
+    .update(updates)
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteWeeklyBudgetEntry(id: string) {
+  const { error } = await supabase
+    .from('weekly_budget_entries')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
 export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
   // Inicializar listeners após a criação do store
   setTimeout(() => {
@@ -127,7 +182,8 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     currentYear,
     setCurrentYear: (year: number) => set({ currentYear: year }),
     entries: [],
-    addEntry: (entry: WeeklyBudgetEntry) => {
+    
+    addEntry: async (entry: WeeklyBudgetEntry) => {
       // Verificar se já existe uma entrada com o mesmo valor e descrição na mesma semana
       const state = useWeeklyBudgetStore.getState();
       const existingEntry = state.entries.find(e => 
@@ -143,12 +199,25 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         console.log('Entrada já existe no Weekly Budget, ignorando duplicação:', existingEntry);
         return;
       }
+
+      // Salva no supabase (ou ignora erro)
+      try {
+        entry.week = entry.week.replace(/[^\d.-]+/g, '') as any; // Remove caracteres não numéricos
+
+        await addWeeklyBudgetEntry(entry);
+      } catch (e) {
+        console.error('Erro ao adicionar entrada no Supabase:', e);
+      }
       
       // Add to weekly budget entries only - no automatic sync to transactions
       // This avoids foreign key constraint errors when there's no valid user
-      set((state) => ({
-        entries: [...state.entries, entry]
-      }));
+      set((state) => {
+        entry.week = `Week ${entry.week}` as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4';
+        const newEntries = [...state.entries, entry];
+        saveEntriesToStorage(newEntries); // <-- salva sempre que altera
+
+        return { entries: newEntries };
+      });
       
       // Após adicionar uma entrada, cria automaticamente uma transação correspondente
       // mas apenas se não for uma entrada de sincronização (para evitar loop)
@@ -279,12 +348,22 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       }
     },
     
-    updateEntry: (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
-      set((state) => ({
-        entries: state.entries.map(entry => 
+    updateEntry: async (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
+      try {
+        // Atualizar a entrada no Supabase
+        await updateWeeklyBudgetEntry(id, updatedEntry);
+      } catch (error) {
+        console.error('Erro ao atualizar entrada no Supabase:', error);
+        return;
+      }
+      
+      set((state) => {
+        const newEntries = state.entries.map(entry =>
           entry.id === id ? { ...entry, ...updatedEntry } : entry
-        )
-      }));
+        );
+        saveEntriesToStorage(newEntries); // Salva após atualizar
+        return { entries: newEntries };
+      });
       
       // Atualizar também a transação associada no localStorage
       try {
@@ -311,15 +390,37 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         console.error('Erro ao atualizar transação associada:', error);
       }
     },
+
+    fetchEntries: async (userId: string) => {
+      const data = await fetchWeeklyBudgetEntries(userId);
+
+      const entry = data.map(entry => ({
+        ...entry,
+        week: `Week ${entry.week}`
+      }));
+      
+      saveEntriesToStorage([...entry]);
+
+      set({ entries: [...entry] });
+    },
     
-    deleteEntry: (id: string) => {
+    deleteEntry: async (id: string) => {
       // Obter a entrada antes de excluí-la para poder excluir a transação associada
       const entryToDelete = get().entries.find(entry => entry.id === id);
+
+      try {
+        await deleteWeeklyBudgetEntry(id);
+      } catch (error) {
+        console.error('Erro ao excluir entrada no Supabase:', error);
+        return;
+      }
       
       // Excluir a entrada do Weekly Budget
-      set((state) => ({
-        entries: state.entries.filter(entry => entry.id !== id)
-      }));
+      set((state) => {
+        const newEntries = state.entries.filter(entry => entry.id !== id);
+        saveEntriesToStorage(newEntries); // Salva após deletar
+        return { entries: newEntries };
+      });
       
       // Se a entrada foi encontrada, excluir também a transação associada
       if (entryToDelete) {
@@ -347,13 +448,15 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     moveEntryToWeek: (entryId: string, targetWeek: string) => {
-      set((state) => ({
-        entries: state.entries.map((entry) =>
+      set((state) => {
+        const newEntries = state.entries.map((entry) =>
           entry.id === entryId
             ? { ...entry, week: targetWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4' }
             : entry
-        ),
-      }));
+        );
+        saveEntriesToStorage(newEntries); // Salva após mover
+        return { entries: newEntries };
+      });
       
       // Atualiza também a transação associada no localStorage
       try {
@@ -375,6 +478,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     
     clearAllEntries: () => {
       set({ entries: [] });
+      saveEntriesToStorage([]); 
       
       // Limpa também as transações locais associadas ao Weekly Budget
       try {

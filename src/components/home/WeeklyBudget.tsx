@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
+import { useAuthStore } from '../../stores/authStore';
 // Removemos a dependência de react-beautiful-dnd para evitar erros de hooks
 
 type Period = 'Month' | 'Year';
@@ -23,6 +24,50 @@ function Tooltip({ children, content }: TooltipProps) {
   );
 }
 
+// Anos fixos de 2022 a 2025
+const years = [2022, 2023, 2024, 2025];
+
+const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
+
+const monthsShort = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+const months = [
+  { full: 'January', short: 'Jan' },
+  { full: 'February', short: 'Feb' },
+  { full: 'March', short: 'Mar' },
+  { full: 'April', short: 'Apr' },
+  { full: 'May', short: 'May' },
+  { full: 'June', short: 'Jun' },
+  { full: 'July', short: 'Jul' },
+  { full: 'August', short: 'Aug' },
+  { full: 'September', short: 'Sep' },
+  { full: 'October', short: 'Oct' },
+  { full: 'November', short: 'Nov' },
+  { full: 'December', short: 'Dec' }
+];
+
+const getCurrentMonth = () => monthsShort[new Date().getMonth()];
+const getCurrentYear = () => new Date().getFullYear();
+
+const getCurrentWeek = () => {
+  const now = new Date();
+  const dayOfMonth = now.getDate();
+  const weekNumber = Math.ceil(dayOfMonth / 7);
+  return `Week ${weekNumber}`;
+};
+
+// Categoria descriptions for tooltips
+const categoryDescriptions: Record<string, string> = {
+  Fixed: 'Mandatory and recurring expenses, such as rent, school, health insurance, etc.',
+  Variable: 'Flexible and monthly expenses, such as groceries, fuel, delivery.',
+  Extra: 'Non-standard costs, such as unexpected repairs or last-minute travel. Should be used with caution.',
+  Additional: 'Non-essential expenses that you chose to make, such as gifts or parties. Ideally, these should be planned.',
+  Income: 'Money received from salary, freelance work, or other sources.'
+};
+
 export default function WeeklyBudget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -32,23 +77,26 @@ export default function WeeklyBudget() {
   const [entryToEdit, setEntryToEdit] = useState<any>(null);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   const [entryToMove, setEntryToMove] = useState<string | null>(null);
-  const [detailsData, setDetailsData] = useState<{category: string, week: string, entries: any[]}>({category: '', week: '', entries: []});
-  const getCurrentMonth = () => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return months[new Date().getMonth()];
-  };
-
-  const getCurrentYear = () => new Date().getFullYear();
-
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
   const [showMonths, setShowMonths] = useState(true); // Show months by default
   const [showYears, setShowYears] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
-  const { entries, currentYear, setCurrentYear, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
+  const [detailsData, setDetailsData] = useState<{category: string, week: string, entries: any[]}>({category: '', week: '', entries: []});
+
+  // Estado para controlar a entrada selecionada para movimentação
+  const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
   
+  const { entries, currentYear, setCurrentYear, fetchEntries, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
+
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchEntries(user.id);
+    }
+  }, [user?.id]);
+
   // Forçar atualização quando novas transações forem adicionadas
   useEffect(() => {
     // Função para sincronizar com transações quando eventos forem disparados
@@ -67,10 +115,6 @@ export default function WeeklyBudget() {
       window.removeEventListener('transaction-added', handleTransactionsUpdated);
     };
   }, [syncWithTransactions]);
-  
-  // Estado para controlar a entrada selecionada para movimentação
-  const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
-  const [showOptions, setShowOptions] = useState(false);
   
   // Função para selecionar uma entrada para mover
   const handleSelectEntry = (entryId: string) => {
@@ -101,6 +145,7 @@ export default function WeeklyBudget() {
   const handleEditEntry = () => {
     if (selectedEntry) {
       const entry = entries.find(e => e.id === selectedEntry);
+
       if (entry) {
         setEntryToEdit(entry);
         setIsEditModalOpen(true);
@@ -161,11 +206,6 @@ export default function WeeklyBudget() {
     window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
   }, []);
   
-  // Anos fixos de 2022 a 2025
-  const years = [2022, 2023, 2024, 2025];
-
-  // Opções de período são definidas diretamente no código
-  
   // Função para renderizar as opções de período
   const renderPeriodOptions = () => {
     return (
@@ -204,26 +244,17 @@ export default function WeeklyBudget() {
       </>
     );
   };
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
-  const getCurrentWeek = () => {
-    const now = new Date();
-    const dayOfMonth = now.getDate();
-    const weekNumber = Math.ceil(dayOfMonth / 7);
-    return `Week ${weekNumber}`;
-  };
-
+  
   const getWeekBalance = (week: string) => {
     // Filtrar entradas para a semana, mês e ano atual
-    const weekEntries = entries.filter(entry => 
-      entry.week === week && 
-      entry.month === selectedMonth &&
+    const weekEntries = entries.filter(entry => {
+      const month = months.find(month => month.short === selectedMonth);
+
+      return entry.week === week && 
+      entry.month === month?.short &&
       entry.year === currentYear
-    );
-    
+    });
+
     // Calcular o Income (receita) - sempre positivo
     const income = weekEntries
       .filter(entry => entry.category === 'Income')
@@ -238,17 +269,6 @@ export default function WeeklyBudget() {
     // Calcular o saldo: Income - expenses
     // Subtraímos todas as despesas do income conforme solicitado
     return income - expenses;
-  };
-
-  const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
-
-  // Categoria descriptions for tooltips
-  const categoryDescriptions: Record<string, string> = {
-    Fixed: 'Mandatory and recurring expenses, such as rent, school, health insurance, etc.',
-    Variable: 'Flexible and monthly expenses, such as groceries, fuel, delivery.',
-    Extra: 'Non-standard costs, such as unexpected repairs or last-minute travel. Should be used with caution.',
-    Additional: 'Non-essential expenses that you chose to make, such as gifts or parties. Ideally, these should be planned.',
-    Income: 'Money received from salary, freelance work, or other sources.'
   };
 
   return (
@@ -300,22 +320,22 @@ export default function WeeklyBudget() {
             ))}
           </div>
         )}
+
         {selectedPeriod === 'Month' && showMonths && (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-12">
-            {months.map(month => (
+            {months.map(({ full, short }) => (
               <button
-                key={month}
+                key={short}
                 onClick={() => {
-                  setSelectedMonth(month);
-                  setShowMonths(false);
+                  setSelectedMonth(short);
                 }}
                 className={`py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                  selectedMonth === month
+                  selectedMonth === short
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'
                     : 'border border-gray-200 text-gray-700 hover:border-purple-200'
                 }`}
               >
-                {month}
+                {short}
               </button>
             ))}
           </div>
@@ -347,6 +367,7 @@ export default function WeeklyBudget() {
                 ))}
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {categories.map(category => (
                 <tr key={category} className="hover:bg-gray-50">
@@ -362,11 +383,14 @@ export default function WeeklyBudget() {
                     const isCurrentWeek = week === getCurrentWeek();
                     
                     // Encontrar todas as entradas desta categoria e semana
-                    const weekEntries = entries.filter(entry => 
-                      entry.week === week && 
-                      entry.category === category && 
-                      entry.month === selectedMonth &&
-                      entry.year === currentYear
+                    const weekEntries = entries.filter(entry => {
+                      const month = months.find(month => month.short === selectedMonth);
+                    
+                      return entry.week === week && 
+                        entry.category === category && 
+                        entry.month === month?.short &&
+                        entry.year === currentYear
+                      }
                     );
                     
                     return (
@@ -464,6 +488,7 @@ export default function WeeklyBudget() {
         </div>
         {/* Removed the bottom panel as requested */}
       </div>
+
       {/* Edit Modal */}
       {isEditModalOpen && entryToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
