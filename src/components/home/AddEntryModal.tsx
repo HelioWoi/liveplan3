@@ -231,7 +231,6 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
     
     // Não precisamos criar a transação aqui, pois o weeklyBudgetStore já faz isso
     // A criação duplicada estava causando problemas de cálculo
-    console.log('Entrada adicionada ao Weekly Budget. A transação será criada pelo weeklyBudgetStore.');
 
     // Reset form
     setDescription('');
@@ -288,8 +287,6 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
                       ))}
                     </select>
                   </div>
-
-
 
                   {/* Week Selection */}
                   <div>

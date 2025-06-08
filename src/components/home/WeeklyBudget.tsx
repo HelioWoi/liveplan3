@@ -68,7 +68,6 @@ const categoryDescriptions: Record<string, string> = {
   Income: 'Money received from salary, freelance work, or other sources.'
 };
 
-
 export default function WeeklyBudget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -256,8 +255,6 @@ export default function WeeklyBudget() {
       entry.year === currentYear
     });
 
-     
-    
     // Calcular o Income (receita) - sempre positivo
     const income = weekEntries
       .filter(entry => entry.category === 'Income')
