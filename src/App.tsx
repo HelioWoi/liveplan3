@@ -12,6 +12,10 @@ import SwipeableView from './components/layout/SwipeableView';
 import { FeedbackProvider } from './components/feedback/FeedbackProvider';
 import { syncService } from './utils/syncService';
 import { clearOldBasiqApiKey } from './utils/basiqUtils';
+// Importações de segurança - versão simplificada
+import SimpleSyncStatus from './components/security/SimpleSyncStatus';
+import SimplePrivacyDashboard from './components/security/SimplePrivacyDashboard';
+import { useSimpleSecurityState } from './hooks/useSimpleSecurityState';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/signup';
@@ -61,6 +65,16 @@ function AppContent() {
   // Estado para controlar o modal Add New Entry
   const [isAddEntryModalOpen, setIsAddEntryModalOpen] = useState(false);
   
+  // Estado para controlar os componentes de segurança - versão simplificada
+  const {
+    showPrivacyDashboard,
+    setShowPrivacyDashboard,
+    securityLevel,
+    setSecurityLevel,
+    dataProtectionEnabled,
+    setDataProtectionEnabled
+  } = useSimpleSecurityState();
+  
   // Função para abrir o modal Add New Entry
   const handleOpenAddEntryModal = () => {
     setIsAddEntryModalOpen(true);
@@ -91,6 +105,19 @@ function AppContent() {
           selectedMonth={new Date().toLocaleString('default', { month: 'long' })} 
           selectedYear={new Date().getFullYear()}
         />
+        
+        {/* Privacy Dashboard - versão simplificada */}
+        <SimplePrivacyDashboard 
+          isOpen={showPrivacyDashboard} 
+          onClose={() => setShowPrivacyDashboard(false)}
+          securityLevel={securityLevel}
+          setSecurityLevel={setSecurityLevel}
+          dataProtectionEnabled={dataProtectionEnabled}
+          setDataProtectionEnabled={setDataProtectionEnabled}
+        />
+        
+        {/* Sync Status Indicator - versão simplificada */}
+        {session?.user && <SimpleSyncStatus />}
         
         {showQuickActions && <QuickActions onOpenAddEntryModal={handleOpenAddEntryModal} />}
         <Routes>
@@ -309,6 +336,16 @@ function AppContent() {
         {showBottomNav && <BottomNavigation />}
         <Toaster />
         <ToastContainer />
+        
+        {/* Security indicator - versão simplificada */}
+        {session?.user && securityLevel === 'high' && dataProtectionEnabled && (
+          <div className="fixed bottom-16 left-4 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center z-40">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Seguro
+          </div>
+        )}
       </div>
     </SwipeableView>
   );
