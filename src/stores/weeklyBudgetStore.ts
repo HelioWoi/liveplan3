@@ -208,7 +208,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
           
           const nextMonthTransaction = {
-            id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 10)}-next1`,
+            // Não definimos o ID para permitir que o Supabase gere um UUID válido automaticamente
             origin: entry.description,
             description: entry.description,
             amount: entry.amount,
@@ -227,7 +227,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           nextTwoMonthDate.setMonth(nextTwoMonthDate.getMonth() + 2);
           
           const nextTwoMonthTransaction = {
-            id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 10)}-next2`,
+            // Não definimos o ID para permitir que o Supabase gere um UUID válido automaticamente
             origin: entry.description,
             description: entry.description,
             amount: entry.amount,
