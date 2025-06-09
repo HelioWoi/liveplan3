@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
-import { DollarSign, Wallet, PiggyBank, ChevronRight, PlusCircle } from 'lucide-react';
+import { DollarSign, Wallet, PiggyBank } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/home/TopGoals';
 import TransactionModal from '../components/modals/TransactionModal';
 import PeriodSelector from '../components/common/PeriodSelector';
-import PeriodSummary from '../components/dashboard/PeriodSummary';
+import PeriodSummaryCards from '../components/dashboard/PeriodSummaryCards';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useIncomeStore } from '../stores/incomeStore';
-import { startOfDay, endOfDay, subDays } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
 
@@ -40,14 +39,38 @@ interface FinancialSummary {
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
+type WeekNumber = '1' | '2' | '3' | '4' | '5';
 
 export default function Dashboard() {
   const { transactions, fetchTransactions } = useTransactionStore();
   const { totalIncome, fetchTotalIncome } = useIncomeStore();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Day');
-  const [selectedMonth, setSelectedMonth] = useState<Month>('May');
-  const [selectedYear, setSelectedYear] = useState('2025');
+  
+  // Get current date information
+  const getCurrentMonth = (): Month => {
+    const months: Month[] = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[new Date().getMonth()];
+  };
+  
+  const getCurrentYear = (): string => {
+    return new Date().getFullYear().toString();
+  };
+  
+  const getCurrentWeek = (): WeekNumber => {
+    const date = new Date();
+    const dayOfMonth = date.getDate();
+    // Calculate which week of the month we're in (1-5)
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return weekNumber > 5 ? '5' : weekNumber.toString() as WeekNumber;
+  };
+  
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Week');
+  const [selectedMonth, setSelectedMonth] = useState<Month>(getCurrentMonth());
+  const [selectedYear, setSelectedYear] = useState(getCurrentYear());
+  const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getCurrentWeek());
   const [dataRefreshed, setDataRefreshed] = useState(false);
 
   // Check for data refresh flags and reload data as needed
@@ -94,9 +117,9 @@ export default function Dashboard() {
     };
   }, [fetchTransactions, fetchTotalIncome]);
   
-  // Recarregar dados quando o período, mês ou ano mudar
+  // Recarregar dados quando o período, mês, semana ou ano mudar
   useEffect(() => {
-    console.log(`Período mudou: ${selectedPeriod}, Mês: ${selectedMonth}, Ano: ${selectedYear}`);
+    console.log(`Período mudou: ${selectedPeriod}, Mês: ${selectedMonth}, Ano: ${selectedYear}, Semana: ${selectedWeek}`);
     // Forçar recarga dos dados
     fetchTransactions();
     fetchTotalIncome();
@@ -117,19 +140,31 @@ export default function Dashboard() {
     const today = new Date();
     const selectedMonthIndex = getMonthNumber(selectedMonth);
     const selectedYearNumber = parseInt(selectedYear);
+    const selectedWeekNumber = parseInt(selectedWeek);
     
     // Log para debug
     console.log(`Dashboard - Filtering transactions:`);
     console.log(`- Selected Period: ${selectedPeriod}`);
     console.log(`- Selected Month: ${selectedMonth} (index: ${selectedMonthIndex})`);
     console.log(`- Selected Year: ${selectedYear}`);
+    console.log(`- Selected Week: ${selectedWeek}`);
     console.log(`- Transaction date: ${transactionDate.toISOString()}`);
+    
+    // Verificar se o ano é 2025 ou posterior
+    if (transactionDate.getFullYear() < 2025) {
+      return false; // Não mostrar dados anteriores a 2025
+    }
     
     switch (selectedPeriod) {
       case 'Day':
         return transactionDate >= startOfDay(today) && transactionDate <= endOfDay(today);
       case 'Week':
-        return transactionDate >= subDays(today, 7);
+        // Filtrar pela semana selecionada no mês e ano selecionados
+        const dayOfMonth = transactionDate.getDate();
+        const weekOfMonth = Math.ceil(dayOfMonth / 7);
+        return transactionDate.getMonth() === selectedMonthIndex && 
+               transactionDate.getFullYear() === selectedYearNumber &&
+               weekOfMonth === selectedWeekNumber;
       case 'Month':
         // Usar o mês e ano selecionados
         return transactionDate.getMonth() === selectedMonthIndex && 
@@ -142,8 +177,11 @@ export default function Dashboard() {
     }
   });
 
-  // Calculate financial summary
-  const financialSummary = filteredTransactions.reduce<FinancialSummary>((summary, transaction) => {
+  // Check if there are any transactions for the selected period
+  const hasTransactions = filteredTransactions.length > 0;
+  
+  // Calculate financial summary only if there are transactions
+  const financialSummary = hasTransactions ? filteredTransactions.reduce<FinancialSummary>((summary, transaction) => {
     const category = transaction.category;
     if (category in summary.categoryTotals) {
       summary.categoryTotals[category] += transaction.amount;
@@ -167,7 +205,22 @@ export default function Dashboard() {
       Contribution: 0,
       Goal: 0
     }
-  });
+  }) : {
+    totalIncome: 0,
+    totalSpent: 0,
+    categoryTotals: {
+      Income: 0,
+      Investment: 0,
+      Fixed: 0,
+      Variable: 0,
+      Extra: 0,
+      Additional: 0,
+      Tax: 0,
+      Invoices: 0,
+      Contribution: 0,
+      Goal: 0
+    }
+  };
 
   const COLORS = ['#A855F7', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#EC4899'];
 
@@ -231,26 +284,33 @@ export default function Dashboard() {
             selectedPeriod={selectedPeriod}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
+            selectedWeek={selectedWeek}
             onPeriodChange={setSelectedPeriod}
             onMonthChange={setSelectedMonth}
             onYearChange={setSelectedYear}
+            onWeekChange={setSelectedWeek}
+            useShortMonthNames={true}
           />
         </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex gap-2">
-            <button 
-              className="btn btn-primary flex-1 sm:flex-none"
-              onClick={() => setShowTransactionForm(true)}
-            >
-              <PlusCircle className="h-5 w-5 mr-2" />
-              Add New
-            </button>
+        
+        {hasTransactions ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <PeriodSummaryCards period="Weekly" selectedMonth={selectedMonth} selectedYear={selectedYear} />
+          <PeriodSummaryCards period="Monthly" selectedMonth={selectedMonth} selectedYear={selectedYear} />
+          <PeriodSummaryCards period="Annual" selectedMonth={selectedMonth} selectedYear={selectedYear} />
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="py-8">
+            <p className="text-gray-500 text-center">
+              No financial data available for {selectedPeriod === 'Week' ? `Week ${selectedWeek}` : ''} {selectedMonth} {selectedYear}.<br/>
+              Try selecting a different period or add new transactions.
+            </p>
           </div>
         </div>
+      )}
 
         {/* Period Summary Cards - Weekly, Monthly, Annual */}
-        <PeriodSummary selectedMonth={selectedMonth} selectedYear={selectedYear} />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-blue-50 rounded-xl p-6 shadow-card">
@@ -301,7 +361,7 @@ export default function Dashboard() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {chartData.map((_entry, index) => (
+                      {chartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -324,76 +384,81 @@ export default function Dashboard() {
           <TopGoals />
         </div>
 
-        <div className="bg-white rounded-xl shadow-card overflow-hidden mb-8">
-          <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h2 className="text-xl font-bold">Recent Statement</h2>
-            <Link to="/statement" className="text-primary-600 hover:text-primary-700 font-medium flex items-center">
-              View All <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
-          </div>
-          <div className="divide-y divide-gray-100">
-            <div className="p-8 text-center text-gray-500">
-              <p>No transactions recorded</p>
-              <Link 
-                to="/transactions" 
-                className="mt-2 inline-block text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Add your first transaction →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-card overflow-hidden mb-8">
-          <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h2 className="text-xl font-bold">Recent Variables</h2>
-            <Link to="/variables" className="text-primary-600 hover:text-primary-700 font-medium flex items-center">
-              View All <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
-          </div>
-          <div className="divide-y divide-gray-100">
-            <div className="p-8 text-center text-gray-500">
-              <p>No variable expenses recorded</p>
-              <Link 
-                to="/variables" 
-                className="mt-2 inline-block text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Add your first variable expense →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Spending Overview Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-card mb-8">
-          <h2 className="text-xl font-bold mb-6">Spending Overview</h2>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+          {hasTransactions ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredTransactions.slice(0, 5).map((transaction, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(transaction.date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {transaction.description}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {transaction.category}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                        {transaction.type === 'income' ? '+' : '-'}${Number(transaction.amount).toLocaleString()}
+                      </td>
+                    </tr>
                   ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => `$${Number(value).toLocaleString()}`}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  formatter={(value) => <span className="text-sm font-medium">{value}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="py-8">
+              <p className="text-gray-500 text-center">
+                No transactions found for the selected period.<br/>
+                Try selecting a different period or add new transactions.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Expense Distribution</h2>
+          {hasTransactions && chartData.length > 0 ? (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {chartData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${Number(value).toLocaleString()}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center">
+              <p className="text-gray-500 text-center">
+                No expense data available for the selected period.<br/>
+                Try selecting a different period or add new transactions.
+              </p>
+            </div>
+          )}
         </div>
         
         {/* Transaction Form Modal */}

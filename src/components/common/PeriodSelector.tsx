@@ -1,29 +1,36 @@
 import { useState, useRef, useEffect } from 'react';
 import PeriodButton from './PeriodButton';
-import { ChevronDown } from 'lucide-react';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
+type WeekNumber = '1' | '2' | '3' | '4' | '5';
 
 interface PeriodSelectorProps {
   onPeriodChange: (period: Period) => void;
   onMonthChange: (month: Month) => void;
   onYearChange?: (year: string) => void;
+  onWeekChange?: (week: WeekNumber) => void;
   selectedPeriod: Period;
   selectedMonth: Month;
   selectedYear?: string;
+  selectedWeek?: WeekNumber;
+  useShortMonthNames?: boolean;
 }
 
 export default function PeriodSelector({
   onPeriodChange,
   onMonthChange,
   onYearChange,
+  onWeekChange,
   selectedPeriod,
   selectedMonth,
-  selectedYear
+  selectedYear,
+  selectedWeek = '1',
+  useShortMonthNames = false
 }: PeriodSelectorProps) {
   const [showMonths, setShowMonths] = useState(false);
   const [showYears, setShowYears] = useState(false);
+  const [showWeeks, setShowWeeks] = useState(false);
 
   const periods: Period[] = ['Week', 'Month', 'Year'];
   const months: Month[] = [
@@ -31,33 +38,112 @@ export default function PeriodSelector({
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   
-  const currentYear = new Date().getFullYear();
+  const shortMonths: Record<Month, string> = {
+    'January': 'Jan',
+    'February': 'Feb',
+    'March': 'Mar',
+    'April': 'Apr',
+    'May': 'May',
+    'June': 'Jun',
+    'July': 'Jul',
+    'August': 'Aug',
+    'September': 'Sep',
+    'October': 'Oct',
+    'November': 'Nov',
+    'December': 'Dec'
+  };
+  
   const years = Array.from({ length: 4 }, (_, i) => (2022 + i).toString());
+  
+  // Function to determine if a month has 5 weeks
+  const hasFiveWeeks = (month: Month, year: string): boolean => {
+    const monthIndex = months.indexOf(month);
+    if (monthIndex === -1) return false;
+    
+    // Get the first day of the month
+    const firstDay = new Date(parseInt(year), monthIndex, 1);
+    
+    // Get the last day of the month
+    const lastDay = new Date(parseInt(year), monthIndex + 1, 0);
+    
+    // Calculate the number of days in the month
+    const daysInMonth = lastDay.getDate();
+    
+    // Calculate the day of week the month starts on (0 = Sunday, 6 = Saturday)
+    const firstDayOfWeek = firstDay.getDay();
+    
+    // Calculate total number of weeks
+    // If the month starts late in the week and has many days, it might span 5 weeks
+    const totalWeeks = Math.ceil((firstDayOfWeek + daysInMonth) / 7);
+    
+    return totalWeeks >= 5;
+  };
+  
+  // Ensure the selected week is valid for the current month
+  useEffect(() => {
+    // If Week 5 is selected but the current month doesn't have 5 weeks, reset to Week 4
+    if (selectedWeek === '5' && !hasFiveWeeks(selectedMonth, selectedYear || new Date().getFullYear().toString())) {
+      if (onWeekChange) {
+        onWeekChange('4');
+      }
+    }
+  }, [selectedMonth, selectedYear, selectedWeek, onWeekChange]);
+  
+  // Determine available weeks based on the selected month
+  const getAvailableWeeks = (): WeekNumber[] => {
+    const baseWeeks: WeekNumber[] = ['1', '2', '3', '4'];
+    if (hasFiveWeeks(selectedMonth, selectedYear || new Date().getFullYear().toString())) {
+      return [...baseWeeks, '5'];
+    }
+    return baseWeeks;
+  };
+  
+  const weeks = getAvailableWeeks();
 
   const handlePeriodClick = (period: Period) => {
     onPeriodChange(period);
     if (period === 'Month') {
-      setShowMonths(false);
+      setShowMonths(!showMonths);
       setShowYears(false);
+      setShowWeeks(false);
     } else if (period === 'Year') {
-      setShowYears(false);
+      setShowYears(!showYears);
       setShowMonths(false);
+      setShowWeeks(false);
+    } else if (period === 'Week') {
+      setShowWeeks(!showWeeks);
+      setShowMonths(false);
+      setShowYears(false);
     } else {
       setShowMonths(false);
       setShowYears(false);
+      setShowWeeks(false);
     }
   };
 
   const handleMonthClick = (month: Month) => {
     onMonthChange(month);
+    // Keep the month dropdown open after selection
+    setShowMonths(true);
   };
 
   const handleYearClick = (year: string) => {
-    onYearChange?.(year);
+    if (onYearChange) {
+      onYearChange(year);
+    }
+    setShowYears(false);
+  };
+
+  const handleWeekClick = (week: WeekNumber) => {
+    if (onWeekChange) {
+      onWeekChange(week);
+    }
+    setShowWeeks(false);
   };
 
   const monthsDropdownRef = useRef<HTMLDivElement>(null);
   const yearsDropdownRef = useRef<HTMLDivElement>(null);
+  const weeksDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -66,6 +152,9 @@ export default function PeriodSelector({
       }
       if (yearsDropdownRef.current && !yearsDropdownRef.current.contains(event.target as Node)) {
         setShowYears(false);
+      }
+      if (weeksDropdownRef.current && !weeksDropdownRef.current.contains(event.target as Node)) {
+        setShowWeeks(false);
       }
     }
 
@@ -83,78 +172,76 @@ export default function PeriodSelector({
             onClick={() => handlePeriodClick(period)}
             isActive={selectedPeriod === period}
           >
-            {period === 'Year' && selectedPeriod === 'Year' ? selectedYear : period}
+            {period === 'Week' && selectedWeek ? `Week ${selectedWeek}` :
+             period === 'Month' ? (useShortMonthNames ? shortMonths[selectedMonth] : selectedMonth) :
+             period === 'Year' ? (selectedYear || new Date().getFullYear().toString()) :
+             period}
           </PeriodButton>
         ))}
-
-        {/* Month Dropdown */}
-        {selectedPeriod === 'Month' && (
-          <div className="relative" ref={monthsDropdownRef}>
-            <button
-              onClick={() => setShowMonths(!showMonths)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-                bg-gradient-to-r from-[#A855F7] to-[#9333EA] text-white shadow-sm"
-            >
-              {selectedMonth}
-              <ChevronDown className="h-4 w-4" />
-            </button>
-
-            {showMonths && (
-              <div className="absolute z-10 mt-2 w-48 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1 max-h-60 overflow-auto">
-                  {months.map((month) => (
-                    <button
-                      key={month}
-                      onClick={() => {
-                        handleMonthClick(month);
-                        setShowMonths(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-purple-50
-                        ${selectedMonth === month ? 'bg-purple-100 text-purple-900' : 'text-gray-700'}`}
-                    >
-                      {month}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Year Dropdown */}
-        {selectedPeriod === 'Year' && (
-          <div className="relative" ref={yearsDropdownRef}>
-            <button
-              onClick={() => setShowYears(!showYears)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-                bg-gradient-to-r from-[#A855F7] to-[#9333EA] text-white shadow-sm"
-            >
-              {selectedYear || currentYear}
-              <ChevronDown className="h-4 w-4" />
-            </button>
-
-            {showYears && (
-              <div className="absolute z-10 mt-2 w-48 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1 max-h-60 overflow-auto">
-                  {years.map((year) => (
-                    <button
-                      key={year}
-                      onClick={() => {
-                        handleYearClick(year);
-                        setShowYears(false);
-                      }}
-                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-purple-50
-                        ${selectedYear === year ? 'bg-purple-100 text-purple-900' : 'text-gray-700'}`}
-                    >
-                      {year}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
+
+      {/* Week Dropdown */}
+      {selectedPeriod === 'Week' && showWeeks && (
+        <div className="mt-2" ref={weeksDropdownRef}>
+          <div className="grid grid-cols-4 gap-2">
+            {weeks.map((week) => (
+              <button
+                key={week}
+                onClick={() => handleWeekClick(week)}
+                className={`py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                  selectedWeek === week
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : 'border border-gray-200 text-gray-700 hover:border-purple-200'
+                }`}
+              >
+                Week {week}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Month Dropdown */}
+      {selectedPeriod === 'Month' && showMonths && (
+        <div className="mt-2" ref={monthsDropdownRef}>
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-12">
+            {months.map((month) => (
+              <button
+                key={month}
+                onClick={() => handleMonthClick(month)}
+                className={`py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                  selectedMonth === month
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : 'border border-gray-200 text-gray-700 hover:border-purple-200'
+                }`}
+              >
+                {useShortMonthNames ? shortMonths[month] : month}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Year Dropdown */}
+      {selectedPeriod === 'Year' && showYears && (
+        <div className="mt-2" ref={yearsDropdownRef}>
+          <div className="flex gap-2">
+            {years.map((year) => (
+              <button
+                key={year}
+                onClick={() => handleYearClick(year)}
+                className={`py-1.5 px-4 rounded-md text-sm font-medium transition-colors ${
+                  selectedYear === year
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : 'border border-gray-200 text-gray-700 hover:border-purple-200'
+                }`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

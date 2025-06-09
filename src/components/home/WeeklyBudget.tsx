@@ -174,7 +174,8 @@ export default function WeeklyBudget() {
         <button
           onClick={() => {
             setSelectedPeriod('Month');
-            setShowMonths(!showMonths);
+            // Always keep months dropdown open
+            setShowMonths(true);
             setShowYears(false);
           }}
           className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -191,7 +192,7 @@ export default function WeeklyBudget() {
             // Don't clear the selected month
             // setSelectedMonth('');
             setShowYears(!showYears);
-            setShowMonths(false);
+            setShowMonths(true); // Keep months dropdown open
           }}
           className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
             selectedPeriod === 'Year'
@@ -199,7 +200,7 @@ export default function WeeklyBudget() {
               : 'text-gray-700 hover:text-purple-600'
           }`}
         >
-          Year
+          2025
         </button>
       </>
     );

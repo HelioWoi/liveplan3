@@ -30,9 +30,22 @@ export default function ExpensesPage() {
   const { transactions, fetchTransactions } = useTransactionStore();
   const [dataRefreshed, setDataRefreshed] = useState(false);
   const [localTransactions, setLocalTransactions] = useState<LocalTransaction[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
+  type Period = 'Day' | 'Week' | 'Month' | 'Year';
+  type WeekNumber = '1' | '2' | '3' | '4' | '5';
+  
+  // Get current week based on day of month
+  const getCurrentWeek = (): WeekNumber => {
+    const date = new Date();
+    const dayOfMonth = date.getDate();
+    // Calculate which week of the month we're in (1-5)
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return weekNumber > 5 ? '5' : weekNumber.toString() as WeekNumber;
+  };
+
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
   const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getCurrentWeek());
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -110,7 +123,7 @@ export default function ExpensesPage() {
   }, [selectedMonth, selectedYear, selectedPeriod]);
 
   // Versão simplificada e mais direta da função de filtragem
-  const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
+  const filterExpensesByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string, selectedWeek: WeekNumber = '1') => {
     // Converter o mês selecionado para índice (0-11)
     const selectedMonthIndex = months.indexOf(selectedMonth);
     const selectedYearNumber = parseInt(selectedYear);
@@ -159,15 +172,19 @@ export default function ExpensesPage() {
           shouldInclude = transactionYear === selectedYearNumber;
           break;
           
-        // Outros casos (Day, Week) - manter a lógica original
+        // Outros casos (Day, Week) - atualizar a lógica para usar a semana selecionada
         default:
           const now = new Date();
           if (period === 'Day') {
             shouldInclude = date.toDateString() === now.toDateString();
           } else if (period === 'Week') {
-            const weekStart = new Date(now);
-            weekStart.setDate(now.getDate() - now.getDay());
-            shouldInclude = date >= weekStart && date <= now;
+            // Usar a semana selecionada no mês e ano selecionados
+            const weekNum = parseInt(selectedWeek);
+            const dayOfMonth = date.getDate();
+            const weekOfMonth = Math.ceil(dayOfMonth / 7);
+            shouldInclude = transactionMonth === selectedMonthIndex && 
+                          transactionYear === selectedYearNumber &&
+                          weekOfMonth === weekNum;
           }
           break;
       }
@@ -249,8 +266,8 @@ export default function ExpensesPage() {
   }, [transactions, localTransactions]);
   
   const filteredExpenses = useMemo(() => {
-    return filterExpensesByPeriod(allTransactions, selectedPeriod, selectedMonth, selectedYear);
-  }, [allTransactions, selectedPeriod, selectedMonth, selectedYear]);
+    return filterExpensesByPeriod(allTransactions, selectedPeriod, selectedMonth, selectedYear, selectedWeek);
+  }, [allTransactions, selectedPeriod, selectedMonth, selectedYear, selectedWeek]);
 
   const expensesByCategory = useMemo(() => {
     const groupedExpenses = filteredExpenses.reduce((acc, t) => {
@@ -294,9 +311,11 @@ export default function ExpensesPage() {
             selectedPeriod={selectedPeriod}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
+            selectedWeek={selectedWeek}
             onPeriodChange={setSelectedPeriod}
             onMonthChange={setSelectedMonth}
             onYearChange={setSelectedYear}
+            onWeekChange={setSelectedWeek}
           />
         </div>
 
@@ -311,7 +330,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Weekly</h2>
                 <p className="text-2xl font-bold text-primary-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Week', selectedMonth, selectedYear)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Week', selectedMonth, selectedYear, selectedWeek)))}
                 </p>
               </div>
             </div>
@@ -326,7 +345,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Monthly</h2>
                 <p className="text-2xl font-bold text-secondary-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Month', selectedMonth, selectedYear)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Month', selectedMonth, selectedYear, selectedWeek)))}
                 </p>
               </div>
             </div>
@@ -341,7 +360,7 @@ export default function ExpensesPage() {
               <div>
                 <h2 className="text-xl font-bold">Annual</h2>
                 <p className="text-2xl font-bold text-accent-600 mt-1">
-                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Year', selectedMonth, selectedYear)))}
+                  {formatCurrency(calculateTotal(filterExpensesByPeriod(transactions, 'Year', selectedMonth, selectedYear, selectedWeek)))}
                 </p>
               </div>
             </div>

@@ -54,7 +54,9 @@ function AppContent() {
   const { session } = useSupabase();
   const publicRoutes = ['/', '/splash', '/login', '/signup', '/forgot-password', '/reset-password', '/terms-of-service', '/privacy-policy'];
   const onboardingRoutes = ['/onboarding-choice', '/bank-onboarding', '/onboarding'];
+  const noQuickActionsRoutes = ['/income']; // Routes where the + button should be hidden
   const showBottomNav = !publicRoutes.includes(location.pathname) && !onboardingRoutes.includes(location.pathname) && session?.user;
+  const showQuickActions = showBottomNav && !noQuickActionsRoutes.includes(location.pathname);
 
   // Estado para controlar o modal Add New Entry
   const [isAddEntryModalOpen, setIsAddEntryModalOpen] = useState(false);
@@ -90,7 +92,7 @@ function AppContent() {
           selectedYear={new Date().getFullYear()}
         />
         
-        {showBottomNav && <QuickActions onOpenAddEntryModal={handleOpenAddEntryModal} />}
+        {showQuickActions && <QuickActions onOpenAddEntryModal={handleOpenAddEntryModal} />}
         <Routes>
           {/* Página de teste para diagnóstico */}
           <Route path="/test" element={<TestPage />} />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
-import { Download, Filter, Search, Settings } from 'lucide-react';
+import { Download, Filter, Search } from 'lucide-react';
 import OpeningBalanceModal from '../components/statement/OpeningBalanceModal';
 import PageHeader from '../components/layout/PageHeader';
 import { showToast } from '../utils/toastService';
@@ -15,14 +14,38 @@ import { Transaction } from '../types/transaction';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
+type WeekNumber = '1' | '2' | '3' | '4' | '5';
 
 export default function StatementPage() {
-  const navigate = useNavigate();
   const { transactions, fetchTransactions } = useTransactionStore();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
-  const [selectedMonth, setSelectedMonth] = useState<Month>('May');  // Alterado para o mês atual
-  const [selectedYear, setSelectedYear] = useState('2025');
+  
+  // Get current date information
+  const getCurrentMonth = (): Month => {
+    const months: Month[] = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[new Date().getMonth()];
+  };
+  
+  const getCurrentYear = (): string => {
+    return new Date().getFullYear().toString();
+  };
+  
+  const getCurrentWeek = (): WeekNumber => {
+    const date = new Date();
+    const dayOfMonth = date.getDate();
+    // Calculate which week of the month we're in (1-5)
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return weekNumber > 5 ? '5' : weekNumber.toString() as WeekNumber;
+  };
+  
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Week');
+  const [selectedMonth, setSelectedMonth] = useState<Month>(getCurrentMonth());
+  const [selectedYear, setSelectedYear] = useState(getCurrentYear());
+  const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getCurrentWeek());
+  
   const [isOpeningBalanceModalOpen, setIsOpeningBalanceModalOpen] = useState(false);
   const [openingBalanceValue, setOpeningBalanceValue] = useState<number>(0);
   const [showFilters, setShowFilters] = useState(false);
@@ -30,6 +53,10 @@ export default function StatementPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [localTransactions, setLocalTransactions] = useState<Transaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 10;
   
   // Carrega as transações locais do localStorage
   useEffect(() => {
@@ -68,6 +95,53 @@ export default function StatementPage() {
     combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setAllTransactions(combined);
   }, [transactions, localTransactions]);
+  
+  // Filter transactions based on selected period
+  const filteredTransactions = allTransactions.filter(transaction => {
+    // Filter by search term
+    if (searchTerm && !transaction.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+    
+    // Filter by period
+    const transactionDate = new Date(transaction.date);
+    const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' }) as Month;
+    const transactionYear = transactionDate.getFullYear().toString();
+    
+    // Filter by year - only show transactions from 2025 onwards
+    if (parseInt(transactionYear) < 2025) {
+      return false;
+    }
+    
+    // Calculate week number for the transaction date
+    const getWeekNumber = (date: Date): string => {
+      const dayOfMonth = date.getDate();
+      const weekNumber = Math.ceil(dayOfMonth / 7);
+      return weekNumber > 5 ? '5' : weekNumber.toString();
+    };
+    
+    const transactionWeek = getWeekNumber(transactionDate);
+    
+    // Filter by selected period
+    if (selectedPeriod === 'Week') {
+      return transactionMonth === selectedMonth && 
+             transactionYear === selectedYear && 
+             transactionWeek === selectedWeek;
+    }
+    
+    if (selectedPeriod === 'Month') {
+      return transactionMonth === selectedMonth && transactionYear === selectedYear;
+    }
+    
+    if (selectedPeriod === 'Year') {
+      return transactionYear === selectedYear;
+    }
+    
+    return true;
+  });
+  
+  // Check if there are any transactions for the selected period
+  const hasTransactions = filteredTransactions.length > 0;
   
   // Carrega as transações do banco de dados
   useEffect(() => {
@@ -145,11 +219,7 @@ export default function StatementPage() {
     console.log('Exporting statement...');
   };
 
-  // Função para depurar transações locais
-  const debugLocalTransactions = () => {
-    const storedTransactions = localStorage.getItem('local_transactions');
-    console.log('Local Transactions:', storedTransactions ? JSON.parse(storedTransactions) : []);
-  };
+  // Debug function removed
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -159,28 +229,21 @@ export default function StatementPage() {
         showBackButton={true}
       />
       
-      {/* Settings Button */}
-      <div className="flex justify-end px-4 -mt-2 mb-4">
-        <button
-          onClick={() => setIsOpeningBalanceModalOpen(true)}
-          className="flex items-center text-primary-600 hover:text-primary-700"
-          title="Configure initial balance"
-        >
-          <Settings size={20} className="mr-1" />
-          <span className="text-sm">Initial Balance</span>
-        </button>
-      </div>
+      {/* Removed Initial Balance link */}
 
       <div className="max-w-7xl mx-auto px-4 space-y-6 mt-6">
         {/* Period Selection */}
-        <div className="flex flex-col gap-4">
+        <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
           <PeriodSelector
             selectedPeriod={selectedPeriod}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
+            selectedWeek={selectedWeek}
             onPeriodChange={setSelectedPeriod}
             onMonthChange={setSelectedMonth}
             onYearChange={setSelectedYear}
+            onWeekChange={setSelectedWeek}
+            useShortMonthNames={true}
           />
         </div>
 
@@ -212,12 +275,6 @@ export default function StatementPage() {
                 <Download className="h-5 w-5 mr-2" />
                 Export
               </button>
-              <button
-                onClick={debugLocalTransactions}
-                className="btn btn-secondary"
-              >
-                Debug
-              </button>
             </div>
           </div>
 
@@ -244,69 +301,55 @@ export default function StatementPage() {
         </div>
 
         {/* Statement Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">Opening Balance</h3>
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(openingBalance)}</p>
-          </div>
+        {hasTransactions ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl p-6 shadow-card">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Opening Balance</h3>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(openingBalance)}</p>
+            </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">Total Movement</h3>
-            <p className={`text-2xl font-bold ${totalMovement >= 0 ? 'text-success-600' : 'text-error-600'}`}>
-              {totalMovement >= 0 ? '+' : ''}{formatCurrency(totalMovement)}
-            </p>
-          </div>
+            <div className="bg-white rounded-xl p-6 shadow-card">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Total Movement</h3>
+              <p className={`text-2xl font-bold ${totalMovement >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+                {totalMovement >= 0 ? '+' : ''}{formatCurrency(totalMovement)}
+              </p>
+            </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">Closing Balance</h3>
-            <p className={`text-2xl font-bold ${closingBalance >= 0 ? 'text-success-600' : 'text-error-600'}`}>
-              {formatCurrency(closingBalance)}
-            </p>
+            <div className="bg-white rounded-xl p-6 shadow-card">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Closing Balance</h3>
+              <p className={`text-2xl font-bold ${closingBalance >= 0 ? 'text-success-600' : 'text-error-600'}`}>
+                {formatCurrency(closingBalance)}
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="py-8">
+              <p className="text-gray-500 text-center">
+                No financial data available for {selectedPeriod === 'Week' ? `Week ${selectedWeek}` : ''} {selectedMonth} {selectedYear}.<br/>
+                Try selecting a different period or add new transactions.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Transaction List */}
-        <div className="bg-white rounded-xl shadow-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {allTransactions.length === 0 ? (
+        {hasTransactions ? (
+          <div className="bg-white rounded-xl shadow-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
-                      No transactions found
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
                   </tr>
-                ) : (
-                  allTransactions
-                    .filter(transaction => {
-                      // Filter by search term
-                      if (searchTerm && !transaction.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
-                        return false;
-                      }
-                      
-                      // Filter by period
-                      const transactionDate = new Date(transaction.date);
-                      const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' }) as Month;
-                      const transactionYear = transactionDate.getFullYear().toString();
-                      
-                      if (selectedPeriod === 'Month' && (transactionMonth !== selectedMonth || transactionYear !== selectedYear)) {
-                        return false;
-                      }
-                      
-                      if (selectedPeriod === 'Year' && transactionYear !== selectedYear) {
-                        return false;
-                      }
-                      
-                      return true;
-                    })
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Get current transactions for pagination */}
+                  {filteredTransactions
+                    .slice((currentPage - 1) * transactionsPerPage, currentPage * transactionsPerPage)
                     .map((transaction, index) => (
                       <tr 
                         key={`${transaction.id}-${index}`} 
@@ -335,12 +378,60 @@ export default function StatementPage() {
                           {formatCurrency(calculateRunningBalance(index))}
                         </td>
                       </tr>
-                    ))
-                )}
-              </tbody>
-            </table>
+                    ))}
+                </tbody>
+              </table>
+              
+              {/* Pagination Controls */}
+              {filteredTransactions.length > transactionsPerPage && (
+                <div className="px-6 py-4 flex justify-between items-center border-t border-gray-200">
+                  <div className="text-sm text-gray-500">
+                    Showing {Math.min((currentPage - 1) * transactionsPerPage + 1, filteredTransactions.length)} to {Math.min(currentPage * transactionsPerPage, filteredTransactions.length)} of {filteredTransactions.length} transactions
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: Math.ceil(filteredTransactions.length / transactionsPerPage) }, (_, i) => i + 1)
+                      .filter(pageNum => {
+                        // Show first page, last page, current page, and pages around current page
+                        const maxPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+                        return pageNum === 1 || 
+                               pageNum === maxPages || 
+                               Math.abs(pageNum - currentPage) <= 1;
+                      })
+                      .map(pageNum => (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-3 py-1 rounded ${currentPage === pageNum ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                        >
+                          {pageNum}
+                        </button>
+                      ))}
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredTransactions.length / transactionsPerPage)))}
+                      disabled={currentPage === Math.ceil(filteredTransactions.length / transactionsPerPage)}
+                      className={`px-3 py-1 rounded ${currentPage === Math.ceil(filteredTransactions.length / transactionsPerPage) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-card p-6">
+            <p className="text-center text-gray-500 py-8">
+              No transactions found for {selectedPeriod === 'Week' ? `Week ${selectedWeek}` : ''} {selectedMonth} {selectedYear}.
+            </p>
+          </div>
+        )}
       </div>
 
       <BottomNavigation />

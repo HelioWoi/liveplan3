@@ -20,8 +20,36 @@ export default function Home() {
   const { user } = useAuthStore();
   const { transactions, fetchTransactions } = useTransactionStore();
   const [dataRefreshed, setDataRefreshed] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Day');
-  const [selectedMonth, setSelectedMonth] = useState<'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December'>('April');
+  // Define types for period selection
+  type Period = 'Day' | 'Week' | 'Month' | 'Year';
+  type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
+  type WeekNumber = '1' | '2' | '3' | '4' | '5';
+  
+  // Get current date information
+  const getCurrentMonth = (): Month => {
+    const months: Month[] = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[new Date().getMonth()];
+  };
+  
+  const getCurrentYear = (): string => {
+    return new Date().getFullYear().toString();
+  };
+  
+  const getCurrentWeek = (): WeekNumber => {
+    const date = new Date();
+    const dayOfMonth = date.getDate();
+    // Calculate which week of the month we're in (1-5)
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    return weekNumber > 5 ? '5' : weekNumber.toString() as WeekNumber;
+  };
+  
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Week');
+  const [selectedMonth, setSelectedMonth] = useState<Month>(getCurrentMonth());
+  const [selectedYear, setSelectedYear] = useState(getCurrentYear());
+  const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getCurrentWeek());
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
 
@@ -198,7 +226,13 @@ export default function Home() {
     const transactionDate = new Date(transaction.date);
     const today = new Date();
     const selectedMonthIndex = getMonthNumber(selectedMonth);
-    const currentYear = today.getFullYear();
+    const selectedYearNumber = parseInt(selectedYear);
+    const selectedWeekNumber = parseInt(selectedWeek);
+    
+    // Verificar se o ano é 2025 ou posterior
+    if (transactionDate.getFullYear() < 2025) {
+      return false; // Não mostrar dados anteriores a 2025
+    }
     
     switch (selectedPeriod) {
       case 'Day':
@@ -209,19 +243,21 @@ export default function Home() {
           transactionDate.getFullYear() === today.getFullYear()
         );
       case 'Week':
-        // Transações dos últimos 7 dias
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(today.getDate() - 7);
-        return transactionDate >= oneWeekAgo;
+        // Filtrar pela semana selecionada no mês e ano selecionados
+        const dayOfMonth = transactionDate.getDate();
+        const weekOfMonth = Math.ceil(dayOfMonth / 7);
+        return transactionDate.getMonth() === selectedMonthIndex && 
+               transactionDate.getFullYear() === selectedYearNumber &&
+               weekOfMonth === selectedWeekNumber;
       case 'Month':
-        // Transações do mês selecionado no ano atual
+        // Usar o mês e ano selecionados
         return (
           transactionDate.getMonth() === selectedMonthIndex &&
-          transactionDate.getFullYear() === currentYear
+          transactionDate.getFullYear() === selectedYearNumber
         );
       case 'Year':
-        // Transações do ano atual
-        return transactionDate.getFullYear() === currentYear;
+        // Usar o ano selecionado
+        return transactionDate.getFullYear() === selectedYearNumber;
       default:
         return true;
     }
@@ -354,12 +390,19 @@ export default function Home() {
         </div>
 
         <div className="max-w-3xl mx-auto px-4 space-y-6 mt-6">
-          <PeriodSelector
-            selectedPeriod={selectedPeriod}
-            selectedMonth={selectedMonth}
-            onPeriodChange={setSelectedPeriod}
-            onMonthChange={setSelectedMonth}
-          />
+          <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
+            <PeriodSelector
+              selectedPeriod={selectedPeriod}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              selectedWeek={selectedWeek}
+              onPeriodChange={setSelectedPeriod}
+              onMonthChange={setSelectedMonth}
+              onYearChange={setSelectedYear}
+              onWeekChange={setSelectedWeek}
+              useShortMonthNames={true}
+            />
+          </div>
           {/* Total Income/Expenses Section */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 shadow-sm">
