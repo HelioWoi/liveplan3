@@ -1,8 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { builtinModules } from 'module'
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      external: [
+        // Node.js built-in modules
+        ...builtinModules,
+        // Add any other problematic dependencies here
+        'basiq-sdk-nodejs',
+        'node-fetch'
+      ]
+    }
+  },
   plugins: [
     react(),
     VitePWA({
@@ -55,5 +67,8 @@ export default defineConfig({
         swDest: 'sw.js'
       }
     })
-  ]
+  ],
+  optimizeDeps: {
+    exclude: ['basiq-sdk-nodejs', 'node-fetch']
+  }
 })
