@@ -8,6 +8,7 @@ import BottomNavigation from '../components/layout/BottomNavigation';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
 import LogoutConfirmationModal from '../components/modals/LogoutConfirmationModal';
 import { PageHeader } from '../components/layout/PageHeader';
+import DataManagementSection from '../components/profile/DataManagementSection';
 
 interface ProfileFormValues {
   email: string;
@@ -358,6 +359,8 @@ export default function Profile() {
                   </div>
                 )}
               </form>
+              {/* Seção de Gerenciamento de Dados */}
+              <DataManagementSection />
             </div>
           </div>
         </div>
