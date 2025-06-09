@@ -1,0 +1,3117 @@
+[
+  {
+    "name": "liveplan3",
+    "version": "0.0.0",
+    "path": "/Users/heliowoi/Documents/VS Code",
+    "private": true,
+    "dependencies": {
+      "@headlessui/react": {
+        "from": "@headlessui/react",
+        "version": "2.2.2",
+        "resolved": "https://registry.npmjs.org/@headlessui/react/-/react-2.2.2.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@headlessui+react@2.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@headlessui/react"
+      },
+      "@hello-pangea/dnd": {
+        "from": "@hello-pangea/dnd",
+        "version": "18.0.1",
+        "resolved": "https://registry.npmjs.org/@hello-pangea/dnd/-/dnd-18.0.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@hello-pangea+dnd@18.0.1_@types+react@18.3.21_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@hello-pangea/dnd"
+      },
+      "@hookform/resolvers": {
+        "from": "@hookform/resolvers",
+        "version": "5.0.1",
+        "resolved": "https://registry.npmjs.org/@hookform/resolvers/-/resolvers-5.0.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@hookform+resolvers@5.0.1_react-hook-form@7.56.3_react@18.3.1_/node_modules/@hookform/resolvers"
+      },
+      "@radix-ui/react-dialog": {
+        "from": "@radix-ui/react-dialog",
+        "version": "1.1.13",
+        "resolved": "https://registry.npmjs.org/@radix-ui/react-dialog/-/react-dialog-1.1.13.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@radix-ui+react-dialog@1.1.13_@types+react-dom@18.3.7_@types+react@18.3.21__@types+reac_2166b17bc656237802115d6a5eb1ffc1/node_modules/@radix-ui/react-dialog"
+      },
+      "@supabase/supabase-js": {
+        "from": "@supabase/supabase-js",
+        "version": "2.49.4",
+        "resolved": "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.49.4.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@supabase+supabase-js@2.49.4/node_modules/@supabase/supabase-js"
+      },
+      "@types/crypto-js": {
+        "from": "@types/crypto-js",
+        "version": "4.2.2",
+        "resolved": "https://registry.npmjs.org/@types/crypto-js/-/crypto-js-4.2.2.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@types+crypto-js@4.2.2/node_modules/@types/crypto-js"
+      },
+      "basiq-sdk-nodejs": {
+        "from": "basiq-sdk-nodejs",
+        "version": "1.1.3",
+        "resolved": "https://registry.npmjs.org/basiq-sdk-nodejs/-/basiq-sdk-nodejs-1.1.3.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/basiq-sdk-nodejs@1.1.3/node_modules/basiq-sdk-nodejs"
+      },
+      "classnames": {
+        "from": "classnames",
+        "version": "2.5.1",
+        "resolved": "https://registry.npmjs.org/classnames/-/classnames-2.5.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/classnames@2.5.1/node_modules/classnames"
+      },
+      "crypto-js": {
+        "from": "crypto-js",
+        "version": "4.2.0",
+        "resolved": "https://registry.npmjs.org/crypto-js/-/crypto-js-4.2.0.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js"
+      },
+      "date-fns": {
+        "from": "date-fns",
+        "version": "3.6.0",
+        "resolved": "https://registry.npmjs.org/date-fns/-/date-fns-3.6.0.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/date-fns@3.6.0/node_modules/date-fns"
+      },
+      "finnhub": {
+        "from": "finnhub",
+        "version": "1.2.19",
+        "resolved": "https://registry.npmjs.org/finnhub/-/finnhub-1.2.19.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/finnhub@1.2.19_@babel+core@7.27.1/node_modules/finnhub"
+      },
+      "framer-motion": {
+        "from": "framer-motion",
+        "version": "12.10.1",
+        "resolved": "https://registry.npmjs.org/framer-motion/-/framer-motion-12.10.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/framer-motion@12.10.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/framer-motion"
+      },
+      "lucide-react": {
+        "from": "lucide-react",
+        "version": "0.363.0",
+        "resolved": "https://registry.npmjs.org/lucide-react/-/lucide-react-0.363.0.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/lucide-react@0.363.0_react@18.3.1/node_modules/lucide-react"
+      },
+      "papaparse": {
+        "from": "papaparse",
+        "version": "5.5.2",
+        "resolved": "https://registry.npmjs.org/papaparse/-/papaparse-5.5.2.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/papaparse@5.5.2/node_modules/papaparse"
+      },
+      "react": {
+        "from": "react",
+        "version": "18.3.1",
+        "resolved": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react@18.3.1/node_modules/react"
+      },
+      "react-beautiful-dnd": {
+        "from": "react-beautiful-dnd",
+        "version": "13.1.1",
+        "resolved": "https://registry.npmjs.org/react-beautiful-dnd/-/react-beautiful-dnd-13.1.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-beautiful-dnd@13.1.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-beautiful-dnd"
+      },
+      "react-dom": {
+        "from": "react-dom",
+        "version": "18.3.1",
+        "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom"
+      },
+      "react-hook-form": {
+        "from": "react-hook-form",
+        "version": "7.56.3",
+        "resolved": "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.56.3.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-hook-form@7.56.3_react@18.3.1/node_modules/react-hook-form"
+      },
+      "react-hot-toast": {
+        "from": "react-hot-toast",
+        "version": "2.5.2",
+        "resolved": "https://registry.npmjs.org/react-hot-toast/-/react-hot-toast-2.5.2.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-hot-toast@2.5.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-hot-toast"
+      },
+      "react-router-dom": {
+        "from": "react-router-dom",
+        "version": "6.30.0",
+        "resolved": "https://registry.npmjs.org/react-router-dom/-/react-router-dom-6.30.0.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-router-dom@6.30.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-router-dom"
+      },
+      "react-swipeable": {
+        "from": "react-swipeable",
+        "version": "7.0.2",
+        "resolved": "https://registry.npmjs.org/react-swipeable/-/react-swipeable-7.0.2.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-swipeable@7.0.2_react@18.3.1/node_modules/react-swipeable"
+      },
+      "react-toastify": {
+        "from": "react-toastify",
+        "version": "11.0.5",
+        "resolved": "https://registry.npmjs.org/react-toastify/-/react-toastify-11.0.5.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/react-toastify@11.0.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-toastify"
+      },
+      "recharts": {
+        "from": "recharts",
+        "version": "2.15.3",
+        "resolved": "https://registry.npmjs.org/recharts/-/recharts-2.15.3.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/recharts@2.15.3_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts"
+      },
+      "xlsx": {
+        "from": "xlsx",
+        "version": "0.18.5",
+        "resolved": "https://registry.npmjs.org/xlsx/-/xlsx-0.18.5.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/xlsx@0.18.5/node_modules/xlsx"
+      },
+      "zod": {
+        "from": "zod",
+        "version": "3.24.4",
+        "resolved": "https://registry.npmjs.org/zod/-/zod-3.24.4.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/zod@3.24.4/node_modules/zod"
+      },
+      "zustand": {
+        "from": "zustand",
+        "version": "4.5.6",
+        "resolved": "https://registry.npmjs.org/zustand/-/zustand-4.5.6.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/zustand@4.5.6_@types+react@18.3.21_react@18.3.1/node_modules/zustand"
+      }
+    },
+    "devDependencies": {
+      "@types/node": {
+        "from": "@types/node",
+        "version": "22.15.16",
+        "resolved": "https://registry.npmjs.org/@types/node/-/node-22.15.16.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@types+node@22.15.16/node_modules/@types/node"
+      },
+      "@types/papaparse": {
+        "from": "@types/papaparse",
+        "version": "5.3.16",
+        "resolved": "https://registry.npmjs.org/@types/papaparse/-/papaparse-5.3.16.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@types+papaparse@5.3.16/node_modules/@types/papaparse"
+      },
+      "@types/react": {
+        "from": "@types/react",
+        "version": "18.3.21",
+        "resolved": "https://registry.npmjs.org/@types/react/-/react-18.3.21.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@types+react@18.3.21/node_modules/@types/react"
+      },
+      "@types/react-beautiful-dnd": {
+        "from": "@types/react-beautiful-dnd",
+        "version": "13.1.8",
+        "resolved": "https://registry.npmjs.org/@types/react-beautiful-dnd/-/react-beautiful-dnd-13.1.8.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@types+react-beautiful-dnd@13.1.8/node_modules/@types/react-beautiful-dnd"
+      },
+      "@types/react-dom": {
+        "from": "@types/react-dom",
+        "version": "18.3.7",
+        "resolved": "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.3.7.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@types+react-dom@18.3.7_@types+react@18.3.21/node_modules/@types/react-dom"
+      },
+      "@vitejs/plugin-react": {
+        "from": "@vitejs/plugin-react",
+        "version": "4.4.1",
+        "resolved": "https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-4.4.1.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/@vitejs+plugin-react@4.4.1_vite@5.4.19_@types+node@22.15.16_terser@5.39.0_/node_modules/@vitejs/plugin-react"
+      },
+      "autoprefixer": {
+        "from": "autoprefixer",
+        "version": "10.4.21",
+        "resolved": "https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.4.21.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/autoprefixer@10.4.21_postcss@8.5.3/node_modules/autoprefixer"
+      },
+      "postcss": {
+        "from": "postcss",
+        "version": "8.5.3",
+        "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.5.3.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/postcss@8.5.3/node_modules/postcss"
+      },
+      "tailwindcss": {
+        "from": "tailwindcss",
+        "version": "3.4.17",
+        "resolved": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/tailwindcss@3.4.17/node_modules/tailwindcss"
+      },
+      "typescript": {
+        "from": "typescript",
+        "version": "5.8.3",
+        "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.8.3.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/typescript@5.8.3/node_modules/typescript"
+      },
+      "vite": {
+        "from": "vite",
+        "version": "5.4.19",
+        "resolved": "https://registry.npmjs.org/vite/-/vite-5.4.19.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/vite@5.4.19_@types+node@22.15.16_terser@5.39.0/node_modules/vite"
+      },
+      "vite-plugin-pwa": {
+        "from": "vite-plugin-pwa",
+        "version": "1.0.0",
+        "resolved": "https://registry.npmjs.org/vite-plugin-pwa/-/vite-plugin-pwa-1.0.0.tgz",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/.pnpm/vite-plugin-pwa@1.0.0_vite@5.4.19_@types+node@22.15.16_terser@5.39.0__workbox-build@7.3_cf1d762a3ebc470280ec8523c7ed2469/node_modules/vite-plugin-pwa"
+      }
+    },
+    "unsavedDependencies": {
+      "acorn": {
+        "from": "acorn",
+        "version": "8.14.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/acorn"
+      },
+      "adler-32": {
+        "from": "adler-32",
+        "version": "1.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/adler-32"
+      },
+      "ajv": {
+        "from": "ajv",
+        "version": "8.17.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ajv"
+      },
+      "ansi-regex": {
+        "from": "ansi-regex",
+        "version": "6.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ansi-regex"
+      },
+      "ansi-styles": {
+        "from": "ansi-styles",
+        "version": "6.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ansi-styles"
+      },
+      "any-promise": {
+        "from": "any-promise",
+        "version": "1.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/any-promise"
+      },
+      "anymatch": {
+        "from": "anymatch",
+        "version": "3.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/anymatch"
+      },
+      "arg": {
+        "from": "arg",
+        "version": "5.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/arg"
+      },
+      "aria-hidden": {
+        "from": "aria-hidden",
+        "version": "1.2.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/aria-hidden"
+      },
+      "array-buffer-byte-length": {
+        "from": "array-buffer-byte-length",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/array-buffer-byte-length"
+      },
+      "arraybuffer.prototype.slice": {
+        "from": "arraybuffer.prototype.slice",
+        "version": "1.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/arraybuffer.prototype.slice"
+      },
+      "asn1": {
+        "from": "asn1",
+        "version": "0.2.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/asn1"
+      },
+      "assert-plus": {
+        "from": "assert-plus",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/assert-plus"
+      },
+      "async-function": {
+        "from": "async-function",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/async-function"
+      },
+      "async": {
+        "from": "async",
+        "version": "3.2.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/async"
+      },
+      "asynckit": {
+        "from": "asynckit",
+        "version": "0.4.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/asynckit"
+      },
+      "at-least-node": {
+        "from": "at-least-node",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/at-least-node"
+      },
+      "available-typed-arrays": {
+        "from": "available-typed-arrays",
+        "version": "1.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/available-typed-arrays"
+      },
+      "aws-sign2": {
+        "from": "aws-sign2",
+        "version": "0.7.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/aws-sign2"
+      },
+      "aws4": {
+        "from": "aws4",
+        "version": "1.13.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/aws4"
+      },
+      "babel-plugin-polyfill-corejs2": {
+        "from": "babel-plugin-polyfill-corejs2",
+        "version": "0.4.13",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/babel-plugin-polyfill-corejs2"
+      },
+      "babel-plugin-polyfill-corejs3": {
+        "from": "babel-plugin-polyfill-corejs3",
+        "version": "0.11.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/babel-plugin-polyfill-corejs3"
+      },
+      "babel-plugin-polyfill-regenerator": {
+        "from": "babel-plugin-polyfill-regenerator",
+        "version": "0.6.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/babel-plugin-polyfill-regenerator"
+      },
+      "balanced-match": {
+        "from": "balanced-match",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/balanced-match"
+      },
+      "bcrypt-pbkdf": {
+        "from": "bcrypt-pbkdf",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/bcrypt-pbkdf"
+      },
+      "binary-extensions": {
+        "from": "binary-extensions",
+        "version": "2.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/binary-extensions"
+      },
+      "brace-expansion": {
+        "from": "brace-expansion",
+        "version": "1.1.11",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/brace-expansion"
+      },
+      "braces": {
+        "from": "braces",
+        "version": "3.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/braces"
+      },
+      "browserslist": {
+        "from": "browserslist",
+        "version": "4.24.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/browserslist"
+      },
+      "buffer-from": {
+        "from": "buffer-from",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/buffer-from"
+      },
+      "call-bind": {
+        "from": "call-bind",
+        "version": "1.0.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/call-bind"
+      },
+      "call-bind-apply-helpers": {
+        "from": "call-bind-apply-helpers",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/call-bind-apply-helpers"
+      },
+      "call-bound": {
+        "from": "call-bound",
+        "version": "1.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/call-bound"
+      },
+      "camelcase-css": {
+        "from": "camelcase-css",
+        "version": "2.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/camelcase-css"
+      },
+      "caniuse-lite": {
+        "from": "caniuse-lite",
+        "version": "1.0.30001716",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/caniuse-lite"
+      },
+      "caseless": {
+        "from": "caseless",
+        "version": "0.12.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/caseless"
+      },
+      "cfb": {
+        "from": "cfb",
+        "version": "1.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/cfb"
+      },
+      "chalk": {
+        "from": "chalk",
+        "version": "4.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/chalk"
+      },
+      "chokidar": {
+        "from": "chokidar",
+        "version": "3.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/chokidar"
+      },
+      "clsx": {
+        "from": "clsx",
+        "version": "2.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/clsx"
+      },
+      "co": {
+        "from": "co",
+        "version": "4.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/co"
+      },
+      "codepage": {
+        "from": "codepage",
+        "version": "1.15.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/codepage"
+      },
+      "color-convert": {
+        "from": "color-convert",
+        "version": "2.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/color-convert"
+      },
+      "color-name": {
+        "from": "color-name",
+        "version": "1.1.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/color-name"
+      },
+      "combined-stream": {
+        "from": "combined-stream",
+        "version": "1.0.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/combined-stream"
+      },
+      "commander": {
+        "from": "commander",
+        "version": "4.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/commander"
+      },
+      "common-tags": {
+        "from": "common-tags",
+        "version": "1.8.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/common-tags"
+      },
+      "component-emitter": {
+        "from": "component-emitter",
+        "version": "1.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/component-emitter"
+      },
+      "concat-map": {
+        "from": "concat-map",
+        "version": "0.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/concat-map"
+      },
+      "convert-source-map": {
+        "from": "convert-source-map",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/convert-source-map"
+      },
+      "cookiejar": {
+        "from": "cookiejar",
+        "version": "2.1.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/cookiejar"
+      },
+      "core-js-compat": {
+        "from": "core-js-compat",
+        "version": "3.42.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/core-js-compat"
+      },
+      "crc-32": {
+        "from": "crc-32",
+        "version": "1.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/crc-32"
+      },
+      "core-util-is": {
+        "from": "core-util-is",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/core-util-is"
+      },
+      "cross-spawn": {
+        "from": "cross-spawn",
+        "version": "7.0.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/cross-spawn"
+      },
+      "crypto-random-string": {
+        "from": "crypto-random-string",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/crypto-random-string"
+      },
+      "css-box-model": {
+        "from": "css-box-model",
+        "version": "1.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/css-box-model"
+      },
+      "cssesc": {
+        "from": "cssesc",
+        "version": "3.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/cssesc"
+      },
+      "csstype": {
+        "from": "csstype",
+        "version": "3.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/csstype"
+      },
+      "d3-array": {
+        "from": "d3-array",
+        "version": "3.2.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-array"
+      },
+      "d3-color": {
+        "from": "d3-color",
+        "version": "3.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-color"
+      },
+      "d3-ease": {
+        "from": "d3-ease",
+        "version": "3.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-ease"
+      },
+      "d3-format": {
+        "from": "d3-format",
+        "version": "3.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-format"
+      },
+      "d3-interpolate": {
+        "from": "d3-interpolate",
+        "version": "3.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-interpolate"
+      },
+      "d3-path": {
+        "from": "d3-path",
+        "version": "3.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-path"
+      },
+      "d3-scale": {
+        "from": "d3-scale",
+        "version": "4.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-scale"
+      },
+      "d3-shape": {
+        "from": "d3-shape",
+        "version": "3.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-shape"
+      },
+      "d3-time": {
+        "from": "d3-time",
+        "version": "3.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-time"
+      },
+      "d3-time-format": {
+        "from": "d3-time-format",
+        "version": "4.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-time-format"
+      },
+      "d3-timer": {
+        "from": "d3-timer",
+        "version": "3.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/d3-timer"
+      },
+      "dashdash": {
+        "from": "dashdash",
+        "version": "1.14.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/dashdash"
+      },
+      "data-view-buffer": {
+        "from": "data-view-buffer",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/data-view-buffer"
+      },
+      "data-view-byte-length": {
+        "from": "data-view-byte-length",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/data-view-byte-length"
+      },
+      "data-view-byte-offset": {
+        "from": "data-view-byte-offset",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/data-view-byte-offset"
+      },
+      "debug": {
+        "from": "debug",
+        "version": "4.3.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/debug"
+      },
+      "decimal.js-light": {
+        "from": "decimal.js-light",
+        "version": "2.5.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/decimal.js-light"
+      },
+      "deepmerge": {
+        "from": "deepmerge",
+        "version": "4.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/deepmerge"
+      },
+      "define-data-property": {
+        "from": "define-data-property",
+        "version": "1.1.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/define-data-property"
+      },
+      "define-properties": {
+        "from": "define-properties",
+        "version": "1.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/define-properties"
+      },
+      "delayed-stream": {
+        "from": "delayed-stream",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/delayed-stream"
+      },
+      "detect-node-es": {
+        "from": "detect-node-es",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/detect-node-es"
+      },
+      "didyoumean": {
+        "from": "didyoumean",
+        "version": "1.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/didyoumean"
+      },
+      "dlv": {
+        "from": "dlv",
+        "version": "1.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/dlv"
+      },
+      "dom-helpers": {
+        "from": "dom-helpers",
+        "version": "5.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/dom-helpers"
+      },
+      "dunder-proto": {
+        "from": "dunder-proto",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/dunder-proto"
+      },
+      "eastasianwidth": {
+        "from": "eastasianwidth",
+        "version": "0.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/eastasianwidth"
+      },
+      "ecc-jsbn": {
+        "from": "ecc-jsbn",
+        "version": "0.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ecc-jsbn"
+      },
+      "ejs": {
+        "from": "ejs",
+        "version": "3.1.10",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ejs"
+      },
+      "electron-to-chromium": {
+        "from": "electron-to-chromium",
+        "version": "1.5.145",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/electron-to-chromium"
+      },
+      "emoji-regex": {
+        "from": "emoji-regex",
+        "version": "9.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/emoji-regex"
+      },
+      "es-abstract": {
+        "from": "es-abstract",
+        "version": "1.23.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/es-abstract"
+      },
+      "es-define-property": {
+        "from": "es-define-property",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/es-define-property"
+      },
+      "es-errors": {
+        "from": "es-errors",
+        "version": "1.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/es-errors"
+      },
+      "es-object-atoms": {
+        "from": "es-object-atoms",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/es-object-atoms"
+      },
+      "es-set-tostringtag": {
+        "from": "es-set-tostringtag",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/es-set-tostringtag"
+      },
+      "es-to-primitive": {
+        "from": "es-to-primitive",
+        "version": "1.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/es-to-primitive"
+      },
+      "esbuild": {
+        "from": "esbuild",
+        "version": "0.21.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/esbuild"
+      },
+      "escalade": {
+        "from": "escalade",
+        "version": "3.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/escalade"
+      },
+      "estree-walker": {
+        "from": "estree-walker",
+        "version": "2.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/estree-walker"
+      },
+      "esutils": {
+        "from": "esutils",
+        "version": "2.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/esutils"
+      },
+      "eventemitter3": {
+        "from": "eventemitter3",
+        "version": "4.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/eventemitter3"
+      },
+      "extend": {
+        "from": "extend",
+        "version": "3.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/extend"
+      },
+      "extsprintf": {
+        "from": "extsprintf",
+        "version": "1.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/extsprintf"
+      },
+      "fast-deep-equal": {
+        "from": "fast-deep-equal",
+        "version": "3.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fast-deep-equal"
+      },
+      "fast-equals": {
+        "from": "fast-equals",
+        "version": "5.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fast-equals"
+      },
+      "fast-glob": {
+        "from": "fast-glob",
+        "version": "3.3.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fast-glob"
+      },
+      "fast-json-stable-stringify": {
+        "from": "fast-json-stable-stringify",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fast-json-stable-stringify"
+      },
+      "fast-safe-stringify": {
+        "from": "fast-safe-stringify",
+        "version": "2.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fast-safe-stringify"
+      },
+      "fast-uri": {
+        "from": "fast-uri",
+        "version": "3.0.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fast-uri"
+      },
+      "fastq": {
+        "from": "fastq",
+        "version": "1.19.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fastq"
+      },
+      "filelist": {
+        "from": "filelist",
+        "version": "1.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/filelist"
+      },
+      "fill-range": {
+        "from": "fill-range",
+        "version": "7.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fill-range"
+      },
+      "for-each": {
+        "from": "for-each",
+        "version": "0.3.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/for-each"
+      },
+      "foreground-child": {
+        "from": "foreground-child",
+        "version": "3.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/foreground-child"
+      },
+      "forever-agent": {
+        "from": "forever-agent",
+        "version": "0.6.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/forever-agent"
+      },
+      "formidable": {
+        "from": "formidable",
+        "version": "1.2.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/formidable"
+      },
+      "form-data": {
+        "from": "form-data",
+        "version": "3.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/form-data"
+      },
+      "fraction.js": {
+        "from": "fraction.js",
+        "version": "4.3.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fraction.js"
+      },
+      "frac": {
+        "from": "frac",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/frac"
+      },
+      "fs-readdir-recursive": {
+        "from": "fs-readdir-recursive",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fs-readdir-recursive"
+      },
+      "fs-extra": {
+        "from": "fs-extra",
+        "version": "9.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fs-extra"
+      },
+      "fs.realpath": {
+        "from": "fs.realpath",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fs.realpath"
+      },
+      "fsevents": {
+        "from": "fsevents",
+        "version": "2.3.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/fsevents"
+      },
+      "function-bind": {
+        "from": "function-bind",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/function-bind"
+      },
+      "function.prototype.name": {
+        "from": "function.prototype.name",
+        "version": "1.1.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/function.prototype.name"
+      },
+      "functions-have-names": {
+        "from": "functions-have-names",
+        "version": "1.2.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/functions-have-names"
+      },
+      "gensync": {
+        "from": "gensync",
+        "version": "1.0.0-beta.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/gensync"
+      },
+      "get-intrinsic": {
+        "from": "get-intrinsic",
+        "version": "1.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/get-intrinsic"
+      },
+      "get-nonce": {
+        "from": "get-nonce",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/get-nonce"
+      },
+      "get-own-enumerable-property-symbols": {
+        "from": "get-own-enumerable-property-symbols",
+        "version": "3.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/get-own-enumerable-property-symbols"
+      },
+      "get-proto": {
+        "from": "get-proto",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/get-proto"
+      },
+      "get-symbol-description": {
+        "from": "get-symbol-description",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/get-symbol-description"
+      },
+      "getpass": {
+        "from": "getpass",
+        "version": "0.1.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/getpass"
+      },
+      "glob": {
+        "from": "glob",
+        "version": "10.4.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/glob"
+      },
+      "glob-parent": {
+        "from": "glob-parent",
+        "version": "6.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/glob-parent"
+      },
+      "globalthis": {
+        "from": "globalthis",
+        "version": "1.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/globalthis"
+      },
+      "globals": {
+        "from": "globals",
+        "version": "11.12.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/globals"
+      },
+      "goober": {
+        "from": "goober",
+        "version": "2.1.16",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/goober"
+      },
+      "gopd": {
+        "from": "gopd",
+        "version": "1.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/gopd"
+      },
+      "graceful-fs": {
+        "from": "graceful-fs",
+        "version": "4.2.11",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/graceful-fs"
+      },
+      "har-schema": {
+        "from": "har-schema",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/har-schema"
+      },
+      "has-bigints": {
+        "from": "has-bigints",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/has-bigints"
+      },
+      "has-flag": {
+        "from": "has-flag",
+        "version": "4.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/has-flag"
+      },
+      "har-validator": {
+        "from": "har-validator",
+        "version": "5.1.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/har-validator"
+      },
+      "has-property-descriptors": {
+        "from": "has-property-descriptors",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/has-property-descriptors"
+      },
+      "has-proto": {
+        "from": "has-proto",
+        "version": "1.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/has-proto"
+      },
+      "has-symbols": {
+        "from": "has-symbols",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/has-symbols"
+      },
+      "has-tostringtag": {
+        "from": "has-tostringtag",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/has-tostringtag"
+      },
+      "hasown": {
+        "from": "hasown",
+        "version": "2.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/hasown"
+      },
+      "http-signature": {
+        "from": "http-signature",
+        "version": "1.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/http-signature"
+      },
+      "hoist-non-react-statics": {
+        "from": "hoist-non-react-statics",
+        "version": "3.3.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/hoist-non-react-statics"
+      },
+      "idb": {
+        "from": "idb",
+        "version": "7.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/idb"
+      },
+      "inflight": {
+        "from": "inflight",
+        "version": "1.0.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/inflight"
+      },
+      "inherits": {
+        "from": "inherits",
+        "version": "2.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/inherits"
+      },
+      "internal-slot": {
+        "from": "internal-slot",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/internal-slot"
+      },
+      "internmap": {
+        "from": "internmap",
+        "version": "2.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/internmap"
+      },
+      "is-array-buffer": {
+        "from": "is-array-buffer",
+        "version": "3.0.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-array-buffer"
+      },
+      "is-async-function": {
+        "from": "is-async-function",
+        "version": "2.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-async-function"
+      },
+      "is-binary-path": {
+        "from": "is-binary-path",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-binary-path"
+      },
+      "is-bigint": {
+        "from": "is-bigint",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-bigint"
+      },
+      "is-boolean-object": {
+        "from": "is-boolean-object",
+        "version": "1.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-boolean-object"
+      },
+      "is-callable": {
+        "from": "is-callable",
+        "version": "1.2.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-callable"
+      },
+      "is-core-module": {
+        "from": "is-core-module",
+        "version": "2.16.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-core-module"
+      },
+      "is-data-view": {
+        "from": "is-data-view",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-data-view"
+      },
+      "is-date-object": {
+        "from": "is-date-object",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-date-object"
+      },
+      "is-extglob": {
+        "from": "is-extglob",
+        "version": "2.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-extglob"
+      },
+      "is-finalizationregistry": {
+        "from": "is-finalizationregistry",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-finalizationregistry"
+      },
+      "is-fullwidth-code-point": {
+        "from": "is-fullwidth-code-point",
+        "version": "3.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-fullwidth-code-point"
+      },
+      "is-generator-function": {
+        "from": "is-generator-function",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-generator-function"
+      },
+      "is-glob": {
+        "from": "is-glob",
+        "version": "4.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-glob"
+      },
+      "is-map": {
+        "from": "is-map",
+        "version": "2.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-map"
+      },
+      "is-module": {
+        "from": "is-module",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-module"
+      },
+      "is-number": {
+        "from": "is-number",
+        "version": "7.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-number"
+      },
+      "is-number-object": {
+        "from": "is-number-object",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-number-object"
+      },
+      "is-obj": {
+        "from": "is-obj",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-obj"
+      },
+      "is-regex": {
+        "from": "is-regex",
+        "version": "1.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-regex"
+      },
+      "is-regexp": {
+        "from": "is-regexp",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-regexp"
+      },
+      "is-set": {
+        "from": "is-set",
+        "version": "2.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-set"
+      },
+      "is-shared-array-buffer": {
+        "from": "is-shared-array-buffer",
+        "version": "1.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-shared-array-buffer"
+      },
+      "is-stream": {
+        "from": "is-stream",
+        "version": "2.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-stream"
+      },
+      "is-string": {
+        "from": "is-string",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-string"
+      },
+      "is-symbol": {
+        "from": "is-symbol",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-symbol"
+      },
+      "is-typed-array": {
+        "from": "is-typed-array",
+        "version": "1.1.15",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-typed-array"
+      },
+      "is-typedarray": {
+        "from": "is-typedarray",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-typedarray"
+      },
+      "is-weakref": {
+        "from": "is-weakref",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-weakref"
+      },
+      "is-weakmap": {
+        "from": "is-weakmap",
+        "version": "2.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-weakmap"
+      },
+      "is-weakset": {
+        "from": "is-weakset",
+        "version": "2.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/is-weakset"
+      },
+      "isarray": {
+        "from": "isarray",
+        "version": "2.0.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/isarray"
+      },
+      "isexe": {
+        "from": "isexe",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/isexe"
+      },
+      "isstream": {
+        "from": "isstream",
+        "version": "0.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/isstream"
+      },
+      "jackspeak": {
+        "from": "jackspeak",
+        "version": "3.4.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jackspeak"
+      },
+      "jake": {
+        "from": "jake",
+        "version": "10.9.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jake"
+      },
+      "jiti": {
+        "from": "jiti",
+        "version": "1.21.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jiti"
+      },
+      "js-tokens": {
+        "from": "js-tokens",
+        "version": "4.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/js-tokens"
+      },
+      "jsbn": {
+        "from": "jsbn",
+        "version": "0.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jsbn"
+      },
+      "jsesc": {
+        "from": "jsesc",
+        "version": "3.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jsesc"
+      },
+      "json-schema": {
+        "from": "json-schema",
+        "version": "0.4.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/json-schema"
+      },
+      "json-stringify-safe": {
+        "from": "json-stringify-safe",
+        "version": "5.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/json-stringify-safe"
+      },
+      "json-schema-traverse": {
+        "from": "json-schema-traverse",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/json-schema-traverse"
+      },
+      "json5": {
+        "from": "json5",
+        "version": "2.2.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/json5"
+      },
+      "jsonfile": {
+        "from": "jsonfile",
+        "version": "6.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jsonfile"
+      },
+      "jsprim": {
+        "from": "jsprim",
+        "version": "1.4.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jsprim"
+      },
+      "jsonpointer": {
+        "from": "jsonpointer",
+        "version": "5.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/jsonpointer"
+      },
+      "leven": {
+        "from": "leven",
+        "version": "3.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/leven"
+      },
+      "lilconfig": {
+        "from": "lilconfig",
+        "version": "3.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/lilconfig"
+      },
+      "lines-and-columns": {
+        "from": "lines-and-columns",
+        "version": "1.2.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/lines-and-columns"
+      },
+      "lodash": {
+        "from": "lodash",
+        "version": "4.17.21",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/lodash"
+      },
+      "lodash.debounce": {
+        "from": "lodash.debounce",
+        "version": "4.0.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/lodash.debounce"
+      },
+      "loose-envify": {
+        "from": "loose-envify",
+        "version": "1.4.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/loose-envify"
+      },
+      "lru-cache": {
+        "from": "lru-cache",
+        "version": "5.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/lru-cache"
+      },
+      "lodash.sortby": {
+        "from": "lodash.sortby",
+        "version": "4.7.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/lodash.sortby"
+      },
+      "magic-string": {
+        "from": "magic-string",
+        "version": "0.25.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/magic-string"
+      },
+      "make-dir": {
+        "from": "make-dir",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/make-dir"
+      },
+      "math-intrinsics": {
+        "from": "math-intrinsics",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/math-intrinsics"
+      },
+      "memoize-one": {
+        "from": "memoize-one",
+        "version": "5.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/memoize-one"
+      },
+      "merge2": {
+        "from": "merge2",
+        "version": "1.4.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/merge2"
+      },
+      "methods": {
+        "from": "methods",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/methods"
+      },
+      "micromatch": {
+        "from": "micromatch",
+        "version": "4.0.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/micromatch"
+      },
+      "mime": {
+        "from": "mime",
+        "version": "2.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/mime"
+      },
+      "mime-db": {
+        "from": "mime-db",
+        "version": "1.52.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/mime-db"
+      },
+      "mime-types": {
+        "from": "mime-types",
+        "version": "2.1.35",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/mime-types"
+      },
+      "minimatch": {
+        "from": "minimatch",
+        "version": "3.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/minimatch"
+      },
+      "minipass": {
+        "from": "minipass",
+        "version": "7.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/minipass"
+      },
+      "motion-dom": {
+        "from": "motion-dom",
+        "version": "12.10.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/motion-dom"
+      },
+      "motion-utils": {
+        "from": "motion-utils",
+        "version": "12.9.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/motion-utils"
+      },
+      "mz": {
+        "from": "mz",
+        "version": "2.7.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/mz"
+      },
+      "nanoid": {
+        "from": "nanoid",
+        "version": "3.3.11",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/nanoid"
+      },
+      "node-releases": {
+        "from": "node-releases",
+        "version": "2.0.19",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/node-releases"
+      },
+      "normalize-path": {
+        "from": "normalize-path",
+        "version": "3.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/normalize-path"
+      },
+      "ms": {
+        "from": "ms",
+        "version": "2.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ms"
+      },
+      "oauth-sign": {
+        "from": "oauth-sign",
+        "version": "0.9.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/oauth-sign"
+      },
+      "object-assign": {
+        "from": "object-assign",
+        "version": "4.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/object-assign"
+      },
+      "normalize-range": {
+        "from": "normalize-range",
+        "version": "0.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/normalize-range"
+      },
+      "object-hash": {
+        "from": "object-hash",
+        "version": "3.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/object-hash"
+      },
+      "object-keys": {
+        "from": "object-keys",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/object-keys"
+      },
+      "object.assign": {
+        "from": "object.assign",
+        "version": "4.1.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/object.assign"
+      },
+      "object-inspect": {
+        "from": "object-inspect",
+        "version": "1.13.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/object-inspect"
+      },
+      "once": {
+        "from": "once",
+        "version": "1.4.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/once"
+      },
+      "own-keys": {
+        "from": "own-keys",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/own-keys"
+      },
+      "package-json-from-dist": {
+        "from": "package-json-from-dist",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/package-json-from-dist"
+      },
+      "path-key": {
+        "from": "path-key",
+        "version": "3.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/path-key"
+      },
+      "path-is-absolute": {
+        "from": "path-is-absolute",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/path-is-absolute"
+      },
+      "path-parse": {
+        "from": "path-parse",
+        "version": "1.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/path-parse"
+      },
+      "path-scurry": {
+        "from": "path-scurry",
+        "version": "1.11.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/path-scurry"
+      },
+      "performance-now": {
+        "from": "performance-now",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/performance-now"
+      },
+      "picocolors": {
+        "from": "picocolors",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/picocolors"
+      },
+      "picomatch": {
+        "from": "picomatch",
+        "version": "2.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/picomatch"
+      },
+      "pify": {
+        "from": "pify",
+        "version": "2.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/pify"
+      },
+      "possible-typed-array-names": {
+        "from": "possible-typed-array-names",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/possible-typed-array-names"
+      },
+      "pirates": {
+        "from": "pirates",
+        "version": "4.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/pirates"
+      },
+      "postcss-import": {
+        "from": "postcss-import",
+        "version": "15.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/postcss-import"
+      },
+      "postcss-js": {
+        "from": "postcss-js",
+        "version": "4.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/postcss-js"
+      },
+      "postcss-load-config": {
+        "from": "postcss-load-config",
+        "version": "4.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/postcss-load-config"
+      },
+      "postcss-nested": {
+        "from": "postcss-nested",
+        "version": "6.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/postcss-nested"
+      },
+      "postcss-selector-parser": {
+        "from": "postcss-selector-parser",
+        "version": "6.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/postcss-selector-parser"
+      },
+      "postcss-value-parser": {
+        "from": "postcss-value-parser",
+        "version": "4.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/postcss-value-parser"
+      },
+      "prop-types": {
+        "from": "prop-types",
+        "version": "15.8.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/prop-types"
+      },
+      "pretty-bytes": {
+        "from": "pretty-bytes",
+        "version": "6.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/pretty-bytes"
+      },
+      "psl": {
+        "from": "psl",
+        "version": "1.15.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/psl"
+      },
+      "punycode": {
+        "from": "punycode",
+        "version": "2.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/punycode"
+      },
+      "qs": {
+        "from": "qs",
+        "version": "6.14.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/qs"
+      },
+      "queue-microtask": {
+        "from": "queue-microtask",
+        "version": "1.2.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/queue-microtask"
+      },
+      "raf-schd": {
+        "from": "raf-schd",
+        "version": "4.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/raf-schd"
+      },
+      "randombytes": {
+        "from": "randombytes",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/randombytes"
+      },
+      "react-is": {
+        "from": "react-is",
+        "version": "18.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-is"
+      },
+      "react-redux": {
+        "from": "react-redux",
+        "version": "9.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-redux"
+      },
+      "react-refresh": {
+        "from": "react-refresh",
+        "version": "0.17.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-refresh"
+      },
+      "react-remove-scroll": {
+        "from": "react-remove-scroll",
+        "version": "2.6.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-remove-scroll"
+      },
+      "react-remove-scroll-bar": {
+        "from": "react-remove-scroll-bar",
+        "version": "2.3.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-remove-scroll-bar"
+      },
+      "react-router": {
+        "from": "react-router",
+        "version": "6.30.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-router"
+      },
+      "react-smooth": {
+        "from": "react-smooth",
+        "version": "4.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-smooth"
+      },
+      "react-style-singleton": {
+        "from": "react-style-singleton",
+        "version": "2.2.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-style-singleton"
+      },
+      "react-transition-group": {
+        "from": "react-transition-group",
+        "version": "4.4.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/react-transition-group"
+      },
+      "read-cache": {
+        "from": "read-cache",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/read-cache"
+      },
+      "readable-stream": {
+        "from": "readable-stream",
+        "version": "3.6.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/readable-stream"
+      },
+      "readdirp": {
+        "from": "readdirp",
+        "version": "3.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/readdirp"
+      },
+      "recharts-scale": {
+        "from": "recharts-scale",
+        "version": "0.4.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/recharts-scale"
+      },
+      "redux": {
+        "from": "redux",
+        "version": "5.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/redux"
+      },
+      "reflect.getprototypeof": {
+        "from": "reflect.getprototypeof",
+        "version": "1.0.10",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/reflect.getprototypeof"
+      },
+      "regenerate": {
+        "from": "regenerate",
+        "version": "1.4.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regenerate"
+      },
+      "regenerate-unicode-properties": {
+        "from": "regenerate-unicode-properties",
+        "version": "10.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regenerate-unicode-properties"
+      },
+      "regenerator-runtime": {
+        "from": "regenerator-runtime",
+        "version": "0.14.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regenerator-runtime"
+      },
+      "regexp.prototype.flags": {
+        "from": "regexp.prototype.flags",
+        "version": "1.5.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regexp.prototype.flags"
+      },
+      "regexpu-core": {
+        "from": "regexpu-core",
+        "version": "6.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regexpu-core"
+      },
+      "regjsgen": {
+        "from": "regjsgen",
+        "version": "0.8.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regjsgen"
+      },
+      "regjsparser": {
+        "from": "regjsparser",
+        "version": "0.12.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/regjsparser"
+      },
+      "request": {
+        "from": "request",
+        "version": "2.88.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/request"
+      },
+      "require-from-string": {
+        "from": "require-from-string",
+        "version": "2.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/require-from-string"
+      },
+      "resolve": {
+        "from": "resolve",
+        "version": "1.22.10",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/resolve"
+      },
+      "reusify": {
+        "from": "reusify",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/reusify"
+      },
+      "rollup": {
+        "from": "rollup",
+        "version": "4.40.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/rollup"
+      },
+      "run-parallel": {
+        "from": "run-parallel",
+        "version": "1.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/run-parallel"
+      },
+      "safe-array-concat": {
+        "from": "safe-array-concat",
+        "version": "1.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/safe-array-concat"
+      },
+      "safe-buffer": {
+        "from": "safe-buffer",
+        "version": "5.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/safe-buffer"
+      },
+      "safe-push-apply": {
+        "from": "safe-push-apply",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/safe-push-apply"
+      },
+      "safe-regex-test": {
+        "from": "safe-regex-test",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/safe-regex-test"
+      },
+      "safer-buffer": {
+        "from": "safer-buffer",
+        "version": "2.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/safer-buffer"
+      },
+      "scheduler": {
+        "from": "scheduler",
+        "version": "0.23.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/scheduler"
+      },
+      "semver": {
+        "from": "semver",
+        "version": "6.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/semver"
+      },
+      "set-function-name": {
+        "from": "set-function-name",
+        "version": "2.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/set-function-name"
+      },
+      "serialize-javascript": {
+        "from": "serialize-javascript",
+        "version": "6.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/serialize-javascript"
+      },
+      "set-proto": {
+        "from": "set-proto",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/set-proto"
+      },
+      "shebang-regex": {
+        "from": "shebang-regex",
+        "version": "3.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/shebang-regex"
+      },
+      "side-channel": {
+        "from": "side-channel",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/side-channel"
+      },
+      "set-function-length": {
+        "from": "set-function-length",
+        "version": "1.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/set-function-length"
+      },
+      "shebang-command": {
+        "from": "shebang-command",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/shebang-command"
+      },
+      "side-channel-map": {
+        "from": "side-channel-map",
+        "version": "1.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/side-channel-map"
+      },
+      "side-channel-list": {
+        "from": "side-channel-list",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/side-channel-list"
+      },
+      "smob": {
+        "from": "smob",
+        "version": "1.5.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/smob"
+      },
+      "side-channel-weakmap": {
+        "from": "side-channel-weakmap",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/side-channel-weakmap"
+      },
+      "source-map": {
+        "from": "source-map",
+        "version": "0.8.0-beta.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/source-map"
+      },
+      "signal-exit": {
+        "from": "signal-exit",
+        "version": "4.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/signal-exit"
+      },
+      "sourcemap-codec": {
+        "from": "sourcemap-codec",
+        "version": "1.4.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/sourcemap-codec"
+      },
+      "source-map-support": {
+        "from": "source-map-support",
+        "version": "0.5.21",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/source-map-support"
+      },
+      "source-map-js": {
+        "from": "source-map-js",
+        "version": "1.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/source-map-js"
+      },
+      "string-width": {
+        "from": "string-width",
+        "version": "5.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string-width"
+      },
+      "sshpk": {
+        "from": "sshpk",
+        "version": "1.18.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/sshpk"
+      },
+      "ssf": {
+        "from": "ssf",
+        "version": "0.11.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ssf"
+      },
+      "string-width-cjs": {
+        "from": "string-width-cjs",
+        "version": "4.2.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string-width-cjs"
+      },
+      "string.prototype.matchall": {
+        "from": "string.prototype.matchall",
+        "version": "4.0.12",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string.prototype.matchall"
+      },
+      "string.prototype.trim": {
+        "from": "string.prototype.trim",
+        "version": "1.2.10",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string.prototype.trim"
+      },
+      "string.prototype.trimend": {
+        "from": "string.prototype.trimend",
+        "version": "1.0.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string.prototype.trimend"
+      },
+      "stringify-object": {
+        "from": "stringify-object",
+        "version": "3.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/stringify-object"
+      },
+      "string_decoder": {
+        "from": "string_decoder",
+        "version": "1.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string_decoder"
+      },
+      "string.prototype.trimstart": {
+        "from": "string.prototype.trimstart",
+        "version": "1.0.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/string.prototype.trimstart"
+      },
+      "strip-ansi": {
+        "from": "strip-ansi",
+        "version": "7.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/strip-ansi"
+      },
+      "strip-ansi-cjs": {
+        "from": "strip-ansi-cjs",
+        "version": "6.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/strip-ansi-cjs"
+      },
+      "strip-comments": {
+        "from": "strip-comments",
+        "version": "2.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/strip-comments"
+      },
+      "sucrase": {
+        "from": "sucrase",
+        "version": "3.35.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/sucrase"
+      },
+      "superagent": {
+        "from": "superagent",
+        "version": "5.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/superagent"
+      },
+      "supports-color": {
+        "from": "supports-color",
+        "version": "7.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/supports-color"
+      },
+      "supports-preserve-symlinks-flag": {
+        "from": "supports-preserve-symlinks-flag",
+        "version": "1.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/supports-preserve-symlinks-flag"
+      },
+      "tabbable": {
+        "from": "tabbable",
+        "version": "6.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tabbable"
+      },
+      "tempy": {
+        "from": "tempy",
+        "version": "0.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tempy"
+      },
+      "terser": {
+        "from": "terser",
+        "version": "5.39.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/terser"
+      },
+      "temp-dir": {
+        "from": "temp-dir",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/temp-dir"
+      },
+      "thenify": {
+        "from": "thenify",
+        "version": "3.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/thenify"
+      },
+      "tiny-invariant": {
+        "from": "tiny-invariant",
+        "version": "1.3.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tiny-invariant"
+      },
+      "thenify-all": {
+        "from": "thenify-all",
+        "version": "1.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/thenify-all"
+      },
+      "tinyglobby": {
+        "from": "tinyglobby",
+        "version": "0.2.13",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tinyglobby"
+      },
+      "tough-cookie": {
+        "from": "tough-cookie",
+        "version": "2.5.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tough-cookie"
+      },
+      "to-regex-range": {
+        "from": "to-regex-range",
+        "version": "5.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/to-regex-range"
+      },
+      "ts-interface-checker": {
+        "from": "ts-interface-checker",
+        "version": "0.1.13",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ts-interface-checker"
+      },
+      "tunnel-agent": {
+        "from": "tunnel-agent",
+        "version": "0.6.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tunnel-agent"
+      },
+      "tslib": {
+        "from": "tslib",
+        "version": "2.8.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tslib"
+      },
+      "tr46": {
+        "from": "tr46",
+        "version": "0.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tr46"
+      },
+      "tweetnacl": {
+        "from": "tweetnacl",
+        "version": "0.14.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/tweetnacl"
+      },
+      "type-fest": {
+        "from": "type-fest",
+        "version": "0.16.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/type-fest"
+      },
+      "typed-array-buffer": {
+        "from": "typed-array-buffer",
+        "version": "1.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/typed-array-buffer"
+      },
+      "typed-array-byte-offset": {
+        "from": "typed-array-byte-offset",
+        "version": "1.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/typed-array-byte-offset"
+      },
+      "typed-array-byte-length": {
+        "from": "typed-array-byte-length",
+        "version": "1.0.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/typed-array-byte-length"
+      },
+      "unbox-primitive": {
+        "from": "unbox-primitive",
+        "version": "1.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/unbox-primitive"
+      },
+      "typed-array-length": {
+        "from": "typed-array-length",
+        "version": "1.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/typed-array-length"
+      },
+      "unicode-match-property-ecmascript": {
+        "from": "unicode-match-property-ecmascript",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/unicode-match-property-ecmascript"
+      },
+      "unicode-property-aliases-ecmascript": {
+        "from": "unicode-property-aliases-ecmascript",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/unicode-property-aliases-ecmascript"
+      },
+      "unique-string": {
+        "from": "unique-string",
+        "version": "2.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/unique-string"
+      },
+      "universalify": {
+        "from": "universalify",
+        "version": "2.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/universalify"
+      },
+      "unicode-match-property-value-ecmascript": {
+        "from": "unicode-match-property-value-ecmascript",
+        "version": "2.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/unicode-match-property-value-ecmascript"
+      },
+      "upath": {
+        "from": "upath",
+        "version": "1.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/upath"
+      },
+      "update-browserslist-db": {
+        "from": "update-browserslist-db",
+        "version": "1.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/update-browserslist-db"
+      },
+      "unicode-canonical-property-names-ecmascript": {
+        "from": "unicode-canonical-property-names-ecmascript",
+        "version": "2.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/unicode-canonical-property-names-ecmascript"
+      },
+      "use-callback-ref": {
+        "from": "use-callback-ref",
+        "version": "1.3.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/use-callback-ref"
+      },
+      "use-memo-one": {
+        "from": "use-memo-one",
+        "version": "1.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/use-memo-one"
+      },
+      "uri-js": {
+        "from": "uri-js",
+        "version": "4.4.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/uri-js"
+      },
+      "use-sidecar": {
+        "from": "use-sidecar",
+        "version": "1.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/use-sidecar"
+      },
+      "use-sync-external-store": {
+        "from": "use-sync-external-store",
+        "version": "1.5.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/use-sync-external-store"
+      },
+      "util-deprecate": {
+        "from": "util-deprecate",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/util-deprecate"
+      },
+      "undici-types": {
+        "from": "undici-types",
+        "version": "6.21.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/undici-types"
+      },
+      "uuid": {
+        "from": "uuid",
+        "version": "3.4.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/uuid"
+      },
+      "verror": {
+        "from": "verror",
+        "version": "1.10.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/verror"
+      },
+      "victory-vendor": {
+        "from": "victory-vendor",
+        "version": "36.9.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/victory-vendor"
+      },
+      "whatwg-url": {
+        "from": "whatwg-url",
+        "version": "5.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/whatwg-url"
+      },
+      "which": {
+        "from": "which",
+        "version": "2.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/which"
+      },
+      "which-boxed-primitive": {
+        "from": "which-boxed-primitive",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/which-boxed-primitive"
+      },
+      "which-builtin-type": {
+        "from": "which-builtin-type",
+        "version": "1.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/which-builtin-type"
+      },
+      "which-collection": {
+        "from": "which-collection",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/which-collection"
+      },
+      "wmf": {
+        "from": "wmf",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/wmf"
+      },
+      "which-typed-array": {
+        "from": "which-typed-array",
+        "version": "1.1.19",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/which-typed-array"
+      },
+      "webidl-conversions": {
+        "from": "webidl-conversions",
+        "version": "3.0.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/webidl-conversions"
+      },
+      "word": {
+        "from": "word",
+        "version": "0.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/word"
+      },
+      "workbox-background-sync": {
+        "from": "workbox-background-sync",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-background-sync"
+      },
+      "workbox-broadcast-update": {
+        "from": "workbox-broadcast-update",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-broadcast-update"
+      },
+      "workbox-build": {
+        "from": "workbox-build",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-build"
+      },
+      "workbox-cacheable-response": {
+        "from": "workbox-cacheable-response",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-cacheable-response"
+      },
+      "workbox-core": {
+        "from": "workbox-core",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-core"
+      },
+      "workbox-expiration": {
+        "from": "workbox-expiration",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-expiration"
+      },
+      "workbox-google-analytics": {
+        "from": "workbox-google-analytics",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-google-analytics"
+      },
+      "workbox-navigation-preload": {
+        "from": "workbox-navigation-preload",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-navigation-preload"
+      },
+      "workbox-precaching": {
+        "from": "workbox-precaching",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-precaching"
+      },
+      "workbox-range-requests": {
+        "from": "workbox-range-requests",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-range-requests"
+      },
+      "workbox-recipes": {
+        "from": "workbox-recipes",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-recipes"
+      },
+      "workbox-routing": {
+        "from": "workbox-routing",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-routing"
+      },
+      "workbox-strategies": {
+        "from": "workbox-strategies",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-strategies"
+      },
+      "workbox-streams": {
+        "from": "workbox-streams",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-streams"
+      },
+      "workbox-sw": {
+        "from": "workbox-sw",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-sw"
+      },
+      "workbox-window": {
+        "from": "workbox-window",
+        "version": "7.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/workbox-window"
+      },
+      "wrap-ansi": {
+        "from": "wrap-ansi",
+        "version": "8.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/wrap-ansi"
+      },
+      "wrap-ansi-cjs": {
+        "from": "wrap-ansi-cjs",
+        "version": "7.0.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/wrap-ansi-cjs"
+      },
+      "ws": {
+        "from": "ws",
+        "version": "8.18.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/ws"
+      },
+      "yallist": {
+        "from": "yallist",
+        "version": "3.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/yallist"
+      },
+      "wrappy": {
+        "from": "wrappy",
+        "version": "1.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/wrappy"
+      },
+      "yaml": {
+        "from": "yaml",
+        "version": "2.7.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/yaml"
+      },
+      "@ampproject/remapping": {
+        "from": "@ampproject/remapping",
+        "version": "2.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@ampproject/remapping"
+      },
+      "@apideck/better-ajv-errors": {
+        "from": "@apideck/better-ajv-errors",
+        "version": "0.3.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@apideck/better-ajv-errors"
+      },
+      "@alloc/quick-lru": {
+        "from": "@alloc/quick-lru",
+        "version": "5.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@alloc/quick-lru"
+      },
+      "@esbuild/darwin-arm64": {
+        "from": "@esbuild/darwin-arm64",
+        "version": "0.21.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@esbuild/darwin-arm64"
+      },
+      "@floating-ui/core": {
+        "from": "@floating-ui/core",
+        "version": "1.6.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@floating-ui/core"
+      },
+      "@floating-ui/dom": {
+        "from": "@floating-ui/dom",
+        "version": "1.6.13",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@floating-ui/dom"
+      },
+      "@floating-ui/react": {
+        "from": "@floating-ui/react",
+        "version": "0.26.28",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@floating-ui/react"
+      },
+      "@floating-ui/react-dom": {
+        "from": "@floating-ui/react-dom",
+        "version": "2.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@floating-ui/react-dom"
+      },
+      "@floating-ui/utils": {
+        "from": "@floating-ui/utils",
+        "version": "0.2.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@floating-ui/utils"
+      },
+      "@isaacs/cliui": {
+        "from": "@isaacs/cliui",
+        "version": "8.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@isaacs/cliui"
+      },
+      "@nicolo-ribaudo/chokidar-2": {
+        "from": "@nicolo-ribaudo/chokidar-2",
+        "version": "2.1.8-no-fsevents.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@nicolo-ribaudo/chokidar-2"
+      },
+      "@jridgewell/gen-mapping": {
+        "from": "@jridgewell/gen-mapping",
+        "version": "0.3.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@jridgewell/gen-mapping"
+      },
+      "@jridgewell/resolve-uri": {
+        "from": "@jridgewell/resolve-uri",
+        "version": "3.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@jridgewell/resolve-uri"
+      },
+      "@jridgewell/set-array": {
+        "from": "@jridgewell/set-array",
+        "version": "1.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@jridgewell/set-array"
+      },
+      "@jridgewell/source-map": {
+        "from": "@jridgewell/source-map",
+        "version": "0.3.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@jridgewell/source-map"
+      },
+      "@jridgewell/sourcemap-codec": {
+        "from": "@jridgewell/sourcemap-codec",
+        "version": "1.5.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@jridgewell/sourcemap-codec"
+      },
+      "@jridgewell/trace-mapping": {
+        "from": "@jridgewell/trace-mapping",
+        "version": "0.3.25",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@jridgewell/trace-mapping"
+      },
+      "@nodelib/fs.scandir": {
+        "from": "@nodelib/fs.scandir",
+        "version": "2.1.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@nodelib/fs.scandir"
+      },
+      "@nodelib/fs.stat": {
+        "from": "@nodelib/fs.stat",
+        "version": "2.0.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@nodelib/fs.stat"
+      },
+      "@nodelib/fs.walk": {
+        "from": "@nodelib/fs.walk",
+        "version": "1.2.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@nodelib/fs.walk"
+      },
+      "@pkgjs/parseargs": {
+        "from": "@pkgjs/parseargs",
+        "version": "0.11.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@pkgjs/parseargs"
+      },
+      "@react-aria/focus": {
+        "from": "@react-aria/focus",
+        "version": "3.20.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-aria/focus"
+      },
+      "@react-aria/interactions": {
+        "from": "@react-aria/interactions",
+        "version": "3.25.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-aria/interactions"
+      },
+      "@react-aria/ssr": {
+        "from": "@react-aria/ssr",
+        "version": "3.9.8",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-aria/ssr"
+      },
+      "@react-aria/utils": {
+        "from": "@react-aria/utils",
+        "version": "3.28.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-aria/utils"
+      },
+      "@react-stately/flags": {
+        "from": "@react-stately/flags",
+        "version": "3.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-stately/flags"
+      },
+      "@react-stately/utils": {
+        "from": "@react-stately/utils",
+        "version": "3.10.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-stately/utils"
+      },
+      "@radix-ui/react-compose-refs": {
+        "from": "@radix-ui/react-compose-refs",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-compose-refs"
+      },
+      "@radix-ui/primitive": {
+        "from": "@radix-ui/primitive",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/primitive"
+      },
+      "@radix-ui/react-context": {
+        "from": "@radix-ui/react-context",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-context"
+      },
+      "@radix-ui/react-dismissable-layer": {
+        "from": "@radix-ui/react-dismissable-layer",
+        "version": "1.1.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-dismissable-layer"
+      },
+      "@radix-ui/react-focus-guards": {
+        "from": "@radix-ui/react-focus-guards",
+        "version": "1.1.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-focus-guards"
+      },
+      "@radix-ui/react-focus-scope": {
+        "from": "@radix-ui/react-focus-scope",
+        "version": "1.1.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-focus-scope"
+      },
+      "@radix-ui/react-id": {
+        "from": "@radix-ui/react-id",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-id"
+      },
+      "@radix-ui/react-portal": {
+        "from": "@radix-ui/react-portal",
+        "version": "1.1.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-portal"
+      },
+      "@radix-ui/react-primitive": {
+        "from": "@radix-ui/react-primitive",
+        "version": "2.1.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-primitive"
+      },
+      "@radix-ui/react-presence": {
+        "from": "@radix-ui/react-presence",
+        "version": "1.1.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-presence"
+      },
+      "@radix-ui/react-slot": {
+        "from": "@radix-ui/react-slot",
+        "version": "1.2.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-slot"
+      },
+      "@radix-ui/react-use-callback-ref": {
+        "from": "@radix-ui/react-use-callback-ref",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-use-callback-ref"
+      },
+      "@radix-ui/react-use-controllable-state": {
+        "from": "@radix-ui/react-use-controllable-state",
+        "version": "1.2.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-use-controllable-state"
+      },
+      "@radix-ui/react-use-effect-event": {
+        "from": "@radix-ui/react-use-effect-event",
+        "version": "0.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-use-effect-event"
+      },
+      "@radix-ui/react-use-escape-keydown": {
+        "from": "@radix-ui/react-use-escape-keydown",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-use-escape-keydown"
+      },
+      "@radix-ui/react-use-layout-effect": {
+        "from": "@radix-ui/react-use-layout-effect",
+        "version": "1.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@radix-ui/react-use-layout-effect"
+      },
+      "@react-types/shared": {
+        "from": "@react-types/shared",
+        "version": "3.29.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@react-types/shared"
+      },
+      "@remix-run/router": {
+        "from": "@remix-run/router",
+        "version": "1.23.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@remix-run/router"
+      },
+      "@standard-schema/utils": {
+        "from": "@standard-schema/utils",
+        "version": "0.3.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@standard-schema/utils"
+      },
+      "@rollup/plugin-node-resolve": {
+        "from": "@rollup/plugin-node-resolve",
+        "version": "15.3.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@rollup/plugin-node-resolve"
+      },
+      "@rollup/plugin-terser": {
+        "from": "@rollup/plugin-terser",
+        "version": "0.4.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@rollup/plugin-terser"
+      },
+      "@rollup/pluginutils": {
+        "from": "@rollup/pluginutils",
+        "version": "5.1.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@rollup/pluginutils"
+      },
+      "@rollup/rollup-darwin-arm64": {
+        "from": "@rollup/rollup-darwin-arm64",
+        "version": "4.40.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@rollup/rollup-darwin-arm64"
+      },
+      "@supabase/auth-js": {
+        "from": "@supabase/auth-js",
+        "version": "2.69.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@supabase/auth-js"
+      },
+      "@supabase/functions-js": {
+        "from": "@supabase/functions-js",
+        "version": "2.4.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@supabase/functions-js"
+      },
+      "@supabase/node-fetch": {
+        "from": "@supabase/node-fetch",
+        "version": "2.6.15",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@supabase/node-fetch"
+      },
+      "@supabase/postgrest-js": {
+        "from": "@supabase/postgrest-js",
+        "version": "1.19.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@supabase/postgrest-js"
+      },
+      "@supabase/storage-js": {
+        "from": "@supabase/storage-js",
+        "version": "2.7.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@supabase/storage-js"
+      },
+      "@supabase/realtime-js": {
+        "from": "@supabase/realtime-js",
+        "version": "2.11.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@supabase/realtime-js"
+      },
+      "@surma/rollup-plugin-off-main-thread": {
+        "from": "@surma/rollup-plugin-off-main-thread",
+        "version": "2.2.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@surma/rollup-plugin-off-main-thread"
+      },
+      "@swc/helpers": {
+        "from": "@swc/helpers",
+        "version": "0.5.17",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@swc/helpers"
+      },
+      "@tanstack/virtual-core": {
+        "from": "@tanstack/virtual-core",
+        "version": "3.13.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@tanstack/virtual-core"
+      },
+      "@tanstack/react-virtual": {
+        "from": "@tanstack/react-virtual",
+        "version": "3.13.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@tanstack/react-virtual"
+      },
+      "@babel/cli": {
+        "from": "@babel/cli",
+        "version": "7.27.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/cli"
+      },
+      "@babel/code-frame": {
+        "from": "@babel/code-frame",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/code-frame"
+      },
+      "@babel/compat-data": {
+        "from": "@babel/compat-data",
+        "version": "7.27.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/compat-data"
+      },
+      "@babel/core": {
+        "from": "@babel/core",
+        "version": "7.26.10",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/core"
+      },
+      "@babel/generator": {
+        "from": "@babel/generator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/generator"
+      },
+      "@babel/helper-annotate-as-pure": {
+        "from": "@babel/helper-annotate-as-pure",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-annotate-as-pure"
+      },
+      "@babel/helper-compilation-targets": {
+        "from": "@babel/helper-compilation-targets",
+        "version": "7.27.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-compilation-targets"
+      },
+      "@babel/helper-create-class-features-plugin": {
+        "from": "@babel/helper-create-class-features-plugin",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-create-class-features-plugin"
+      },
+      "@babel/helper-create-regexp-features-plugin": {
+        "from": "@babel/helper-create-regexp-features-plugin",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-create-regexp-features-plugin"
+      },
+      "@babel/helper-define-polyfill-provider": {
+        "from": "@babel/helper-define-polyfill-provider",
+        "version": "0.6.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-define-polyfill-provider"
+      },
+      "@babel/helper-member-expression-to-functions": {
+        "from": "@babel/helper-member-expression-to-functions",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-member-expression-to-functions"
+      },
+      "@babel/helper-module-imports": {
+        "from": "@babel/helper-module-imports",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-module-imports"
+      },
+      "@babel/helper-module-transforms": {
+        "from": "@babel/helper-module-transforms",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-module-transforms"
+      },
+      "@babel/helper-optimise-call-expression": {
+        "from": "@babel/helper-optimise-call-expression",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-optimise-call-expression"
+      },
+      "@babel/helper-plugin-utils": {
+        "from": "@babel/helper-plugin-utils",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-plugin-utils"
+      },
+      "@babel/helper-remap-async-to-generator": {
+        "from": "@babel/helper-remap-async-to-generator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-remap-async-to-generator"
+      },
+      "@babel/helper-replace-supers": {
+        "from": "@babel/helper-replace-supers",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-replace-supers"
+      },
+      "@babel/helper-skip-transparent-expression-wrappers": {
+        "from": "@babel/helper-skip-transparent-expression-wrappers",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-skip-transparent-expression-wrappers"
+      },
+      "@babel/helper-string-parser": {
+        "from": "@babel/helper-string-parser",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-string-parser"
+      },
+      "@babel/helper-validator-identifier": {
+        "from": "@babel/helper-validator-identifier",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-validator-identifier"
+      },
+      "@babel/helper-validator-option": {
+        "from": "@babel/helper-validator-option",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-validator-option"
+      },
+      "@babel/helper-wrap-function": {
+        "from": "@babel/helper-wrap-function",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helper-wrap-function"
+      },
+      "@babel/helpers": {
+        "from": "@babel/helpers",
+        "version": "7.27.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/helpers"
+      },
+      "@babel/parser": {
+        "from": "@babel/parser",
+        "version": "7.27.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/parser"
+      },
+      "@babel/plugin-bugfix-firefox-class-in-computed-class-key": {
+        "from": "@babel/plugin-bugfix-firefox-class-in-computed-class-key",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-bugfix-firefox-class-in-computed-class-key"
+      },
+      "@babel/plugin-bugfix-safari-class-field-initializer-scope": {
+        "from": "@babel/plugin-bugfix-safari-class-field-initializer-scope",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-bugfix-safari-class-field-initializer-scope"
+      },
+      "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression": {
+        "from": "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression"
+      },
+      "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining": {
+        "from": "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining"
+      },
+      "@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly": {
+        "from": "@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly"
+      },
+      "@babel/plugin-proposal-private-property-in-object": {
+        "from": "@babel/plugin-proposal-private-property-in-object",
+        "version": "7.21.0-placeholder-for-preset-env.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-proposal-private-property-in-object"
+      },
+      "@babel/plugin-syntax-import-assertions": {
+        "from": "@babel/plugin-syntax-import-assertions",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-syntax-import-assertions"
+      },
+      "@babel/plugin-syntax-import-attributes": {
+        "from": "@babel/plugin-syntax-import-attributes",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-syntax-import-attributes"
+      },
+      "@babel/plugin-syntax-unicode-sets-regex": {
+        "from": "@babel/plugin-syntax-unicode-sets-regex",
+        "version": "7.18.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-syntax-unicode-sets-regex"
+      },
+      "@babel/plugin-transform-async-generator-functions": {
+        "from": "@babel/plugin-transform-async-generator-functions",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-async-generator-functions"
+      },
+      "@babel/plugin-transform-arrow-functions": {
+        "from": "@babel/plugin-transform-arrow-functions",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-arrow-functions"
+      },
+      "@babel/plugin-transform-async-to-generator": {
+        "from": "@babel/plugin-transform-async-to-generator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-async-to-generator"
+      },
+      "@babel/plugin-transform-block-scoped-functions": {
+        "from": "@babel/plugin-transform-block-scoped-functions",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-block-scoped-functions"
+      },
+      "@babel/plugin-transform-block-scoping": {
+        "from": "@babel/plugin-transform-block-scoping",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-block-scoping"
+      },
+      "@babel/plugin-transform-class-properties": {
+        "from": "@babel/plugin-transform-class-properties",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-class-properties"
+      },
+      "@babel/plugin-transform-class-static-block": {
+        "from": "@babel/plugin-transform-class-static-block",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-class-static-block"
+      },
+      "@babel/plugin-transform-classes": {
+        "from": "@babel/plugin-transform-classes",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-classes"
+      },
+      "@babel/plugin-transform-computed-properties": {
+        "from": "@babel/plugin-transform-computed-properties",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-computed-properties"
+      },
+      "@babel/plugin-transform-destructuring": {
+        "from": "@babel/plugin-transform-destructuring",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-destructuring"
+      },
+      "@babel/plugin-transform-dotall-regex": {
+        "from": "@babel/plugin-transform-dotall-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-dotall-regex"
+      },
+      "@babel/plugin-transform-duplicate-keys": {
+        "from": "@babel/plugin-transform-duplicate-keys",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-duplicate-keys"
+      },
+      "@babel/plugin-transform-duplicate-named-capturing-groups-regex": {
+        "from": "@babel/plugin-transform-duplicate-named-capturing-groups-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-duplicate-named-capturing-groups-regex"
+      },
+      "@babel/plugin-transform-exponentiation-operator": {
+        "from": "@babel/plugin-transform-exponentiation-operator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-exponentiation-operator"
+      },
+      "@babel/plugin-transform-dynamic-import": {
+        "from": "@babel/plugin-transform-dynamic-import",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-dynamic-import"
+      },
+      "@babel/plugin-transform-export-namespace-from": {
+        "from": "@babel/plugin-transform-export-namespace-from",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-export-namespace-from"
+      },
+      "@babel/plugin-transform-for-of": {
+        "from": "@babel/plugin-transform-for-of",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-for-of"
+      },
+      "@babel/plugin-transform-function-name": {
+        "from": "@babel/plugin-transform-function-name",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-function-name"
+      },
+      "@babel/plugin-transform-json-strings": {
+        "from": "@babel/plugin-transform-json-strings",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-json-strings"
+      },
+      "@babel/plugin-transform-literals": {
+        "from": "@babel/plugin-transform-literals",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-literals"
+      },
+      "@babel/plugin-transform-logical-assignment-operators": {
+        "from": "@babel/plugin-transform-logical-assignment-operators",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-logical-assignment-operators"
+      },
+      "@babel/plugin-transform-member-expression-literals": {
+        "from": "@babel/plugin-transform-member-expression-literals",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-member-expression-literals"
+      },
+      "@babel/plugin-transform-modules-amd": {
+        "from": "@babel/plugin-transform-modules-amd",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-modules-amd"
+      },
+      "@babel/plugin-transform-modules-commonjs": {
+        "from": "@babel/plugin-transform-modules-commonjs",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-modules-commonjs"
+      },
+      "@babel/plugin-transform-modules-systemjs": {
+        "from": "@babel/plugin-transform-modules-systemjs",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-modules-systemjs"
+      },
+      "@babel/plugin-transform-modules-umd": {
+        "from": "@babel/plugin-transform-modules-umd",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-modules-umd"
+      },
+      "@babel/plugin-transform-named-capturing-groups-regex": {
+        "from": "@babel/plugin-transform-named-capturing-groups-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-named-capturing-groups-regex"
+      },
+      "@babel/plugin-transform-new-target": {
+        "from": "@babel/plugin-transform-new-target",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-new-target"
+      },
+      "@babel/plugin-transform-nullish-coalescing-operator": {
+        "from": "@babel/plugin-transform-nullish-coalescing-operator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-nullish-coalescing-operator"
+      },
+      "@babel/plugin-transform-numeric-separator": {
+        "from": "@babel/plugin-transform-numeric-separator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-numeric-separator"
+      },
+      "@babel/plugin-transform-object-rest-spread": {
+        "from": "@babel/plugin-transform-object-rest-spread",
+        "version": "7.27.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-object-rest-spread"
+      },
+      "@babel/plugin-transform-object-super": {
+        "from": "@babel/plugin-transform-object-super",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-object-super"
+      },
+      "@babel/plugin-transform-optional-catch-binding": {
+        "from": "@babel/plugin-transform-optional-catch-binding",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-optional-catch-binding"
+      },
+      "@babel/plugin-transform-optional-chaining": {
+        "from": "@babel/plugin-transform-optional-chaining",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-optional-chaining"
+      },
+      "@babel/plugin-transform-parameters": {
+        "from": "@babel/plugin-transform-parameters",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-parameters"
+      },
+      "@babel/plugin-transform-private-methods": {
+        "from": "@babel/plugin-transform-private-methods",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-private-methods"
+      },
+      "@babel/plugin-transform-property-literals": {
+        "from": "@babel/plugin-transform-property-literals",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-property-literals"
+      },
+      "@babel/plugin-transform-react-jsx-self": {
+        "from": "@babel/plugin-transform-react-jsx-self",
+        "version": "7.25.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-react-jsx-self"
+      },
+      "@babel/plugin-transform-private-property-in-object": {
+        "from": "@babel/plugin-transform-private-property-in-object",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-private-property-in-object"
+      },
+      "@babel/plugin-transform-react-jsx-source": {
+        "from": "@babel/plugin-transform-react-jsx-source",
+        "version": "7.25.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-react-jsx-source"
+      },
+      "@babel/plugin-transform-regexp-modifiers": {
+        "from": "@babel/plugin-transform-regexp-modifiers",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-regexp-modifiers"
+      },
+      "@babel/plugin-transform-regenerator": {
+        "from": "@babel/plugin-transform-regenerator",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-regenerator"
+      },
+      "@babel/plugin-transform-reserved-words": {
+        "from": "@babel/plugin-transform-reserved-words",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-reserved-words"
+      },
+      "@babel/plugin-transform-shorthand-properties": {
+        "from": "@babel/plugin-transform-shorthand-properties",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-shorthand-properties"
+      },
+      "@babel/plugin-transform-sticky-regex": {
+        "from": "@babel/plugin-transform-sticky-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-sticky-regex"
+      },
+      "@babel/plugin-transform-spread": {
+        "from": "@babel/plugin-transform-spread",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-spread"
+      },
+      "@babel/plugin-transform-template-literals": {
+        "from": "@babel/plugin-transform-template-literals",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-template-literals"
+      },
+      "@babel/plugin-transform-typeof-symbol": {
+        "from": "@babel/plugin-transform-typeof-symbol",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-typeof-symbol"
+      },
+      "@babel/plugin-transform-unicode-escapes": {
+        "from": "@babel/plugin-transform-unicode-escapes",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-unicode-escapes"
+      },
+      "@babel/plugin-transform-unicode-property-regex": {
+        "from": "@babel/plugin-transform-unicode-property-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-unicode-property-regex"
+      },
+      "@babel/plugin-transform-unicode-regex": {
+        "from": "@babel/plugin-transform-unicode-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-unicode-regex"
+      },
+      "@babel/plugin-transform-unicode-sets-regex": {
+        "from": "@babel/plugin-transform-unicode-sets-regex",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/plugin-transform-unicode-sets-regex"
+      },
+      "@babel/preset-env": {
+        "from": "@babel/preset-env",
+        "version": "7.27.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/preset-env"
+      },
+      "@babel/preset-modules": {
+        "from": "@babel/preset-modules",
+        "version": "0.1.6-no-external-plugins",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/preset-modules"
+      },
+      "@babel/template": {
+        "from": "@babel/template",
+        "version": "7.27.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/template"
+      },
+      "@babel/traverse": {
+        "from": "@babel/traverse",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/traverse"
+      },
+      "@babel/runtime": {
+        "from": "@babel/runtime",
+        "version": "7.27.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/runtime"
+      },
+      "@babel/types": {
+        "from": "@babel/types",
+        "version": "7.27.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@babel/types"
+      },
+      "@types/babel__core": {
+        "from": "@types/babel__core",
+        "version": "7.20.5",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/babel__core"
+      },
+      "@types/babel__generator": {
+        "from": "@types/babel__generator",
+        "version": "7.27.0",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/babel__generator"
+      },
+      "@types/babel__template": {
+        "from": "@types/babel__template",
+        "version": "7.4.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/babel__template"
+      },
+      "@types/babel__traverse": {
+        "from": "@types/babel__traverse",
+        "version": "7.20.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/babel__traverse"
+      },
+      "@types/d3-array": {
+        "from": "@types/d3-array",
+        "version": "3.2.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-array"
+      },
+      "@types/d3-color": {
+        "from": "@types/d3-color",
+        "version": "3.1.3",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-color"
+      },
+      "@types/d3-ease": {
+        "from": "@types/d3-ease",
+        "version": "3.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-ease"
+      },
+      "@types/d3-interpolate": {
+        "from": "@types/d3-interpolate",
+        "version": "3.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-interpolate"
+      },
+      "@types/d3-path": {
+        "from": "@types/d3-path",
+        "version": "3.1.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-path"
+      },
+      "@types/d3-scale": {
+        "from": "@types/d3-scale",
+        "version": "4.0.9",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-scale"
+      },
+      "@types/d3-shape": {
+        "from": "@types/d3-shape",
+        "version": "3.1.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-shape"
+      },
+      "@types/d3-time": {
+        "from": "@types/d3-time",
+        "version": "3.0.4",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-time"
+      },
+      "@types/d3-timer": {
+        "from": "@types/d3-timer",
+        "version": "3.0.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/d3-timer"
+      },
+      "@types/estree": {
+        "from": "@types/estree",
+        "version": "1.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/estree"
+      },
+      "@types/hoist-non-react-statics": {
+        "from": "@types/hoist-non-react-statics",
+        "version": "3.3.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/hoist-non-react-statics"
+      },
+      "@types/phoenix": {
+        "from": "@types/phoenix",
+        "version": "1.6.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/phoenix"
+      },
+      "@types/prop-types": {
+        "from": "@types/prop-types",
+        "version": "15.7.14",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/prop-types"
+      },
+      "@types/react-redux": {
+        "from": "@types/react-redux",
+        "version": "7.1.34",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/react-redux"
+      },
+      "@types/resolve": {
+        "from": "@types/resolve",
+        "version": "1.20.2",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/resolve"
+      },
+      "@types/trusted-types": {
+        "from": "@types/trusted-types",
+        "version": "2.0.7",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/trusted-types"
+      },
+      "@types/use-sync-external-store": {
+        "from": "@types/use-sync-external-store",
+        "version": "0.0.6",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/use-sync-external-store"
+      },
+      "@types/ws": {
+        "from": "@types/ws",
+        "version": "8.18.1",
+        "path": "/Users/heliowoi/Documents/VS Code/node_modules/@types/ws"
+      }
+    }
+  }
+]
