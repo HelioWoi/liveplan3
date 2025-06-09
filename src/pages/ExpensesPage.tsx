@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
 import { useTransactionStore } from '../stores/transactionStore';
+import { useNotificationStore } from '../stores/notificationStore';
 import { Transaction, TransactionCategory, TransactionType } from '../types/transaction';
+import NotificationModal from '../components/notifications/NotificationModal';
 import { ArrowLeft, Bell, Calendar, ArrowDownCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -48,6 +50,8 @@ export default function ExpensesPage() {
   const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getCurrentWeek());
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const { unreadCount } = useNotificationStore();
 
   const expenseCategories: TransactionCategory[] = ['Fixed', 'Variable', 'Extra', 'Investment', 'Tax', 'Additional', 'Contribution', 'Goal'];
   const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#8B5CF6', '#14B8A6'];
@@ -295,9 +299,17 @@ export default function ExpensesPage() {
                 <ArrowLeft className="h-6 w-6" />
               </button>
               <h1 className="text-2xl font-bold">Expenses Overview</h1>
-              <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+              <button 
+                onClick={() => setIsNotificationModalOpen(true)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors relative"
+                aria-label="Notifications"
+              >
                 <Bell className="h-6 w-6" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center text-xs text-white bg-red-500 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -528,6 +540,11 @@ export default function ExpensesPage() {
         transaction={selectedTransaction}
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+      {/* Notification Modal */}
+      <NotificationModal 
+        isOpen={isNotificationModalOpen} 
+        onClose={() => setIsNotificationModalOpen(false)} 
       />
     </div>
   );

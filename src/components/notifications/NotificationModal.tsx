@@ -26,7 +26,7 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
           <div className="flex items-center">
             <Bell className="h-5 w-5 text-primary-600 mr-2" />
-            <h3 className="font-semibold text-gray-900">Notificações</h3>
+            <h3 className="font-semibold text-gray-900">Notifications</h3>
           </div>
           
           <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                 className="text-sm text-primary-600 hover:text-primary-700"
                 onClick={() => markAllAsRead()}
               >
-                Marcar todas como lidas
+                Mark all as read
               </button>
             )}
             <button 
@@ -51,9 +51,9 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
           {notifications.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <h3 className="text-lg font-medium text-gray-700 mb-1">Nenhuma notificação</h3>
+              <h3 className="text-lg font-medium text-gray-700 mb-1">No notifications</h3>
               <p className="text-sm text-gray-500">
-                Você receberá notificações sobre seu orçamento, metas e transações aqui
+                You will receive notifications about your budget, goals, and transactions here
               </p>
             </div>
           ) : (
@@ -76,7 +76,7 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                     </span>
                     {!notification.isRead && (
                       <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                        Nova
+                        New
                       </span>
                     )}
                   </div>

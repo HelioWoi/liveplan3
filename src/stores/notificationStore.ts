@@ -25,7 +25,7 @@ interface NotificationStore {
   addNotification: (notification: Omit<Notification, 'id' | 'createdAt' | 'isRead'>) => Promise<void>;
 }
 
-// Os dados de notificações agora vêm do endpoint mock em ../mocks/api/notifications
+// Notification store state now comes from the mock endpoint in ../mocks/api/notifications
 
 export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
@@ -37,7 +37,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Buscando do endpoint mock
+      // Fetching from the mock endpoint
       const data = await fetchNotificationsApi();
       
       set({ 
@@ -46,8 +46,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         isLoading: false 
       });
     } catch (error) {
-      console.error('Erro ao buscar notificações:', error);
-      set({ error: 'Falha ao carregar notificações', isLoading: false });
+      console.error('Error fetching notifications:', error);
+      set({ error: 'Failed to load notifications', isLoading: false });
     }
   },
   
@@ -67,8 +67,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         unreadCount: updatedNotifications.filter(n => !n.isRead).length
       });
     } catch (error) {
-      console.error('Erro ao marcar notificação como lida:', error);
-      set({ error: 'Falha ao atualizar notificação' });
+      console.error('Error marking notification as read:', error);
+      set({ error: 'Failed to update notification' });
     }
   },
   
@@ -83,8 +83,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       
       set({ notifications: updatedNotifications, unreadCount: 0 });
     } catch (error) {
-      console.error('Erro ao marcar todas notificações como lidas:', error);
-      set({ error: 'Falha ao atualizar notificações' });
+      console.error('Error marking all notifications as read:', error);
+      set({ error: 'Failed to update notifications' });
     }
   },
   

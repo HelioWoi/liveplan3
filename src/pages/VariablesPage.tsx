@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
+import { useNotificationStore } from '../stores/notificationStore';
 import { ArrowLeft, Bell, ArrowDownCircle } from 'lucide-react';
+import NotificationModal from '../components/notifications/NotificationModal';
 import { format } from 'date-fns';
 import { ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import BottomNavigation from '../components/layout/BottomNavigation';
@@ -17,6 +19,8 @@ export default function VariablesPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
   const [selectedMonth, setSelectedMonth] = useState<Month>('April');
   const [selectedYear, setSelectedYear] = useState('2025');
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const { unreadCount } = useNotificationStore();
 
   // Sample data for the trend chart
   const trendData = [
@@ -43,9 +47,17 @@ export default function VariablesPage() {
                 <ArrowLeft className="h-6 w-6" />
               </button>
               <h1 className="text-2xl font-bold">Variables</h1>
-              <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+              <button 
+                onClick={() => setIsNotificationModalOpen(true)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors relative"
+                aria-label="Notifications"
+              >
                 <Bell className="h-6 w-6" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center text-xs text-white bg-red-500 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -153,6 +165,11 @@ export default function VariablesPage() {
       </div>
 
       <BottomNavigation />
+      {/* Notification Modal */}
+      <NotificationModal 
+        isOpen={isNotificationModalOpen} 
+        onClose={() => setIsNotificationModalOpen(false)} 
+      />
     </div>
   );
 }

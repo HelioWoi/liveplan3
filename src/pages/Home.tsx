@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import SpreadsheetUploadModal from '../components/modals/SpreadsheetUploadModal';
+import NotificationModal from '../components/notifications/NotificationModal';
 import { checkRefreshFlag, clearRefreshFlag, REFRESH_FLAGS } from '../utils/dataRefreshService';
 import { Bell, Clock, Target, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -51,7 +52,8 @@ export default function Home() {
   const [selectedYear, setSelectedYear] = useState(getCurrentYear());
   const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getCurrentWeek());
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
+  const [isSpreadsheetModalOpen, setIsSpreadsheetModalOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   useEffect(() => {
     // Verificar se o usuário já fez upload da planilha
@@ -66,7 +68,7 @@ export default function Home() {
     // Mostrar o modal apenas se for um novo usuário E não tiver feito upload ainda E estiver vindo do login
     if (!imported && isNewUser && isFromLogin) {
       console.log('Showing spreadsheet modal for new user first login');
-      setShowSpreadsheetModal(true);
+      setIsSpreadsheetModalOpen(true);
     }
   }, [user]);
   
@@ -113,7 +115,7 @@ export default function Home() {
 
   // Callback para fechar e marcar como importado
   const handleCloseSpreadsheetModal = () => {
-    setShowSpreadsheetModal(false);
+    setIsSpreadsheetModalOpen(false);
     localStorage.setItem('spreadsheet_imported', 'true');
   };
 
@@ -315,7 +317,18 @@ export default function Home() {
 
   return (
     <>
-      <SpreadsheetUploadModal open={showSpreadsheetModal} onClose={handleCloseSpreadsheetModal} />
+      {/* Spreadsheet Upload Modal */}
+      <SpreadsheetUploadModal
+        open={isSpreadsheetModalOpen}
+        onClose={handleCloseSpreadsheetModal}
+      />
+      
+      {/* Notification Modal */}
+      <NotificationModal 
+        isOpen={isNotificationModalOpen} 
+        onClose={() => setIsNotificationModalOpen(false)} 
+      />
+      
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -337,9 +350,15 @@ export default function Home() {
                 <span className="font-poppins italic text-2xl tracking-tight text-white select-none mr-3">
                   LivePlan<sup className="align-super text-xs ml-0.5 italic">3</sup>
                 </span>
-                <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+                <button 
+                  onClick={() => setIsNotificationModalOpen(true)}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors relative"
+                  aria-label="Notifications"
+                >
                   <Bell className="h-6 w-6" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center text-xs text-white bg-red-500 rounded-full">
+                    2
+                  </span>
                 </button>
               </div>
             </div>

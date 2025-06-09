@@ -1,58 +1,58 @@
-// Mock API para notificações
+// Mock API for notifications
 import { Notification } from '../../stores/notificationStore';
 
-// Dados de exemplo para notificações
+// Sample notification data
 const mockNotifications: Notification[] = [
   {
     id: '1',
-    title: 'Alerta de Orçamento',
-    message: 'Você já utilizou 85% do seu orçamento para despesas variáveis este mês.',
+    title: 'Budget Alert',
+    message: 'You have already used 85% of your variable expenses budget this month.',
     type: 'budget',
     isRead: false,
     createdAt: new Date().toISOString(),
   },
   {
     id: '2',
-    title: 'Meta Atingida',
-    message: 'Parabéns! Você atingiu 50% da sua meta "Viagem para o Japão".',
+    title: 'Goal Achieved',
+    message: 'Congratulations! You have reached 50% of your "Trip to Japan" goal.',
     type: 'goal',
     isRead: false,
-    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 dia atrás
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
   },
   {
     id: '3',
-    title: 'Transação Recorrente',
-    message: 'Lembrete: Sua assinatura de streaming será cobrada amanhã (R$29,90).',
+    title: 'Recurring Transaction',
+    message: 'Reminder: Your streaming subscription will be charged tomorrow ($29.90).',
     type: 'transaction',
     isRead: true,
-    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 dias atrás
+    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
   },
   {
     id: '4',
-    title: 'Insight Financeiro',
-    message: 'Você gastou 30% menos em restaurantes este mês. Continue assim!',
+    title: 'Financial Insight',
+    message: 'You spent 30% less at restaurants this month. Keep it up!',
     type: 'insight',
     isRead: true,
-    createdAt: new Date(Date.now() - 259200000).toISOString(), // 3 dias atrás
+    createdAt: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
   },
 ];
 
-// Função para simular uma chamada de API
+// Function to simulate an API call
 export async function fetchNotifications(): Promise<Notification[]> {
   // Simula um atraso de rede
   await new Promise(resolve => setTimeout(resolve, 500));
   return mockNotifications;
 }
 
-// Função para simular marcar uma notificação como lida
+// Function to simulate marking a notification as read
 export async function markNotificationAsRead(id: string): Promise<void> {
   // Simula um atraso de rede
   await new Promise(resolve => setTimeout(resolve, 300));
-  // Em uma API real, isso enviaria uma requisição para atualizar o status
-  console.log(`Marcando notificação ${id} como lida`);
+  // In a real API, this would send a request to update the status
+  console.log(`Marking notification ${id} as read`);
 }
 
-// Função para simular marcar todas as notificações como lidas
+// Function to simulate marking all notifications as read
 export async function markAllNotificationsAsRead(): Promise<void> {
   // Simula um atraso de rede
   await new Promise(resolve => setTimeout(resolve, 300));
