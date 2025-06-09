@@ -9,6 +9,7 @@
   VITE_APP_ENV = "production"
   NPM_FLAGS = "--version" # Evita que o Netlify execute npm install
   PNPM_VERSION = "10.10.0" # Especifica a versão do pnpm a ser usada
+  PNPM_FLAGS = "--no-frozen-lockfile" # Permite que o pnpm atualize o lockfile durante a instalação
 
 # Garantir que as funções Netlify tenham acesso à variável VITE_BASIQ_API_KEY
 [functions]
