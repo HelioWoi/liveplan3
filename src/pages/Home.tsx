@@ -17,9 +17,19 @@ import PeriodSelector from '../components/common/PeriodSelector';
 import AnimatedCard from '../components/common/AnimatedCard';
 import { motion } from 'framer-motion';
 
+
+function Skeleton({ height = 24, width = '50%', className = '' }) {
+  return (
+    <div
+      className={`bg-gray-200 animate-pulse rounded ${className}`}
+      style={{ height, width }}
+    />
+  );
+}
+
 export default function Home() {
   const { user } = useAuthStore();
-  const { transactions, fetchTransactions } = useTransactionStore();
+  const { transactions, fetchTransactions, isLoading} = useTransactionStore();
   const [dataRefreshed, setDataRefreshed] = useState(false);
   // Define types for period selection
   type Period = 'Day' | 'Week' | 'Month' | 'Year';
@@ -426,13 +436,25 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Total Income</h3>
-              <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+
+              {isLoading ? (
+                <Skeleton height={28} />
+              ) : (
+                <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+              )}
+              
               <p className="text-xs text-gray-500">All income in the period</p>
             </div>
 
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Total Expenses</h3>
-              <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+
+              {isLoading ? (
+                <Skeleton height={28} />
+              ) : (
+                <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+              )}
+
               <p className="text-xs text-gray-500">All expenses in the period</p>
             </div>
           </div>

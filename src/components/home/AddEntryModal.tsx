@@ -1,7 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState } from 'react';
 import { useWeeklyBudgetStore, WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
 import { TransactionCategory } from '../../types/transaction';
+import { useAuthStore } from '../../stores/authStore';
 
 interface AddEntryModalProps {
   isOpen: boolean;
@@ -10,37 +11,40 @@ interface AddEntryModalProps {
   selectedYear?: number;
 }
 
-export default function AddEntryModal({ isOpen, onClose, selectedMonth, selectedYear }: AddEntryModalProps) {
+const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
+
+const repeatOptions = [
+  'Does not repeat',
+  'Daily',
+  'Weekly',
+  'Monthly',
+  'Annually',
+  'Every weekday'
+];
+
+const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const monthlyWeeks = ['First', 'Second', 'Third', 'Fourth', 'Last'];
+
+const months = [
+  { full: 'January', short: 'Jan' },
+  { full: 'February', short: 'Feb' },
+  { full: 'March', short: 'Mar' },
+  { full: 'April', short: 'Apr' },
+  { full: 'May', short: 'May' },
+  { full: 'June', short: 'Jun' },
+  { full: 'July', short: 'Jul' },
+  { full: 'August', short: 'Aug' },
+  { full: 'September', short: 'Sep' },
+  { full: 'October', short: 'Oct' },
+  { full: 'November', short: 'Nov' },
+  { full: 'December', short: 'Dec' }
+];
+
+export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April', selectedYear }: AddEntryModalProps) {
   const { addEntry } = useWeeklyBudgetStore();
-  
-  // Obter o mês atual
-  const getCurrentMonth = () => {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    const currentDate = new Date();
-    return months[currentDate.getMonth()];
-  };
-  
-  // Obter a semana atual com base no dia do mês
-  const getCurrentWeek = () => {
-    const currentDate = new Date();
-    const dayOfMonth = currentDate.getDate();
-    
-    if (dayOfMonth > 21) {
-      return 'Week 4';
-    } else if (dayOfMonth > 14) {
-      return 'Week 3';
-    } else if (dayOfMonth > 7) {
-      return 'Week 2';
-    } else {
-      return 'Week 1';
-    }
-  };
-  
-  const [month, setMonth] = useState(selectedMonth || getCurrentMonth());
-  const [week, setWeek] = useState(getCurrentWeek());
+  const [month, setMonth] = useState(selectedMonth);
+  const [week, setWeek] = useState('Week 1');
   const [category, setCategory] = useState('Extra');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -50,38 +54,8 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
   const [monthlyWeek, setMonthlyWeek] = useState('First');
   const [monthlyDay, setMonthlyDay] = useState('Monday');
   const [annualDate, setAnnualDate] = useState('');
-  
-  // Atualizar o mês e a semana sempre que o modal for aberto
-  useEffect(() => {
-    if (isOpen) {
-      // Usar o mês selecionado se disponível, caso contrário usar o mês atual
-      setMonth(selectedMonth || getCurrentMonth());
-      // Manter a semana selecionada pelo usuário se já tiver sido definida
-      if (!week) {
-        setWeek(getCurrentWeek());
-      }
-      console.log('Modal aberto com mês:', selectedMonth || getCurrentMonth(), 'e semana:', week || getCurrentWeek());
-    }
-  }, [isOpen, selectedMonth]);
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
 
-  const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-  const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
-  
-  const repeatOptions = [
-    'Does not repeat',
-    'Daily',
-    'Weekly',
-    'Monthly',
-    'Annually',
-    'Every weekday'
-  ];
-  
-  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const monthlyWeeks = ['First', 'Second', 'Third', 'Fourth', 'Last'];
+  const user_id = useAuthStore((state) => state.user?.id)?.toString() || '';
 
   // Função para gerar entradas recorrentes com base na opção selecionada
   const generateRecurringEntries = (baseEntry: WeeklyBudgetEntry) => {
@@ -231,54 +205,36 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
     console.log(`Geradas ${futureEntries.length} entradas recorrentes para ${repeatOption}`);
     return futureEntries;
   };
-  
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (!description || !amount) {
       return;
     }
-    
-    console.log(`Adicionando entrada para semana: ${week}, mês: ${month}, ano: ${selectedYear || new Date().getFullYear()}`);
-    
-    // Validar que a semana está corretamente definida
-    if (!week || !['Week 1', 'Week 2', 'Week 3', 'Week 4'].includes(week)) {
-      console.error('Erro ao adicionar entrada: semana inválida', week);
-      setWeek('Week 1'); // Definir uma semana padrão se inválida
-    }
-    
-    // Criar uma nova entrada
-    const newEntry: WeeklyBudgetEntry = {
-      id: `entry-${Date.now()}`,
-      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+
+    const entry: WeeklyBudgetEntry = {
+      id: user_id,
       description,
       amount: parseFloat(amount),
       category: category as TransactionCategory,
-      month,
-      year: selectedYear || new Date().getFullYear(),
-      syncToTransactions: syncToTransactions // Adicionar flag para sincronização com transações
+      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+      month: months.find(m => m.short === month)?.short || month,
+      year: selectedYear || new Date().getFullYear()
     };
+
+    // Adiciona a entrada ao orçamento semanal
+    addEntry(entry);
     
-    console.log('Nova entrada a ser adicionada:', newEntry);
-    
-    // Adicionar a entrada ao Weekly Budget
-    addEntry(newEntry);
-    
-    // Se a opção de repetição estiver selecionada, gerar entradas recorrentes
+    // Se a opção de repetição for diferente de 'Does not repeat', gerar entradas futuras
     if (repeatOption !== 'Does not repeat') {
-      console.log(`Gerando entradas recorrentes com opção: ${repeatOption}`);
-      const recurringEntries = generateRecurringEntries(newEntry);
-      console.log(`${recurringEntries.length} entradas recorrentes geradas`);
+      generateRecurringEntries(entry);
     }
     
+    // Não precisamos criar a transação aqui, pois o weeklyBudgetStore já faz isso
+    // A criação duplicada estava causando problemas de cálculo
+
     // Reset form
     setDescription('');
     setAmount('');
-    // Não resetar o mês e a semana para manter a seleção do usuário
-    // setMonth(getCurrentMonth());
-    // setWeek(getCurrentWeek());
-    
-    // Disparar evento para atualizar a interface
-    window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-    
     onClose();
   };
 
@@ -325,14 +281,12 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
                       className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
                     >
                       {months.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
+                        <option key={m.full} value={m.short}>
+                          {m.full}
                         </option>
                       ))}
                     </select>
                   </div>
-
-
 
                   {/* Week Selection */}
                   <div>
@@ -499,10 +453,7 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
                       type="checkbox"
                       id="syncTransactions"
                       checked={syncToTransactions}
-                      onChange={(e) => {
-                        setSyncToTransactions(e.target.checked);
-                        console.log('Sincronização com transações:', e.target.checked ? 'ativada' : 'desativada');
-                      }}
+                      onChange={(e) => setSyncToTransactions(e.target.checked)}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
                     <label htmlFor="syncTransactions" className="ml-2 block text-sm text-gray-600">
