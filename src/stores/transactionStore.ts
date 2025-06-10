@@ -1,7 +1,11 @@
 import { create } from 'zustand';
 import { Transaction, TaxType } from '../types/transaction';
 import { supabase } from '../lib/supabase/supabaseClient';
-import { SupabaseClient } from '@supabase/supabase-js';
+
+// Extend Transaction type to include possible metadata property
+interface TransactionWithMetadata extends Omit<Transaction, 'id'> {
+  metadata?: Record<string, any>;
+}
 
 interface TaxEntry {
   id: string;
@@ -17,34 +21,46 @@ interface TransactionState {
   taxEntries: TaxEntry[];
   isLoading: boolean;
   error: string | null;
-  addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
-  updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
-  deleteTransaction: (id: string) => Promise<void>;
   fetchTransactions: () => Promise<void>;
+  addTransaction: (transaction: TransactionWithMetadata) => Promise<void>;
+  updateTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
+  updateLocalTransaction: (id: string, transaction: Partial<Transaction>) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
+  fetchTaxEntries: () => Promise<void>;
   addTaxEntry: (entry: Omit<TaxEntry, 'id'>) => Promise<void>;
   updateTaxEntry: (id: string, entry: Partial<TaxEntry>) => Promise<void>;
   deleteTaxEntry: (id: string) => Promise<void>;
-  fetchTaxEntries: () => Promise<void>;
   clearTransactions: () => Promise<void>;
-  bulkAddTransactions: (transactions: Omit<Transaction, 'id'>[]) => Promise<void>;
+  bulkAddTransactions: (transactions: TransactionWithMetadata[]) => Promise<void>;
 }
 
-export const useTransactionStore = create<TransactionState>((set) => ({
-  transactions: [],
-  taxEntries: [],
-  isLoading: false,
-  error: null,
+// Define supabase type to avoid 'any' errors
+declare const supabase: SupabaseClient;
 
-  fetchTransactions: async () => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      // Tentar buscar transações do banco de dados
+export const useTransactionStore = create<TransactionState>((set) => {
+  // Add listener for reset-all-stores event
+  window.addEventListener('reset-all-stores', () => {
+    console.log('Transaction Store: Resetting state due to reset-all-stores event');
+    set({ transactions: [], taxEntries: [], isLoading: false, error: null });
+    // Clear local transactions from localStorage
+    localStorage.removeItem('local_transactions');
+  });
+
+  return {
+    transactions: [],
+    taxEntries: [],
+    isLoading: false,
+    error: null,
+
+    fetchTransactions: async () => {
+      set({ isLoading: true, error: null });
+
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const user = sessionData.session?.user;
 
         if (user) {
+          // Buscar transações do banco de dados
           const { data, error } = await supabase
             .from('transactions')
             .select('*')
@@ -52,39 +68,34 @@ export const useTransactionStore = create<TransactionState>((set) => ({
 
           if (error) throw error;
 
-          // Combinar com transações locais
+          // Buscar transações locais do localStorage
           const storedTransactions = localStorage.getItem('local_transactions');
           const localTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-          
-          const allTransactions = [...(data || []), ...localTransactions];
-          
-          set({ transactions: allTransactions, isLoading: false });
+
+          // Combinar transações do banco e locais
+          set({
+            transactions: [...(data || []), ...localTransactions],
+            isLoading: false,
+          });
+
           return;
         }
       } catch (dbError) {
         console.error('Error fetching transactions from database:', dbError);
         // Continue para buscar transações locais mesmo se houver erro no banco
       }
-      
+
       // Se não conseguiu buscar do banco ou o usuário não está autenticado,
       // buscar apenas do localStorage
       const storedTransactions = localStorage.getItem('local_transactions');
       const localTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-      
-      set({ transactions: localTransactions, isLoading: false });
-    } catch (error: any) {
-      console.error('Error fetching transactions:', error);
-      set({ error: error.message || 'Failed to fetch transactions', isLoading: false });
-    }
-  },
 
-  addTransaction: async (transaction) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      let data;
-      
-      // Tentar obter a sessão do usuário
+      set({ transactions: localTransactions, isLoading: false });
+    },
+
+    addTransaction: async (transaction: TransactionWithMetadata) => {
+      set({ isLoading: true, error: null });
+
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const user = sessionData.session?.user;
@@ -93,8 +104,8 @@ export const useTransactionStore = create<TransactionState>((set) => ({
           // Se o usuário estiver autenticado, salvar no banco de dados
           // Remover o campo metadata para evitar erro, já que essa coluna não existe no banco
           const { metadata, ...transactionWithoutMetadata } = transaction;
-          
-          const { data: dbData, error } = await supabase
+
+          const { data, error } = await supabase
             .from('transactions')
             .insert([{ ...transactionWithoutMetadata, user_id: user.id }])
             .select()
@@ -104,311 +115,460 @@ export const useTransactionStore = create<TransactionState>((set) => ({
             console.error('Error saving transaction to database:', error);
             // Continue mesmo com erro no banco, salvando localmente
           } else {
-            data = dbData;
-          }
-        }
-      } catch (authError) {
-        console.error('Authentication error:', authError);
-        // Continue para salvar localmente
-      }
-      
-      // Se não conseguiu salvar no banco ou o usuário não está autenticado,
-      // criar um objeto de transação local
-      if (!data) {
-        data = {
-          id: Date.now().toString(),
-          ...transaction,
-          user_id: 'local-user'
-        };
-      }
-      
-      // Atualizar o estado com a nova transação
-      set(state => ({
-        transactions: [data, ...state.transactions],
-        isLoading: false
-      }));
-      
-      // Disparar evento para notificar outras partes do app (Weekly Budget e Homepage)
-      if (transaction.category === 'Income' || transaction.type === 'income') {
-        // Apenas disparar eventos para notificar a homepage e o Weekly Budget
-        // Não precisa adicionar ao localStorage novamente, pois já está no estado
-        try {
-          // Disparar evento para notificar a homepage e o Weekly Budget
-          window.dispatchEvent(new CustomEvent('local-transaction-added', { detail: data }));
-          window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-          console.log('Eventos disparados para sincronização de income:', data);
-        } catch (error) {
-          console.error('Erro ao sincronizar transação com eventos:', error);
-        }
-      }
-    } catch (error: any) {
-      console.error('Error adding transaction:', error);
-      set({ error: error.message || 'Failed to add transaction', isLoading: false });
-    }
-  },
+            set(state => ({
+              transactions: [data, ...state.transactions],
+              isLoading: false,
+            }));
 
-  updateTransaction: async (id, transaction) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      // Verificar se é uma transação local (ID começa com 'tx-')
-      if (id.startsWith('tx-')) {
-        // Atualizar transação local
-        set(state => {
-          const updatedTransactions = state.transactions.map(t => 
-            t.id === id ? { ...t, ...transaction } : t
-          );
-          
-          // Atualizar no localStorage se existir
-          try {
-            const storedTransactions = localStorage.getItem('local_transactions');
-            if (storedTransactions) {
-              const localTransactions = JSON.parse(storedTransactions);
-              const updatedLocalTransactions = localTransactions.map((t: any) => 
-                t.id === id ? { ...t, ...transaction } : t
-              );
-              localStorage.setItem('local_transactions', JSON.stringify(updatedLocalTransactions));
+            // Dispatch event
+            window.dispatchEvent(new Event('transactions-updated'));
+
+            // Dispatch transaction-added event
+            const transactionEvent = new CustomEvent('transaction-added', {
+              detail: data,
+            });
+            window.dispatchEvent(transactionEvent);
+
+            // Dispatch local transaction added event
+            const localTransactionEvent = new CustomEvent('local-transaction-added', {
+              detail: data,
+            });
+            window.dispatchEvent(localTransactionEvent);
+
+            // Log for income transactions
+            if (data.category === 'Income' || data.type === 'income') {
+              console.log('Transaction Store: Added income transaction', data);
             }
-          } catch (e) {
-            console.error('Erro ao atualizar transação local no localStorage:', e);
+
+            return;
           }
-          
-          return { isLoading: false, transactions: updatedTransactions, error: null };
+        }
+
+        // Se não conseguiu salvar no banco ou o usuário não está autenticado,
+        // criar um objeto de transação local
+        const localTransaction = {
+          id: `local-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          ...transaction,
+          user_id: 'local-user',
+          created_at: new Date().toISOString(),
+          is_local: true,
+        };
+
+        // Atualizar o estado com a nova transação
+        set(state => ({
+          transactions: [localTransaction, ...state.transactions],
+          isLoading: false,
+        }));
+
+        // Dispatch event
+        window.dispatchEvent(new Event('transactions-updated'));
+
+        // Dispatch transaction-added event
+        const transactionEvent = new CustomEvent('transaction-added', {
+          detail: localTransaction,
         });
+        window.dispatchEvent(transactionEvent);
+
+        // Dispatch local transaction added event
+        const localTransactionEvent = new CustomEvent('local-transaction-added', {
+          detail: localTransaction,
+        });
+        window.dispatchEvent(localTransactionEvent);
+
+        // Log for income transactions
+        if (localTransaction.category === 'Income' || localTransaction.type === 'income') {
+          console.log('Transaction Store: Added income transaction (local)', localTransaction);
         
-        return;
+        set({ transactions: localTransactions, isLoading: false });
+      } catch (error: any) {
+        console.error('Error fetching transactions:', error);
+        set({ error: error.message || 'Failed to fetch transactions', isLoading: false });
       }
+    },
+
+    addTransaction: async (transaction: TransactionWithMetadata) => {
+      set({ isLoading: true, error: null });
       
-      // Para transações normais do banco de dados
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+      try {
+        let data;
+        
+        // Tentar obter a sessão do usuário
+        try {
+          const { data: sessionData } = await supabase.auth.getSession();
+          const user = sessionData.session?.user;
 
-      if (!user) {
-        throw new Error('User not authenticated');
+          if (user) {
+            // Se o usuário estiver autenticado, salvar no banco de dados
+            // Remover o campo metadata para evitar erro, já que essa coluna não existe no banco
+            const { metadata, ...transactionWithoutMetadata } = transaction;
+            
+            const { data: dbData, error } = await supabase
+              .from('transactions')
+              .insert([{ ...transactionWithoutMetadata, user_id: user.id }])
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error saving transaction to database:', error);
+              // Continue mesmo com erro no banco, salvando localmente
+            } else {
+              data = dbData;
+            }
+          }
+        } catch (authError) {
+          console.error('Authentication error:', authError);
+          // Continue para salvar localmente
+        }
+        
+        // Se não conseguiu salvar no banco ou o usuário não está autenticado,
+        // criar um objeto de transação local
+        if (!data) {
+          data = {
+            id: Date.now().toString(),
+            ...transaction,
+            user_id: 'local-user'
+          };
+        }
+        
+        // Atualizar o estado com a nova transação
+        set(state => ({
+          transactions: [data, ...state.transactions],
+          isLoading: false
+        }));
+        
+        // No need for duplicate metadata check
+        
+        // Disparar evento para notificar outras partes do app (Weekly Budget e Homepage)
+        if (transaction.category === 'Income' || transaction.type === 'income') {
+          // Apenas disparar eventos para notificar a homepage e o Weekly Budget
+          // Não precisa adicionar ao localStorage novamente, pois já está no estado
+          try {
+            // Disparar evento para notificar a homepage e o Weekly Budget
+            window.dispatchEvent(new CustomEvent('local-transaction-added', { detail: data }));
+            window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+            console.log('Eventos disparados para sincronização de income:', data);
+          } catch (error) {
+            console.error('Erro ao sincronizar transação com eventos:', error);
+          }
+        }
+      } catch (error: any) {
+        console.error('Error adding transaction:', error);
+        set({ error: error.message || 'Failed to add transaction', isLoading: false });
       }
+    },
 
-      const { data, error } = await supabase
-        .from('transactions')
-        .update(transaction)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      set(state => ({
-        transactions: state.transactions.map(t => (t.id === id ? { ...t, ...data } : t)),
-        isLoading: false
-      }));
-    } catch (error: any) {
-      console.error('Error updating transaction:', error);
-      set({ error: error.message || 'Failed to update transaction', isLoading: false });
-    }
-  },
-
-  deleteTransaction: async (id) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      set(state => ({
-        transactions: state.transactions.filter(t => t.id !== id),
-        isLoading: false
-      }));
+    updateTransaction: async (id: string, transaction: Partial<Transaction>) => {
+      set({ isLoading: true, error: null });
       
-      // Disparar evento para notificar outras partes do app
-      window.dispatchEvent(new CustomEvent('transaction-deleted', { detail: { id } }));
-    } catch (error: any) {
-      console.error('Error deleting transaction:', error);
-      set({ error: error.message || 'Failed to delete transaction', isLoading: false });
-    }
-  },
+      try {
+        // Verificar se é uma transação local (ID começa com 'tx-')
+        if (id.startsWith('tx-')) {
+          // Atualizar transação local
+          set(state => {
+            const updatedTransactions = state.transactions.map(t => 
+              t.id === id ? { ...t, ...transaction } : t
+            );
+            
+            // Atualizar no localStorage se existir
+            try {
+              const storedTransactions = localStorage.getItem('local_transactions');
+              if (storedTransactions) {
+                const localTransactions = JSON.parse(storedTransactions);
+                const updatedLocalTransactions = localTransactions.map((t: any) => 
+                  t.id === id ? { ...t, ...transaction } : t
+                );
+                localStorage.setItem('local_transactions', JSON.stringify(updatedLocalTransactions));
+              }
+            } catch (e) {
+              console.error('Erro ao atualizar transação local no localStorage:', e);
+            }
+            
+            return { isLoading: false, transactions: updatedTransactions, error: null };
+          });
+          
+          return;
+        }
+        
+        // Para transações normais do banco de dados
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-  fetchTaxEntries: async () => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-      if (!user) {
-        throw new Error('User not authenticated');
+        const { data, error } = await supabase
+          .from('transactions')
+          .update(transaction)
+          .eq('id', id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        set(state => ({
+          transactions: state.transactions.map(t => (t.id === id ? { ...t, ...data } : t)),
+          isLoading: false
+        }));
+      } catch (error: any) {
+        console.error('Error updating transaction:', error);
+        set({ error: error.message || 'Failed to update transaction', isLoading: false });
       }
+    },
 
-      const { data, error } = await supabase
-        .from('tax_entries')
-        .select('*')
-        .eq('user_id', user.id);
+    deleteTransaction: async (id: string) => {
+      set({ isLoading: true, error: null });
 
-      if (error) throw error;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-      set({ taxEntries: data || [], isLoading: false });
-    } catch (error: any) {
-      console.error('Error fetching tax entries:', error);
-      set({ error: error.message || 'Failed to fetch tax entries', isLoading: false });
-    }
-  },
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-  addTaxEntry: async (entry) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+        const { error } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
 
-      if (!user) {
-        throw new Error('User not authenticated');
+        if (error) throw error;
+
+        set(state => ({
+          transactions: state.transactions.filter(t => t.id !== id),
+          isLoading: false
+        }));
+
+        // Disparar evento para notificar outras partes do app
+        window.dispatchEvent(new CustomEvent('transaction-deleted', { detail: { id } }));
+      } catch (error: any) {
+        console.error('Error deleting transaction:', error);
+        set({ error: error.message || 'Failed to delete transaction', isLoading: false });
       }
+    },
 
-      const { data, error } = await supabase
-        .from('tax_entries')
-        .insert([{ ...entry, userId: user.id }])
-        .select()
-        .single();
+    fetchTaxEntries: async () => {
+      set({ isLoading: true, error: null });
 
-      if (error) throw error;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-      set(state => ({
-        taxEntries: [data, ...state.taxEntries],
-        isLoading: false
-      }));
-    } catch (error: any) {
-      console.error('Error adding tax entry:', error);
-      set({ error: error.message || 'Failed to add tax entry', isLoading: false });
-    }
-  },
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-  updateTaxEntry: async (id, entry) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+        const { data, error } = await supabase
+          .from('tax_entries')
+          .select('*')
+          .eq('user_id', user.id);
 
-      if (!user) {
-        throw new Error('User not authenticated');
+        if (error) throw error;
+
+        set({ taxEntries: data || [], isLoading: false });
+      } catch (error: any) {
+        console.error('Error fetching tax entries:', error);
+        set({ error: error.message || 'Failed to fetch tax entries', isLoading: false });
       }
+    },
 
-      const { data, error } = await supabase
-        .from('tax_entries')
-        .update(entry)
-        .eq('id', id)
-        .eq('userId', user.id)
-        .select()
-        .single();
+    addTaxEntry: async (entry: Omit<TaxEntry, 'id'>) => {
+      set({ isLoading: true, error: null });
 
-      if (error) throw error;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-      set(state => ({
-        taxEntries: state.taxEntries.map(e => (e.id === id ? { ...e, ...data } : e)),
-        isLoading: false
-      }));
-    } catch (error: any) {
-      console.error('Error updating tax entry:', error);
-      set({ error: error.message || 'Failed to update tax entry', isLoading: false });
-    }
-  },
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-  deleteTaxEntry: async (id) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+        const { data, error } = await supabase
+          .from('tax_entries')
+          .insert({
+            ...entry,
+            user_id: user.id
+          })
+          .select();
 
-      if (!user) {
-        throw new Error('User not authenticated');
+        if (error) throw error;
+
+        set(state => ({
+          taxEntries: [...state.taxEntries, ...(data || [])],
+          isLoading: false
+        }));
+      } catch (error: any) {
+        console.error('Error adding tax entry:', error);
+        set({ error: error.message || 'Failed to add tax entry', isLoading: false });
       }
+    },
 
-      const { error } = await supabase
-        .from('tax_entries')
-        .delete()
-        .eq('id', id)
-        .eq('userId', user.id);
+    updateTaxEntry: async (id: string, entry: Partial<TaxEntry>) => {
+      set({ isLoading: true, error: null });
 
-      if (error) throw error;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-      set(state => ({
-        taxEntries: state.taxEntries.filter(e => e.id !== id),
-        isLoading: false
-      }));
-    } catch (error: any) {
-      console.error('Error deleting tax entry:', error);
-      set({ error: error.message || 'Failed to delete tax entry', isLoading: false });
-    }
-  },
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-  // New methods for handling spreadsheet data
-  clearTransactions: async () => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+        const { data, error } = await supabase
+          .from('tax_entries')
+          .update({
+            ...entry,
+            user_id: user.id
+          })
+          .eq('id', id)
+          .select();
 
-      if (!user) {
-        throw new Error('User not authenticated');
+        if (error) throw error;
+
+        set(state => ({
+          taxEntries: state.taxEntries.map(t => (t.id === id ? (data && data[0]) || t : t)),
+          isLoading: false
+        }));
+      } catch (error: any) {
+        console.error('Error updating tax entry:', error);
+        set({ error: error.message || 'Failed to update tax entry', isLoading: false });
       }
+    },
 
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('user_id', user.id);
+    deleteTaxEntry: async (id: string) => {
+      set({ isLoading: true, error: null });
 
-      if (error) throw error;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-      set({ transactions: [], isLoading: false });
-    } catch (error: any) {
-      console.error('Error clearing transactions:', error);
-      set({ error: error.message || 'Failed to clear transactions', isLoading: false });
-    }
-  },
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-  bulkAddTransactions: async (transactions) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
+        const { error } = await supabase
+          .from('tax_entries')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
 
-      if (!user) {
-        throw new Error('User not authenticated');
+        if (error) throw error;
+
+        set(state => ({
+          taxEntries: state.taxEntries.filter(t => t.id !== id),
+          isLoading: false
+        }));
+      } catch (error: any) {
+        console.error('Error deleting tax entry:', error);
+        set({ error: error.message || 'Failed to delete tax entry', isLoading: false });
       }
+    },
 
-      const transactionsWithUserId = transactions.map(transaction => ({
-        ...transaction,
-        user_id: user.id
-      }));
+    clearTransactions: async () => {
+      set({ isLoading: true, error: null });
 
-      const { data, error } = await supabase
-        .from('transactions')
-        .insert(transactionsWithUserId)
-        .select();
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
 
-      if (error) throw error;
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-      set(state => ({
-        transactions: [...data, ...state.transactions],
-        isLoading: false
-      }));
-    } catch (error: any) {
-      console.error('Error bulk adding transactions:', error);
-      set({ error: error.message || 'Failed to bulk add transactions', isLoading: false });
+        const { error } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        set({ transactions: [], isLoading: false });
+      } catch (error: any) {
+        console.error('Error clearing transactions:', error);
+        set({ error: error.message || 'Failed to clear transactions', isLoading: false });
+      }
+    },
+
+    bulkAddTransactions: async (transactions: TransactionWithMetadata[]) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
+
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+
+        const transactionsWithUserId = transactions.map(transaction => ({
+          ...transaction,
+          user_id: user.id
+        }));
+
+        const { data, error } = await supabase
+          .from('transactions')
+          .insert(transactionsWithUserId)
+          .select();
+
+        if (error) throw error;
+
+        // Add new transactions to state
+        set(state => ({
+          transactions: [...(data || []), ...state.transactions],
+          isLoading: false
+        }));
+
+        // Dispatch event for income transactions
+        transactionsWithUserId.forEach(transaction => {
+          if (transaction.category === 'Income' || transaction.type === 'income') {
+            const event = new CustomEvent('transaction-added', {
+              detail: transaction
+            });
+            window.dispatchEvent(event);
+            console.log('Transaction Store: Dispatched transaction-added event for income transaction');
+          }
+        });
+
+        // Dispatch general transactions-updated event
+        window.dispatchEvent(new Event('transactions-updated'));
+      } catch (error: any) {
+        console.error('Error bulk adding transactions:', error);
+        set({ error: error.message || 'Failed to bulk add transactions', isLoading: false });
+      }
+    },
+
+    updateLocalTransaction: async (id: string, transaction: Partial<Transaction>) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        // Get local transactions from localStorage
+        const localTransactions = JSON.parse(localStorage.getItem('local_transactions') || '[]');
+
+        // Find and update the transaction
+        const updatedLocalTransactions = localTransactions.map((t: any) => {
+          if (t.id === id) {
+            return { ...t, ...transaction };
+          }
+          return t;
+        });
+
+        // Update localStorage
+        localStorage.setItem('local_transactions', JSON.stringify(updatedLocalTransactions));
+
+        // Update state
+        set(state => ({
+          transactions: state.transactions.map(t => (t.id === id ? { ...t, ...transaction } : t)),
+          isLoading: false
+        }));
+
+        // Dispatch event
+        window.dispatchEvent(new Event('transactions-updated'));
+      } catch (error: any) {
+        console.error('Error updating local transaction:', error);
+        set({ error: error.message || 'Failed to update local transaction', isLoading: false });
+      }
     }
-  }
-}));
+  };
+});

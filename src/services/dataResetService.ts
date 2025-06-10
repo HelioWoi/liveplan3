@@ -69,12 +69,20 @@ export const resetAllUserData = async (): Promise<{ success: boolean; message: s
       'cachedIncome',
       'lastSyncTime',
       'transactionFilters',
-      'dashboardState'
+      'dashboardState',
+      'local_transactions',
+      'formula3_data',
+      'formula3_cache',
+      'weekly_budget_data',
+      'income_data'
     ];
     
     localStorageKeysToReset.forEach(key => {
       localStorage.removeItem(key);
     });
+    
+    // Dispatch events to reset Zustand stores
+    window.dispatchEvent(new CustomEvent('reset-all-stores'));
     
     // Definir flags de atualização para forçar recarga de dados
     setAllRefreshFlags();

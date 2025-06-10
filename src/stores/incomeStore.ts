@@ -13,8 +13,8 @@ interface IncomeState {
 // Function to initialize event listeners
 const initializeEventListeners = (fetchTotalIncome: () => Promise<void>) => {
   // Add listeners for events that might change income
-  window.addEventListener('local-transaction-added', () => {
-    console.log('Income Store: Detected local-transaction-added event');
+  window.addEventListener('local-transaction-added', (event: any) => {
+    console.log('Income Store: Detected local-transaction-added event', event.detail);
     fetchTotalIncome();
   });
   
@@ -31,11 +31,19 @@ const initializeEventListeners = (fetchTotalIncome: () => Promise<void>) => {
   
   // Adicionar listener para o evento transaction-added
   window.addEventListener('transaction-added', (event: any) => {
-    console.log('Income Store: Detected transaction-added event');
+    console.log('Income Store: Detected transaction-added event', event.detail);
     // Verificar se a transação adicionada é do tipo income
     if (event.detail && (event.detail.category === 'Income' || event.detail.type === 'income')) {
       console.log('Income Store: Income transaction detected, updating total');
     }
+    fetchTotalIncome();
+  });
+  
+  // Add listener for reset-all-stores event
+  window.addEventListener('reset-all-stores', () => {
+    console.log('Income Store: Resetting state due to reset-all-stores event');
+    localStorage.removeItem('local_transactions');
+    localStorage.removeItem('income_data');
     fetchTotalIncome();
   });
 };
