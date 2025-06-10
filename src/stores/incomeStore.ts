@@ -71,6 +71,7 @@ export const useIncomeStore = create<IncomeState>((set, get) => {
 
     fetchTotalIncome: async () => {
       set({ isLoading: true, error: null });
+      console.log('Income Store: Fetching total income...');
       
       try {
         // Fetch transactions from database
@@ -106,9 +107,10 @@ export const useIncomeStore = create<IncomeState>((set, get) => {
           if (storedTransactions) {
             const localTransactions = JSON.parse(storedTransactions);
             
-            // Filter only income transactions
+            // Filter only income transactions - ensure we catch all income transactions
+            // regardless of how they were created
             const incomeTransactions = localTransactions.filter(
-              (t: any) => (t.category === 'Income' && t.type === 'income')
+              (t: any) => (t.category === 'Income' || t.type === 'income')
             );
             
             // Calculate local income total

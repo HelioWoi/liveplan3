@@ -39,6 +39,18 @@ export interface Transaction {
   type: TransactionType;
   description?: string;
   basiq_id?: string; // ID da transação no Basiq (opcional)
+  is_recent?: boolean; // Indica se a transação deve aparecer em Recent Transactions
+  metadata?: {
+    sourceEntryId?: string;
+    sourceWeek?: string;
+    sourceMonth?: string;
+    sourceYear?: string | number;
+    week?: string;
+    month?: string;
+    year?: string | number;
+    fromWeeklyBudget?: boolean;
+    [key: string]: any; // Permite outros campos de metadata
+  };
 }
 
 export const isIncomeCategory = (category: TransactionCategory): boolean => {

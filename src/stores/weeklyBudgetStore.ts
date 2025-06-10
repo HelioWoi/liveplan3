@@ -193,11 +193,16 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           type: entry.category === 'Income' ? 'income' as TransactionType : 'expense' as TransactionType,
           date: weekDate.toISOString(),
           user_id: 'local-user',
+          is_recent: true, // Marcar como transação recente para aparecer em Recent Transactions
           metadata: {
             sourceEntryId: entry.id,
             sourceWeek: entry.week,
             sourceMonth: entry.month,
-            sourceYear: entry.year
+            sourceYear: entry.year,
+            week: entry.week,  // Adicionar metadados no formato padronizado
+            month: entry.month,
+            year: entry.year,
+            fromWeeklyBudget: true // Indicador de que veio do Weekly Budget
           }
         };
         
@@ -446,8 +451,13 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           let month = '';
           let year = 0;
           
-          if (transaction.metadata && transaction.metadata.sourceWeek) {
+          if (transaction.metadata && transaction.metadata.week) {
             // Se a transação tem metadados de semana, usar esses valores
+            week = transaction.metadata.week;
+            month = transaction.metadata.month || '';
+            year = transaction.metadata.year || 0;
+          } else if (transaction.metadata && transaction.metadata.sourceWeek) {
+            // Compatibilidade com formato anterior
             week = transaction.metadata.sourceWeek;
             month = transaction.metadata.sourceMonth || '';
             year = transaction.metadata.sourceYear || 0;
@@ -467,6 +477,15 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             }
           }
           
+          // Se não temos mês ou ano válidos, usar o mês e ano atual
+          if (!month || month === '') {
+            month = new Date().toLocaleString('default', { month: 'long' });
+          }
+          
+          if (!year || year === 0) {
+            year = new Date().getFullYear();
+          }
+          
           // Verificar se já existe uma entrada com a mesma descrição, valor e semana
           const existingEntry = existingEntries.find(entry => 
             entry.description === (transaction.description || transaction.origin) && 
@@ -481,7 +500,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             const newEntry: WeeklyBudgetEntry = {
               id: `wb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
-              description: transaction.description || transaction.origin,
+              description: transaction.description || transaction.origin || 'Income',
               amount: transaction.amount,
               category: 'Income',
               month: month,

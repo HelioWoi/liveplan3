@@ -49,6 +49,13 @@ export default function WeeklyBudget() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const { entries, currentYear, setCurrentYear, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
   
+  // Sincronizar com transações ao montar o componente
+  useEffect(() => {
+    console.log('WeeklyBudget: Inicializando e sincronizando com transações');
+    // Sincronizar imediatamente ao montar o componente
+    syncWithTransactions();
+  }, [syncWithTransactions]);
+  
   // Forçar atualização quando novas transações forem adicionadas
   useEffect(() => {
     // Função para sincronizar com transações quando eventos forem disparados

@@ -154,6 +154,33 @@ export const useTransactionStore = create<TransactionState>((set) => {
                 week = 'Week 2';
               }
               
+              // Add metadata to the transaction if it doesn't already have it
+              if (!data.metadata) {
+                data.metadata = {};
+              }
+              
+              // Ensure the transaction has week, month, year metadata
+              if (!data.metadata.week) {
+                data.metadata.week = week;
+              }
+              if (!data.metadata.month) {
+                data.metadata.month = month;
+              }
+              if (!data.metadata.year) {
+                data.metadata.year = year;
+              }
+              
+              // Mark transaction as recent to appear in Recent Transactions
+              data.is_recent = true;
+              
+              // Update the transaction in localStorage with the metadata
+              const localTransactions = JSON.parse(localStorage.getItem('local_transactions') || '[]');
+              const transactionIndex = localTransactions.findIndex((t: any) => t.id === data.id);
+              if (transactionIndex !== -1) {
+                localTransactions[transactionIndex] = data;
+                localStorage.setItem('local_transactions', JSON.stringify(localTransactions));
+              }
+              
               // Dispatch a more specific event with transaction details
               window.dispatchEvent(new CustomEvent('income-added-to-week', {
                 detail: {

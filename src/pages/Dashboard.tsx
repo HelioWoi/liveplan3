@@ -149,6 +149,8 @@ export default function Dashboard() {
     console.log(`- Selected Year: ${selectedYear}`);
     console.log(`- Selected Week: ${selectedWeek}`);
     console.log(`- Transaction date: ${transactionDate.toISOString()}`);
+    console.log(`- Transaction metadata:`, transaction.metadata);
+    console.log(`- Is recent:`, transaction.is_recent);
     
     // Verificar se o ano é 2025 ou posterior
     if (transactionDate.getFullYear() < 2025) {
@@ -162,15 +164,42 @@ export default function Dashboard() {
         // Filtrar pela semana selecionada no mês e ano selecionados
         const dayOfMonth = transactionDate.getDate();
         const weekOfMonth = Math.ceil(dayOfMonth / 7);
+        
+        // Verificar metadata para transações do Weekly Budget
+        if (transaction.metadata && transaction.metadata.week) {
+          const weekMatch = transaction.metadata.week === `Week ${selectedWeekNumber}`;
+          const monthMatch = transaction.metadata.month === selectedMonth;
+          const yearMatch = transaction.metadata.year === selectedYearNumber;
+          
+          if (weekMatch && monthMatch && yearMatch) {
+            return true;
+          }
+        }
+        
         return transactionDate.getMonth() === selectedMonthIndex && 
                transactionDate.getFullYear() === selectedYearNumber &&
                weekOfMonth === selectedWeekNumber;
       case 'Month':
         // Usar o mês e ano selecionados
+        // Verificar metadata para transações do Weekly Budget
+        if (transaction.metadata && transaction.metadata.month) {
+          const monthMatch = transaction.metadata.month === selectedMonth;
+          const yearMatch = transaction.metadata.year === selectedYearNumber;
+          
+          if (monthMatch && yearMatch) {
+            return true;
+          }
+        }
+        
         return transactionDate.getMonth() === selectedMonthIndex && 
                transactionDate.getFullYear() === selectedYearNumber;
       case 'Year':
         // Usar o ano selecionado
+        // Verificar metadata para transações do Weekly Budget
+        if (transaction.metadata && transaction.metadata.year) {
+          return transaction.metadata.year === selectedYearNumber;
+        }
+        
         return transactionDate.getFullYear() === selectedYearNumber;
       default:
         return true;
