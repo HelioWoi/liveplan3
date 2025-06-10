@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { Transaction, TaxType } from '../types/transaction';
 import { supabase } from '../lib/supabase/supabaseClient';
 
-// Extend Transaction type to include possible metadata property
-interface TransactionWithMetadata extends Omit<Transaction, 'id'> {
+// Define transaction with metadata for flexibility
+type TransactionWithMetadata = Omit<Transaction, 'id'> & {
+  id?: string;
   metadata?: Record<string, any>;
-}
+  is_local?: boolean;
+};
 
 interface TaxEntry {
   id: string;
@@ -13,7 +15,7 @@ interface TaxEntry {
   amount: number;
   type: TaxType;
   notes?: string;
-  userId: string;
+  user_id: string;
 }
 
 interface TransactionState {
@@ -33,9 +35,6 @@ interface TransactionState {
   clearTransactions: () => Promise<void>;
   bulkAddTransactions: (transactions: TransactionWithMetadata[]) => Promise<void>;
 }
-
-// Define supabase type to avoid 'any' errors
-declare const supabase: SupabaseClient;
 
 export const useTransactionStore = create<TransactionState>((set) => {
   // Add listener for reset-all-stores event
