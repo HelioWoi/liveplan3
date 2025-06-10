@@ -13,7 +13,7 @@ import { FeedbackProvider } from './components/feedback/FeedbackProvider';
 import { syncService } from './utils/syncService';
 import { clearOldBasiqApiKey } from './utils/basiqUtils';
 // Importações de segurança - versão simplificada
-import SimpleSyncStatus from './components/security/SimpleSyncStatus';
+// SimpleSyncStatus import removed as requested
 import SimplePrivacyDashboard from './components/security/SimplePrivacyDashboard';
 import { useSimpleSecurityState } from './hooks/useSimpleSecurityState';
 import Home from './pages/Home';
@@ -117,8 +117,7 @@ function AppContent() {
           setDataProtectionEnabled={setDataProtectionEnabled}
         />
         
-        {/* Sync Status Indicator - versão simplificada */}
-        {session?.user && <SimpleSyncStatus />}
+        {/* Sync Status Indicator removed as requested */}
         
         {showQuickActions && <QuickActions onOpenAddEntryModal={handleOpenAddEntryModal} />}
         <Routes>
