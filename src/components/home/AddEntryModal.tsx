@@ -41,14 +41,6 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
   
   const [month, setMonth] = useState(selectedMonth || getCurrentMonth());
   const [week, setWeek] = useState(getCurrentWeek());
-  
-  // Atualizar o mês e a semana sempre que o modal for aberto
-  useEffect(() => {
-    if (isOpen) {
-      setMonth(getCurrentMonth());
-      setWeek(getCurrentWeek());
-    }
-  }, [isOpen]);
   const [category, setCategory] = useState('Extra');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -58,7 +50,19 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
   const [monthlyWeek, setMonthlyWeek] = useState('First');
   const [monthlyDay, setMonthlyDay] = useState('Monday');
   const [annualDate, setAnnualDate] = useState('');
-
+  
+  // Atualizar o mês e a semana sempre que o modal for aberto
+  useEffect(() => {
+    if (isOpen) {
+      // Usar o mês selecionado se disponível, caso contrário usar o mês atual
+      setMonth(selectedMonth || getCurrentMonth());
+      // Manter a semana selecionada pelo usuário se já tiver sido definida
+      if (!week) {
+        setWeek(getCurrentWeek());
+      }
+      console.log('Modal aberto com mês:', selectedMonth || getCurrentMonth(), 'e semana:', week || getCurrentWeek());
+    }
+  }, [isOpen, selectedMonth]);
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -225,40 +229,56 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
     });
     
     console.log(`Geradas ${futureEntries.length} entradas recorrentes para ${repeatOption}`);
+    return futureEntries;
   };
-
-  const handleSubmit = async () => {
+  
+  const handleSubmit = () => {
     if (!description || !amount) {
       return;
     }
-
-    const entry: WeeklyBudgetEntry = {
-      id: Date.now().toString(),
+    
+    console.log(`Adicionando entrada para semana: ${week}, mês: ${month}, ano: ${selectedYear || new Date().getFullYear()}`);
+    
+    // Validar que a semana está corretamente definida
+    if (!week || !['Week 1', 'Week 2', 'Week 3', 'Week 4'].includes(week)) {
+      console.error('Erro ao adicionar entrada: semana inválida', week);
+      setWeek('Week 1'); // Definir uma semana padrão se inválida
+    }
+    
+    // Criar uma nova entrada
+    const newEntry: WeeklyBudgetEntry = {
+      id: `entry-${Date.now()}`,
+      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
       description,
       amount: parseFloat(amount),
       category: category as TransactionCategory,
-      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
       month,
-      year: selectedYear || new Date().getFullYear()
+      year: selectedYear || new Date().getFullYear(),
+      syncToTransactions: syncToTransactions // Adicionar flag para sincronização com transações
     };
-
-    // Adiciona a entrada ao orçamento semanal
-    addEntry(entry);
     
-    // Se a opção de repetição for diferente de 'Does not repeat', gerar entradas futuras
+    console.log('Nova entrada a ser adicionada:', newEntry);
+    
+    // Adicionar a entrada ao Weekly Budget
+    addEntry(newEntry);
+    
+    // Se a opção de repetição estiver selecionada, gerar entradas recorrentes
     if (repeatOption !== 'Does not repeat') {
-      generateRecurringEntries(entry);
+      console.log(`Gerando entradas recorrentes com opção: ${repeatOption}`);
+      const recurringEntries = generateRecurringEntries(newEntry);
+      console.log(`${recurringEntries.length} entradas recorrentes geradas`);
     }
     
-    // Não precisamos criar a transação aqui, pois o weeklyBudgetStore já faz isso
-    // A criação duplicada estava causando problemas de cálculo
-    console.log('Entrada adicionada ao Weekly Budget. A transação será criada pelo weeklyBudgetStore.');
-
     // Reset form
     setDescription('');
     setAmount('');
-    setMonth(getCurrentMonth());
-    setWeek(getCurrentWeek());
+    // Não resetar o mês e a semana para manter a seleção do usuário
+    // setMonth(getCurrentMonth());
+    // setWeek(getCurrentWeek());
+    
+    // Disparar evento para atualizar a interface
+    window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+    
     onClose();
   };
 
@@ -479,7 +499,10 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth, selected
                       type="checkbox"
                       id="syncTransactions"
                       checked={syncToTransactions}
-                      onChange={(e) => setSyncToTransactions(e.target.checked)}
+                      onChange={(e) => {
+                        setSyncToTransactions(e.target.checked);
+                        console.log('Sincronização com transações:', e.target.checked ? 'ativada' : 'desativada');
+                      }}
                       className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
                     <label htmlFor="syncTransactions" className="ml-2 block text-sm text-gray-600">

@@ -91,17 +91,15 @@ export default function WeeklyBudget() {
   
   // Estado para controlar a entrada selecionada para movimentação
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
-  const [showOptions, setShowOptions] = useState(false);
   
-  // Função para selecionar uma entrada para mover
+  // Função para selecionar uma entrada
   const handleSelectEntry = (entryId: string) => {
     if (selectedEntry === entryId) {
-      // Se clicar no mesmo item novamente, alterna a exibição das opções
-      setShowOptions(!showOptions);
+      // Se clicar no mesmo item novamente, deseleciona
+      setSelectedEntry(null);
     } else {
-      // Se clicar em um novo item, seleciona e mostra as opções
+      // Se clicar em um novo item, seleciona
       setSelectedEntry(entryId);
-      setShowOptions(true);
     }
   };
   
@@ -110,7 +108,6 @@ export default function WeeklyBudget() {
     if (selectedEntry) {
       moveEntryToWeek(selectedEntry, targetWeek);
       setSelectedEntry(null); // Limpa a seleção após mover
-      setShowOptions(false); // Esconde as opções após mover
       
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
@@ -144,7 +141,6 @@ export default function WeeklyBudget() {
       setEntryToDelete(null);
       setIsDeleteModalOpen(false);
       setSelectedEntry(null);
-      setShowOptions(false);
       
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
@@ -159,8 +155,6 @@ export default function WeeklyBudget() {
       setIsEditModalOpen(false);
       setEntryToEdit(null);
       setSelectedEntry(null);
-      setShowOptions(false);
-      
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
       window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
@@ -384,18 +378,24 @@ export default function WeeklyBudget() {
                     const isCurrentWeek = week === getCurrentWeek();
                     
                     // Encontrar todas as entradas desta categoria e semana
-                    const weekEntries = entries.filter(entry => 
-                      entry.week === week && 
-                      entry.category === category && 
-                      entry.month === selectedMonth &&
-                      entry.year === currentYear
-                    );
+                    const weekEntries = entries.filter(entry => {
+                      const matchesWeek = entry.week === week;
+                      const matchesCategory = entry.category === category;
+                      const matchesMonth = entry.month === selectedMonth;
+                      const matchesYear = entry.year === currentYear;
+                      
+                      // Log detalhado para depuração quando os filtros não correspondem
+                      if (matchesCategory && matchesMonth && matchesYear && !matchesWeek && category === 'Income') {
+                        console.log(`Entrada não exibida na ${week} (está na ${entry.week}):`, entry);
+                      }
+                      
+                      return matchesWeek && matchesCategory && matchesMonth && matchesYear;
+                    });
                     
                     return (
                       <td 
                         key={`${category}-${week}`}
-                        className={`px-6 py-4 whitespace-nowrap text-sm ${isCurrentWeek ? 'bg-purple-50' : ''} ${selectedEntry && 'hover:bg-blue-50 cursor-pointer'}`}
-                        onClick={() => selectedEntry && handleMoveToWeek(week)}
+                        className={`px-6 py-4 whitespace-nowrap text-sm ${isCurrentWeek ? 'bg-purple-50' : ''}`}
                       >
                         {weekEntries.length > 0 ? (
                           <div>
@@ -403,7 +403,10 @@ export default function WeeklyBudget() {
                               // Single entry - show as before
                               <div key={weekEntries[0].id} className="relative">
                                 <div
-                                  onClick={() => handleSelectEntry(weekEntries[0].id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Evita que o evento se propague para o td
+                                    handleSelectEntry(weekEntries[0].id);
+                                  }}
                                   className={`mb-1 p-1 rounded cursor-pointer 
                                     ${selectedEntry === weekEntries[0].id ? 'bg-blue-100 shadow-lg' : 'hover:bg-gray-100'} 
                                     ${(category === 'Fixed' || category === 'Variable' || category === 'Extra' || category === 'Additional') ? 'text-yellow-600' : 
@@ -413,21 +416,38 @@ export default function WeeklyBudget() {
                                 </div>
                                 
                                 {/* Options for edit and delete */}
-                                {selectedEntry === weekEntries[0].id && showOptions && (
+                                {selectedEntry === weekEntries[0].id && (
                                   <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
                                     <button 
-                                      onClick={handleEditEntry}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEditEntry();
+                                      }}
                                       className="p-1 text-blue-600 hover:bg-blue-100 rounded"
                                       title="Edit"
                                     >
                                       <Edit size={16} />
                                     </button>
                                     <button 
-                                      onClick={handleDeleteEntry}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteEntry();
+                                      }}
                                       className="p-1 text-red-600 hover:bg-red-100 rounded"
                                       title="Delete"
                                     >
                                       <Trash2 size={16} />
+                                    </button>
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEntryToMove(weekEntries[0].id);
+                                        setIsMoveModalOpen(true);
+                                      }}
+                                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                                      title="Move to another week"
+                                    >
+                                      <ArrowRight size={16} />
                                     </button>
                                   </div>
                                 )}
@@ -665,33 +685,50 @@ export default function WeeklyBudget() {
       )}
       
       {/* Move Entry Modal */}
-      {isMoveModalOpen && (
+      {isMoveModalOpen && entryToMove && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Move to Week</h2>
-            <p className="mb-6 text-gray-600">Select the week you want to move this entry to:</p>
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
-                <button
-                  key={week}
-                  onClick={() => {
-                    if (entryToMove) {
-                      moveEntryToWeek(entryToMove, week);
-                      setEntryToMove(null);
-                      setIsMoveModalOpen(false);
-                    }
-                  }}
-                  className="px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md flex items-center justify-center"
-                >
-                  <ArrowRight size={16} className="mr-2" />
-                  {week}
-                </button>
-              ))}
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Move Entry</h3>
+            <p className="mb-4">Select a week to move this entry to:</p>
+            
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((week) => {
+                // Encontrar a entrada que está sendo movida
+                const entry = entries.find(e => e.id === entryToMove);
+                const isCurrentWeek = entry?.week === week;
+                
+                return (
+                  <button
+                    key={week}
+                    onClick={() => {
+                      if (!isCurrentWeek) { // Só move se não for a semana atual
+                        moveEntryToWeek(entryToMove, week);
+                        setEntryToMove(null);
+                        setIsMoveModalOpen(false);
+                        setSelectedEntry(null);
+                      } else {
+                        // Se for a mesma semana, apenas fecha o modal
+                        setEntryToMove(null);
+                        setIsMoveModalOpen(false);
+                        setSelectedEntry(null);
+                      }
+                    }}
+                    className={`py-2 px-4 ${isCurrentWeek ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 hover:bg-blue-200'} rounded-md`}
+                    disabled={isCurrentWeek}
+                  >
+                    {week} {isCurrentWeek ? '(atual)' : ''}
+                  </button>
+                );
+              })}
             </div>
+            
             <div className="flex justify-end">
-              <button 
-                onClick={() => setIsMoveModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md"
+              <button
+                onClick={() => {
+                  setEntryToMove(null);
+                  setIsMoveModalOpen(false);
+                }}
+                className="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-md"
               >
                 Cancel
               </button>
