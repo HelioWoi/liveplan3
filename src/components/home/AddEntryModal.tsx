@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { useWeeklyBudgetStore, WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
 import { TransactionCategory } from '../../types/transaction';
 
@@ -10,10 +10,45 @@ interface AddEntryModalProps {
   selectedYear?: number;
 }
 
-export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April', selectedYear }: AddEntryModalProps) {
+export default function AddEntryModal({ isOpen, onClose, selectedMonth, selectedYear }: AddEntryModalProps) {
   const { addEntry } = useWeeklyBudgetStore();
-  const [month, setMonth] = useState(selectedMonth);
-  const [week, setWeek] = useState('Week 1');
+  
+  // Obter o mês atual
+  const getCurrentMonth = () => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const currentDate = new Date();
+    return months[currentDate.getMonth()];
+  };
+  
+  // Obter a semana atual com base no dia do mês
+  const getCurrentWeek = () => {
+    const currentDate = new Date();
+    const dayOfMonth = currentDate.getDate();
+    
+    if (dayOfMonth > 21) {
+      return 'Week 4';
+    } else if (dayOfMonth > 14) {
+      return 'Week 3';
+    } else if (dayOfMonth > 7) {
+      return 'Week 2';
+    } else {
+      return 'Week 1';
+    }
+  };
+  
+  const [month, setMonth] = useState(selectedMonth || getCurrentMonth());
+  const [week, setWeek] = useState(getCurrentWeek());
+  
+  // Atualizar o mês e a semana sempre que o modal for aberto
+  useEffect(() => {
+    if (isOpen) {
+      setMonth(getCurrentMonth());
+      setWeek(getCurrentWeek());
+    }
+  }, [isOpen]);
   const [category, setCategory] = useState('Extra');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -222,6 +257,8 @@ export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April'
     // Reset form
     setDescription('');
     setAmount('');
+    setMonth(getCurrentMonth());
+    setWeek(getCurrentWeek());
     onClose();
   };
 

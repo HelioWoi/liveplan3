@@ -10,7 +10,6 @@ import WeeklyBudget from '../components/home/WeeklyBudget';
 import Formula3 from '../components/home/Formula3';
 import TopGoals from '../components/TopGoals';
 import UpcomingBills from '../components/home/UpcomingBills';
-import RecentTransactions from '../components/home/RecentTransactions';
 import TransactionModal from '../components/modals/TransactionModal';
 import { useTransactionStore } from '../stores/transactionStore';
 import { formatCurrency } from '../utils/formatters';
@@ -451,7 +450,7 @@ export default function Home() {
               <TopGoals />
             </AnimatedCard>
 
-            <RecentTransactions />
+            {/* RecentTransactions component removed */}
 
             <div className="bg-white rounded-lg shadow-sm">
               <UpcomingBills />
