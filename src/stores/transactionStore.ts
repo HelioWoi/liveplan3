@@ -133,6 +133,13 @@ export const useTransactionStore = create<TransactionState>((set) => {
               detail: data,
             });
             window.dispatchEvent(localTransactionEvent);
+            
+            // For income transactions, dispatch weekly budget update
+            if (data.category === 'Income' || data.type === 'income') {
+              console.log('Transaction Store: Added income transaction', data);
+              window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+              console.log('Transaction Store: Dispatched weekly-budget-updated event for income');
+            }
 
             // Log for income transactions
             if (data.category === 'Income' || data.type === 'income') {
@@ -174,9 +181,12 @@ export const useTransactionStore = create<TransactionState>((set) => {
         });
         window.dispatchEvent(localTransactionEvent);
 
-        // Log for income transactions
+        // Log for income transactions and dispatch weekly budget update
         if (localTransaction.category === 'Income' || localTransaction.type === 'income') {
           console.log('Transaction Store: Added income transaction (local)', localTransaction);
+          // Dispatch weekly budget update event for income transactions
+          window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+          console.log('Transaction Store: Dispatched weekly-budget-updated event for income');
         }
         
         // Update localStorage with the new transaction
