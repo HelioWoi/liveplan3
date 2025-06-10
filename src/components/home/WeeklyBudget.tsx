@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
+import { useAuthStore } from '../../stores/authStore';
 // Removemos a dependência de react-beautiful-dnd para evitar erros de hooks
 
 type Period = 'Month' | 'Year';
@@ -23,6 +24,51 @@ function Tooltip({ children, content }: TooltipProps) {
   );
 }
 
+// Anos fixos de 2022 a 2025
+const years = [2022, 2023, 2024, 2025];
+
+const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
+
+const monthsShort = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+const months = [
+  { full: 'January', short: 'Jan' },
+  { full: 'February', short: 'Feb' },
+  { full: 'March', short: 'Mar' },
+  { full: 'April', short: 'Apr' },
+  { full: 'May', short: 'May' },
+  { full: 'June', short: 'Jun' },
+  { full: 'July', short: 'Jul' },
+  { full: 'August', short: 'Aug' },
+  { full: 'September', short: 'Sep' },
+  { full: 'October', short: 'Oct' },
+  { full: 'November', short: 'Nov' },
+  { full: 'December', short: 'Dec' }
+];
+
+const getCurrentMonth = () => monthsShort[new Date().getMonth()];
+const getCurrentYear = () => new Date().getFullYear();
+
+const getCurrentWeek = () => {
+  const now = new Date();
+  const dayOfMonth = now.getDate();
+  const weekNumber = Math.ceil(dayOfMonth / 7);
+  return `Week ${weekNumber}`;
+};
+
+// Categoria descriptions for tooltips
+const categoryDescriptions: Record<string, string> = {
+  Fixed: 'Mandatory and recurring expenses, such as rent, school, health insurance, etc.',
+  Variable: 'Flexible and monthly expenses, such as groceries, fuel, delivery.',
+  Extra: 'Non-standard costs, such as unexpected repairs or last-minute travel. Should be used with caution.',
+  Additional: 'Non-essential expenses that you chose to make, such as gifts or parties. Ideally, these should be planned.',
+  Income: 'Money received from salary, freelance work, or other sources.'
+};
+
+
 export default function WeeklyBudget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -32,30 +78,26 @@ export default function WeeklyBudget() {
   const [entryToEdit, setEntryToEdit] = useState<any>(null);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   const [entryToMove, setEntryToMove] = useState<string | null>(null);
-  const [detailsData, setDetailsData] = useState<{category: string, week: string, entries: any[]}>({category: '', week: '', entries: []});
-  const getCurrentMonth = () => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return months[new Date().getMonth()];
-  };
-
-  const getCurrentYear = () => new Date().getFullYear();
-
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
   const [showMonths, setShowMonths] = useState(true); // Show months by default
   const [showYears, setShowYears] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
-  const { entries, currentYear, setCurrentYear, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
+  const [detailsData, setDetailsData] = useState<{category: string, week: string, entries: any[]}>({category: '', week: '', entries: []});
+
+  // Estado para controlar a entrada selecionada para movimentação
+  const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
   
-  // Sincronizar com transações ao montar o componente
+  const { entries, currentYear, setCurrentYear, fetchEntries, updateEntry, deleteEntry, moveEntryToWeek, syncWithTransactions } = useWeeklyBudgetStore();
+
+  const { user } = useAuthStore();
+
   useEffect(() => {
-    console.log('WeeklyBudget: Inicializando e sincronizando com transações');
-    // Sincronizar imediatamente ao montar o componente
-    syncWithTransactions();
-  }, [syncWithTransactions]);
-  
+    if (user?.id) {
+      fetchEntries(user.id);
+    }
+  }, [user?.id]);
+
   // Forçar atualização quando novas transações forem adicionadas
   useEffect(() => {
     // Função para sincronizar com transações quando eventos forem disparados
@@ -64,42 +106,26 @@ export default function WeeklyBudget() {
       syncWithTransactions();
     };
     
-    // Função para sincronizar quando income for adicionado
-    const handleIncomeAdded = (event: any) => {
-      console.log('WeeklyBudget: Detectada adição de income', event.detail);
-      syncWithTransactions();
-    };
-    
     // Adicionar listeners para eventos de atualização de transações
     window.addEventListener('transactions-updated', handleTransactionsUpdated);
-    window.addEventListener('income-added-to-week', handleIncomeAdded);
     window.addEventListener('transaction-added', handleTransactionsUpdated);
-    window.addEventListener('local-transaction-added', handleTransactionsUpdated);
-    window.addEventListener('weekly-budget-updated', handleTransactionsUpdated);
-    window.addEventListener('income-added-from-weekly-budget', handleIncomeAdded);
     
     // Limpar listeners ao desmontar o componente
     return () => {
       window.removeEventListener('transactions-updated', handleTransactionsUpdated);
       window.removeEventListener('transaction-added', handleTransactionsUpdated);
-      window.removeEventListener('local-transaction-added', handleTransactionsUpdated);
-      window.removeEventListener('income-added-to-week', handleIncomeAdded);
-      window.removeEventListener('weekly-budget-updated', handleTransactionsUpdated);
-      window.removeEventListener('income-added-from-weekly-budget', handleIncomeAdded);
     };
   }, [syncWithTransactions]);
   
-  // Estado para controlar a entrada selecionada para movimentação
-  const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
-  
-  // Função para selecionar uma entrada
+  // Função para selecionar uma entrada para mover
   const handleSelectEntry = (entryId: string) => {
     if (selectedEntry === entryId) {
-      // Se clicar no mesmo item novamente, deseleciona
-      setSelectedEntry(null);
+      // Se clicar no mesmo item novamente, alterna a exibição das opções
+      setShowOptions(!showOptions);
     } else {
-      // Se clicar em um novo item, seleciona
+      // Se clicar em um novo item, seleciona e mostra as opções
       setSelectedEntry(entryId);
+      setShowOptions(true);
     }
   };
   
@@ -108,6 +134,7 @@ export default function WeeklyBudget() {
     if (selectedEntry) {
       moveEntryToWeek(selectedEntry, targetWeek);
       setSelectedEntry(null); // Limpa a seleção após mover
+      setShowOptions(false); // Esconde as opções após mover
       
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
@@ -119,6 +146,7 @@ export default function WeeklyBudget() {
   const handleEditEntry = () => {
     if (selectedEntry) {
       const entry = entries.find(e => e.id === selectedEntry);
+
       if (entry) {
         setEntryToEdit(entry);
         setIsEditModalOpen(true);
@@ -141,6 +169,7 @@ export default function WeeklyBudget() {
       setEntryToDelete(null);
       setIsDeleteModalOpen(false);
       setSelectedEntry(null);
+      setShowOptions(false);
       
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
@@ -155,6 +184,8 @@ export default function WeeklyBudget() {
       setIsEditModalOpen(false);
       setEntryToEdit(null);
       setSelectedEntry(null);
+      setShowOptions(false);
+      
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
       window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
@@ -176,11 +207,6 @@ export default function WeeklyBudget() {
     window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
   }, []);
   
-  // Anos fixos de 2022 a 2025
-  const years = [2022, 2023, 2024, 2025];
-
-  // Opções de período são definidas diretamente no código
-  
   // Função para renderizar as opções de período
   const renderPeriodOptions = () => {
     return (
@@ -189,8 +215,7 @@ export default function WeeklyBudget() {
         <button
           onClick={() => {
             setSelectedPeriod('Month');
-            // Always keep months dropdown open
-            setShowMonths(true);
+            setShowMonths(!showMonths);
             setShowYears(false);
           }}
           className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -207,7 +232,7 @@ export default function WeeklyBudget() {
             // Don't clear the selected month
             // setSelectedMonth('');
             setShowYears(!showYears);
-            setShowMonths(true); // Keep months dropdown open
+            setShowMonths(false);
           }}
           className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
             selectedPeriod === 'Year'
@@ -215,30 +240,23 @@ export default function WeeklyBudget() {
               : 'text-gray-700 hover:text-purple-600'
           }`}
         >
-          2025
+          Year
         </button>
       </>
     );
   };
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
-  const getCurrentWeek = () => {
-    const now = new Date();
-    const dayOfMonth = now.getDate();
-    const weekNumber = Math.ceil(dayOfMonth / 7);
-    return `Week ${weekNumber}`;
-  };
-
+  
   const getWeekBalance = (week: string) => {
     // Filtrar entradas para a semana, mês e ano atual
-    const weekEntries = entries.filter(entry => 
-      entry.week === week && 
-      entry.month === selectedMonth &&
+    const weekEntries = entries.filter(entry => {
+      const month = months.find(month => month.short === selectedMonth);
+
+      return entry.week === week && 
+      entry.month === month?.short &&
       entry.year === currentYear
-    );
+    });
+
+     
     
     // Calcular o Income (receita) - sempre positivo
     const income = weekEntries
@@ -254,17 +272,6 @@ export default function WeeklyBudget() {
     // Calcular o saldo: Income - expenses
     // Subtraímos todas as despesas do income conforme solicitado
     return income - expenses;
-  };
-
-  const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
-
-  // Categoria descriptions for tooltips
-  const categoryDescriptions: Record<string, string> = {
-    Fixed: 'Mandatory and recurring expenses, such as rent, school, health insurance, etc.',
-    Variable: 'Flexible and monthly expenses, such as groceries, fuel, delivery.',
-    Extra: 'Non-standard costs, such as unexpected repairs or last-minute travel. Should be used with caution.',
-    Additional: 'Non-essential expenses that you chose to make, such as gifts or parties. Ideally, these should be planned.',
-    Income: 'Money received from salary, freelance work, or other sources.'
   };
 
   return (
@@ -316,22 +323,22 @@ export default function WeeklyBudget() {
             ))}
           </div>
         )}
+
         {selectedPeriod === 'Month' && showMonths && (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-12">
-            {months.map(month => (
+            {months.map(({ full, short }) => (
               <button
-                key={month}
+                key={short}
                 onClick={() => {
-                  setSelectedMonth(month);
-                  setShowMonths(false);
+                  setSelectedMonth(short);
                 }}
                 className={`py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                  selectedMonth === month
+                  selectedMonth === short
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'
                     : 'border border-gray-200 text-gray-700 hover:border-purple-200'
                 }`}
               >
-                {month}
+                {short}
               </button>
             ))}
           </div>
@@ -363,6 +370,7 @@ export default function WeeklyBudget() {
                 ))}
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {categories.map(category => (
                 <tr key={category} className="hover:bg-gray-50">
@@ -379,23 +387,20 @@ export default function WeeklyBudget() {
                     
                     // Encontrar todas as entradas desta categoria e semana
                     const weekEntries = entries.filter(entry => {
-                      const matchesWeek = entry.week === week;
-                      const matchesCategory = entry.category === category;
-                      const matchesMonth = entry.month === selectedMonth;
-                      const matchesYear = entry.year === currentYear;
-                      
-                      // Log detalhado para depuração quando os filtros não correspondem
-                      if (matchesCategory && matchesMonth && matchesYear && !matchesWeek && category === 'Income') {
-                        console.log(`Entrada não exibida na ${week} (está na ${entry.week}):`, entry);
+                      const month = months.find(month => month.short === selectedMonth);
+                    
+                      return entry.week === week && 
+                        entry.category === category && 
+                        entry.month === month?.short &&
+                        entry.year === currentYear
                       }
-                      
-                      return matchesWeek && matchesCategory && matchesMonth && matchesYear;
-                    });
+                    );
                     
                     return (
                       <td 
                         key={`${category}-${week}`}
-                        className={`px-6 py-4 whitespace-nowrap text-sm ${isCurrentWeek ? 'bg-purple-50' : ''}`}
+                        className={`px-6 py-4 whitespace-nowrap text-sm ${isCurrentWeek ? 'bg-purple-50' : ''} ${selectedEntry && 'hover:bg-blue-50 cursor-pointer'}`}
+                        onClick={() => selectedEntry && handleMoveToWeek(week)}
                       >
                         {weekEntries.length > 0 ? (
                           <div>
@@ -403,10 +408,7 @@ export default function WeeklyBudget() {
                               // Single entry - show as before
                               <div key={weekEntries[0].id} className="relative">
                                 <div
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Evita que o evento se propague para o td
-                                    handleSelectEntry(weekEntries[0].id);
-                                  }}
+                                  onClick={() => handleSelectEntry(weekEntries[0].id)}
                                   className={`mb-1 p-1 rounded cursor-pointer 
                                     ${selectedEntry === weekEntries[0].id ? 'bg-blue-100 shadow-lg' : 'hover:bg-gray-100'} 
                                     ${(category === 'Fixed' || category === 'Variable' || category === 'Extra' || category === 'Additional') ? 'text-yellow-600' : 
@@ -416,38 +418,21 @@ export default function WeeklyBudget() {
                                 </div>
                                 
                                 {/* Options for edit and delete */}
-                                {selectedEntry === weekEntries[0].id && (
+                                {selectedEntry === weekEntries[0].id && showOptions && (
                                   <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
                                     <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleEditEntry();
-                                      }}
+                                      onClick={handleEditEntry}
                                       className="p-1 text-blue-600 hover:bg-blue-100 rounded"
                                       title="Edit"
                                     >
                                       <Edit size={16} />
                                     </button>
                                     <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteEntry();
-                                      }}
+                                      onClick={handleDeleteEntry}
                                       className="p-1 text-red-600 hover:bg-red-100 rounded"
                                       title="Delete"
                                     >
                                       <Trash2 size={16} />
-                                    </button>
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setEntryToMove(weekEntries[0].id);
-                                        setIsMoveModalOpen(true);
-                                      }}
-                                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                                      title="Move to another week"
-                                    >
-                                      <ArrowRight size={16} />
                                     </button>
                                   </div>
                                 )}
@@ -506,6 +491,7 @@ export default function WeeklyBudget() {
         </div>
         {/* Removed the bottom panel as requested */}
       </div>
+
       {/* Edit Modal */}
       {isEditModalOpen && entryToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -685,50 +671,33 @@ export default function WeeklyBudget() {
       )}
       
       {/* Move Entry Modal */}
-      {isMoveModalOpen && entryToMove && (
+      {isMoveModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Move Entry</h3>
-            <p className="mb-4">Select a week to move this entry to:</p>
-            
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((week) => {
-                // Encontrar a entrada que está sendo movida
-                const entry = entries.find(e => e.id === entryToMove);
-                const isCurrentWeek = entry?.week === week;
-                
-                return (
-                  <button
-                    key={week}
-                    onClick={() => {
-                      if (!isCurrentWeek) { // Só move se não for a semana atual
-                        moveEntryToWeek(entryToMove, week);
-                        setEntryToMove(null);
-                        setIsMoveModalOpen(false);
-                        setSelectedEntry(null);
-                      } else {
-                        // Se for a mesma semana, apenas fecha o modal
-                        setEntryToMove(null);
-                        setIsMoveModalOpen(false);
-                        setSelectedEntry(null);
-                      }
-                    }}
-                    className={`py-2 px-4 ${isCurrentWeek ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 hover:bg-blue-200'} rounded-md`}
-                    disabled={isCurrentWeek}
-                  >
-                    {week} {isCurrentWeek ? '(atual)' : ''}
-                  </button>
-                );
-              })}
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Move to Week</h2>
+            <p className="mb-6 text-gray-600">Select the week you want to move this entry to:</p>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
+                <button
+                  key={week}
+                  onClick={() => {
+                    if (entryToMove) {
+                      moveEntryToWeek(entryToMove, week);
+                      setEntryToMove(null);
+                      setIsMoveModalOpen(false);
+                    }
+                  }}
+                  className="px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md flex items-center justify-center"
+                >
+                  <ArrowRight size={16} className="mr-2" />
+                  {week}
+                </button>
+              ))}
             </div>
-            
             <div className="flex justify-end">
-              <button
-                onClick={() => {
-                  setEntryToMove(null);
-                  setIsMoveModalOpen(false);
-                }}
-                className="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-md"
+              <button 
+                onClick={() => setIsMoveModalOpen(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md"
               >
                 Cancel
               </button>
