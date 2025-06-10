@@ -179,68 +179,14 @@ export const useTransactionStore = create<TransactionState>((set) => {
           console.log('Transaction Store: Added income transaction (local)', localTransaction);
         }
         
-        set({ transactions: localTransactions, isLoading: false });
+        // Update localStorage with the new transaction
+        const storedTransactions = localStorage.getItem('local_transactions');
+        const localTransactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+        localTransactions.push(localTransaction);
+        localStorage.setItem('local_transactions', JSON.stringify(localTransactions));
       } catch (error) {
         console.error('Error fetching transactions:', error);
         set({ error: error instanceof Error ? error.message : 'Failed to fetch transactions', isLoading: false });
-      }
-    },
-            // Se o usuário estiver autenticado, salvar no banco de dados
-            // Remover o campo metadata para evitar erro, já que essa coluna não existe no banco
-            const { metadata, ...transactionWithoutMetadata } = transaction;
-            
-            const { data: dbData, error } = await supabase
-              .from('transactions')
-              .insert([{ ...transactionWithoutMetadata, user_id: user.id }])
-              .select()
-              .single();
-
-            if (error) {
-              console.error('Error saving transaction to database:', error);
-              // Continue mesmo com erro no banco, salvando localmente
-            } else {
-              data = dbData;
-            }
-          }
-        } catch (authError) {
-          console.error('Authentication error:', authError);
-          // Continue para salvar localmente
-        }
-        
-        // Se não conseguiu salvar no banco ou o usuário não está autenticado,
-        // criar um objeto de transação local
-        if (!data) {
-          data = {
-            id: Date.now().toString(),
-            ...transaction,
-            user_id: 'local-user'
-          };
-        }
-        
-        // Atualizar o estado com a nova transação
-        set(state => ({
-          transactions: [data, ...state.transactions],
-          isLoading: false
-        }));
-        
-        // No need for duplicate metadata check
-        
-        // Disparar evento para notificar outras partes do app (Weekly Budget e Homepage)
-        if (transaction.category === 'Income' || transaction.type === 'income') {
-          // Apenas disparar eventos para notificar a homepage e o Weekly Budget
-          // Não precisa adicionar ao localStorage novamente, pois já está no estado
-          try {
-            // Disparar evento para notificar a homepage e o Weekly Budget
-            window.dispatchEvent(new CustomEvent('local-transaction-added', { detail: data }));
-            window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-            console.log('Eventos disparados para sincronização de income:', data);
-          } catch (error) {
-            console.error('Erro ao sincronizar transação com eventos:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error adding transaction:', error);
-        set({ error: error instanceof Error ? error.message : 'Failed to add transaction', isLoading: false });
       }
     },
 
