@@ -177,26 +177,14 @@ export const useTransactionStore = create<TransactionState>((set) => {
         // Log for income transactions
         if (localTransaction.category === 'Income' || localTransaction.type === 'income') {
           console.log('Transaction Store: Added income transaction (local)', localTransaction);
+        }
         
         set({ transactions: localTransactions, isLoading: false });
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error fetching transactions:', error);
-        set({ error: error.message || 'Failed to fetch transactions', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to fetch transactions', isLoading: false });
       }
     },
-
-    addTransaction: async (transaction: TransactionWithMetadata) => {
-      set({ isLoading: true, error: null });
-      
-      try {
-        let data;
-        
-        // Tentar obter a sessão do usuário
-        try {
-          const { data: sessionData } = await supabase.auth.getSession();
-          const user = sessionData.session?.user;
-
-          if (user) {
             // Se o usuário estiver autenticado, salvar no banco de dados
             // Remover o campo metadata para evitar erro, já que essa coluna não existe no banco
             const { metadata, ...transactionWithoutMetadata } = transaction;
@@ -250,9 +238,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
             console.error('Erro ao sincronizar transação com eventos:', error);
           }
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error adding transaction:', error);
-        set({ error: error.message || 'Failed to add transaction', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to add transaction', isLoading: false });
       }
     },
 
@@ -310,9 +298,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
           transactions: state.transactions.map(t => (t.id === id ? { ...t, ...data } : t)),
           isLoading: false
         }));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error updating transaction:', error);
-        set({ error: error.message || 'Failed to update transaction', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to update transaction', isLoading: false });
       }
     },
 
@@ -342,9 +330,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
 
         // Disparar evento para notificar outras partes do app
         window.dispatchEvent(new CustomEvent('transaction-deleted', { detail: { id } }));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error deleting transaction:', error);
-        set({ error: error.message || 'Failed to delete transaction', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to delete transaction', isLoading: false });
       }
     },
 
@@ -367,9 +355,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
         if (error) throw error;
 
         set({ taxEntries: data || [], isLoading: false });
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error fetching tax entries:', error);
-        set({ error: error.message || 'Failed to fetch tax entries', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to fetch tax entries', isLoading: false });
       }
     },
 
@@ -398,9 +386,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
           taxEntries: [...state.taxEntries, ...(data || [])],
           isLoading: false
         }));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error adding tax entry:', error);
-        set({ error: error.message || 'Failed to add tax entry', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to add tax entry', isLoading: false });
       }
     },
 
@@ -430,9 +418,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
           taxEntries: state.taxEntries.map(t => (t.id === id ? (data && data[0]) || t : t)),
           isLoading: false
         }));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error updating tax entry:', error);
-        set({ error: error.message || 'Failed to update tax entry', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to update tax entry', isLoading: false });
       }
     },
 
@@ -459,9 +447,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
           taxEntries: state.taxEntries.filter(t => t.id !== id),
           isLoading: false
         }));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error deleting tax entry:', error);
-        set({ error: error.message || 'Failed to delete tax entry', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to delete tax entry', isLoading: false });
       }
     },
 
@@ -484,9 +472,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
         if (error) throw error;
 
         set({ transactions: [], isLoading: false });
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error clearing transactions:', error);
-        set({ error: error.message || 'Failed to clear transactions', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to clear transactions', isLoading: false });
       }
     },
 
@@ -532,9 +520,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
 
         // Dispatch general transactions-updated event
         window.dispatchEvent(new Event('transactions-updated'));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error bulk adding transactions:', error);
-        set({ error: error.message || 'Failed to bulk add transactions', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to bulk add transactions', isLoading: false });
       }
     },
 
@@ -564,9 +552,9 @@ export const useTransactionStore = create<TransactionState>((set) => {
 
         // Dispatch event
         window.dispatchEvent(new Event('transactions-updated'));
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error updating local transaction:', error);
-        set({ error: error.message || 'Failed to update local transaction', isLoading: false });
+        set({ error: error instanceof Error ? error.message : 'Failed to update local transaction', isLoading: false });
       }
     }
   };
