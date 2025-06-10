@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PeriodButton from './PeriodButton';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
@@ -28,6 +29,7 @@ export default function PeriodSelector({
   selectedWeek = '1',
   useShortMonthNames = false
 }: PeriodSelectorProps) {
+  const navigate = useNavigate();
   const [showMonths, setShowMonths] = useState(false);
   const [showYears, setShowYears] = useState(false);
   const [showWeeks, setShowWeeks] = useState(false);
@@ -101,6 +103,12 @@ export default function PeriodSelector({
   const weeks = getAvailableWeeks();
 
   const handlePeriodClick = (period: Period) => {
+    // Se for Week e a semana selecionada for 5 ("View More"), redirecionar para o Dashboard
+    if (period === 'Week' && selectedWeek === '5') {
+      navigate('/dashboard');
+      return;
+    }
+    
     onPeriodChange(period);
     if (period === 'Month') {
       setShowMonths(!showMonths);
@@ -135,6 +143,12 @@ export default function PeriodSelector({
   };
 
   const handleWeekClick = (week: WeekNumber) => {
+    // Se for a semana 5 ("View More"), redirecionar para o Dashboard
+    if (week === '5') {
+      navigate('/dashboard');
+      return;
+    }
+    
     if (onWeekChange) {
       onWeekChange(week);
     }
@@ -172,7 +186,8 @@ export default function PeriodSelector({
             onClick={() => handlePeriodClick(period)}
             isActive={selectedPeriod === period}
           >
-            {period === 'Week' && selectedWeek ? `Week ${selectedWeek}` :
+            {period === 'Week' && selectedWeek ? 
+              (selectedWeek === '5' ? 'View More' : `Week ${selectedWeek}`) :
              period === 'Month' ? (useShortMonthNames ? shortMonths[selectedMonth] : selectedMonth) :
              period === 'Year' ? (selectedYear || new Date().getFullYear().toString()) :
              period}
@@ -194,7 +209,7 @@ export default function PeriodSelector({
                     : 'border border-gray-200 text-gray-700 hover:border-purple-200'
                 }`}
               >
-                Week {week}
+                {week === '5' ? 'View More' : `Week ${week}`}
               </button>
             ))}
           </div>
