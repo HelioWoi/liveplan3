@@ -57,14 +57,28 @@ export default function WeeklyBudget() {
       syncWithTransactions();
     };
     
+    // Função para sincronizar quando income for adicionado
+    const handleIncomeAdded = (event: any) => {
+      console.log('WeeklyBudget: Detectada adição de income', event.detail);
+      syncWithTransactions();
+    };
+    
     // Adicionar listeners para eventos de atualização de transações
     window.addEventListener('transactions-updated', handleTransactionsUpdated);
+    window.addEventListener('income-added-to-week', handleIncomeAdded);
     window.addEventListener('transaction-added', handleTransactionsUpdated);
+    window.addEventListener('local-transaction-added', handleTransactionsUpdated);
+    window.addEventListener('weekly-budget-updated', handleTransactionsUpdated);
+    window.addEventListener('income-added-from-weekly-budget', handleIncomeAdded);
     
     // Limpar listeners ao desmontar o componente
     return () => {
       window.removeEventListener('transactions-updated', handleTransactionsUpdated);
       window.removeEventListener('transaction-added', handleTransactionsUpdated);
+      window.removeEventListener('local-transaction-added', handleTransactionsUpdated);
+      window.removeEventListener('income-added-to-week', handleIncomeAdded);
+      window.removeEventListener('weekly-budget-updated', handleTransactionsUpdated);
+      window.removeEventListener('income-added-from-weekly-budget', handleIncomeAdded);
     };
   }, [syncWithTransactions]);
   

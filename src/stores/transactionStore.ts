@@ -134,11 +134,39 @@ export const useTransactionStore = create<TransactionState>((set) => {
             });
             window.dispatchEvent(localTransactionEvent);
             
-            // For income transactions, dispatch weekly budget update
+            // For income transactions, dispatch weekly budget update with detailed information
             if (data.category === 'Income' || data.type === 'income') {
               console.log('Transaction Store: Added income transaction', data);
+              
+              // Get current date info for week determination
+              const transactionDate = new Date(data.date || new Date());
+              const dayOfMonth = transactionDate.getDate();
+              const month = transactionDate.toLocaleString('default', { month: 'long' });
+              const year = transactionDate.getFullYear();
+              
+              // Determine week based on day of month
+              let week = 'Week 1';
+              if (dayOfMonth > 21) {
+                week = 'Week 4';
+              } else if (dayOfMonth > 14) {
+                week = 'Week 3';
+              } else if (dayOfMonth > 7) {
+                week = 'Week 2';
+              }
+              
+              // Dispatch a more specific event with transaction details
+              window.dispatchEvent(new CustomEvent('income-added-to-week', {
+                detail: {
+                  transaction: data,
+                  week,
+                  month,
+                  year
+                }
+              }));
+              
+              // Also dispatch the general weekly budget updated event
               window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-              console.log('Transaction Store: Dispatched weekly-budget-updated event for income');
+              console.log(`Transaction Store: Dispatched income-added-to-week event for ${week}`);
             }
 
             // Log for income transactions
@@ -181,12 +209,39 @@ export const useTransactionStore = create<TransactionState>((set) => {
         });
         window.dispatchEvent(localTransactionEvent);
 
-        // Log for income transactions and dispatch weekly budget update
+        // For income transactions, dispatch weekly budget update with detailed information
         if (localTransaction.category === 'Income' || localTransaction.type === 'income') {
           console.log('Transaction Store: Added income transaction (local)', localTransaction);
-          // Dispatch weekly budget update event for income transactions
+          
+          // Get current date info for week determination
+          const transactionDate = new Date(localTransaction.date || new Date());
+          const dayOfMonth = transactionDate.getDate();
+          const month = transactionDate.toLocaleString('default', { month: 'long' });
+          const year = transactionDate.getFullYear();
+          
+          // Determine week based on day of month
+          let week = 'Week 1';
+          if (dayOfMonth > 21) {
+            week = 'Week 4';
+          } else if (dayOfMonth > 14) {
+            week = 'Week 3';
+          } else if (dayOfMonth > 7) {
+            week = 'Week 2';
+          }
+          
+          // Dispatch a more specific event with transaction details
+          window.dispatchEvent(new CustomEvent('income-added-to-week', {
+            detail: {
+              transaction: localTransaction,
+              week,
+              month,
+              year
+            }
+          }));
+          
+          // Also dispatch the general weekly budget updated event
           window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-          console.log('Transaction Store: Dispatched weekly-budget-updated event for income');
+          console.log(`Transaction Store: Dispatched income-added-to-week event for ${week}`);
         }
         
         // Update localStorage with the new transaction

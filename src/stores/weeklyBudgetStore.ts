@@ -264,6 +264,21 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         // Adicionar a transação usando o transactionStore
         await transactionStore.addTransaction(newTransaction);
         
+        // Para transações de income, disparar evento específico
+        if (entry.category === 'Income') {
+          console.log('Weekly Budget: Criando transação de income a partir de entrada do orçamento');
+          
+          // Disparar evento específico para income
+          window.dispatchEvent(new CustomEvent('income-added-from-weekly-budget', {
+            detail: {
+              transaction: newTransaction,
+              week: entry.week,
+              month: entry.month,
+              year: entry.year
+            }
+          }));
+        }
+        
         // Disparar eventos para atualizar a UI
         window.dispatchEvent(new CustomEvent('transactions-updated'));
         window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
@@ -410,13 +425,22 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           return;
         }
         
-        console.log(`Encontradas ${incomeTransactions.length} transações de income para sincronização`);
+        console.log(`Encontradas ${incomeTransactions.length} trasações de income para sincronização`);
         
         // Obter entradas existentes
         const existingEntries = get().entries;
+        let entriesAdded = false;
         
         // Para cada transação de income, verificar se já existe uma entrada correspondente
         incomeTransactions.forEach((transaction: any) => {
+          // Pular transações que já foram criadas a partir do Weekly Budget
+          // para evitar duplicação cíclica
+          if (transaction.metadata && transaction.metadata.sourceEntryId && 
+              transaction.metadata.sourceEntryId.startsWith('wb-')) {
+            console.log('Pulando transação que já foi criada a partir do Weekly Budget:', transaction);
+            return;
+          }
+          
           // Determinar a semana com base na data da transação ou nos metadados
           let week = 'Week 1';
           let month = '';
@@ -470,8 +494,15 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             }));
             
             console.log('Adicionada nova entrada ao Weekly Budget a partir de transação:', newEntry);
+            entriesAdded = true;
           }
         });
+        
+        // Se novas entradas foram adicionadas, disparar evento para atualizar a UI
+        if (entriesAdded) {
+          window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+          console.log('Weekly Budget: Entradas atualizadas a partir de transações');
+        }
       } catch (error) {
         console.error('Erro ao sincronizar com transações:', error);
       }

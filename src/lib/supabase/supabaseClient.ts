@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Obter as variáveis de ambiente
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -12,7 +12,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Criar o cliente Supabase com tratamento de erros
-let supabase;
+let supabase: SupabaseClient;
 
 try {
   // Usar valores padrão para desenvolvimento se as variáveis não estiverem definidas
