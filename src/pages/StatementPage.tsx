@@ -90,9 +90,30 @@ export default function StatementPage() {
   
   // Combina as transações do banco de dados com as transações locais
   useEffect(() => {
-    const combined = [...transactions, ...localTransactions];
+    // Criar um Map para eliminar duplicatas baseado no ID
+    const transactionMap = new Map();
+    
+    // Adicionar transações do banco de dados
+    transactions.forEach(transaction => {
+      transactionMap.set(transaction.id, transaction);
+    });
+    
+    // Adicionar transações locais (apenas se não existirem no banco)
+    localTransactions.forEach(transaction => {
+      // Só adiciona se não existir no map ou se não tiver ID (transações locais antigas)
+      if (!transaction.id || !transactionMap.has(transaction.id)) {
+        transactionMap.set(transaction.id || `local-${Date.now()}-${Math.random()}`, transaction);
+      }
+    });
+    
+    // Converter o Map para array
+    const combined = Array.from(transactionMap.values());
+    
     // Ordena por data, mais recente primeiro
     combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    console.log(`Statement: Combinadas ${transactions.length} transações do banco e ${localTransactions.length} locais, resultando em ${combined.length} transações únicas`);
+    
     setAllTransactions(combined);
   }, [transactions, localTransactions]);
   
@@ -166,8 +187,8 @@ export default function StatementPage() {
     
     let totalMovement = 0;
     
-    // Usa allTransactions que inclui tanto as transações do banco quanto as locais
-    allTransactions.forEach(transaction => {
+    // Calcular o movimento total apenas para as transações filtradas pelo período selecionado
+    filteredTransactions.forEach(transaction => {
       const amount = Number(transaction.amount) || 0;
       if (transaction.type === 'income') {
         totalMovement += amount;
@@ -175,6 +196,8 @@ export default function StatementPage() {
         totalMovement -= amount;
       }
     });
+    
+    console.log(`Statement: Calculando balanço para ${filteredTransactions.length} transações filtradas, total: ${totalMovement}`);
 
     const closingBalance = openingBalance + totalMovement;
 
@@ -203,7 +226,7 @@ export default function StatementPage() {
   const calculateRunningBalance = (index: number): number => {
     let balance = openingBalance;
     for (let i = 0; i <= index; i++) {
-      const transaction = allTransactions[i];
+      const transaction = filteredTransactions[i];
       const amount = Number(transaction.amount) || 0;
       if (transaction.type === 'income') {
         balance += amount;

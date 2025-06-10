@@ -410,39 +410,52 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     syncWithTransactions: () => {
-      // Obter transações do localStorage
+      // Obter transações do localStorage e do banco de dados
       try {
-        const storedTransactions = localStorage.getItem('local_transactions');
-        if (!storedTransactions) {
-          console.log('Nenhuma transação local encontrada para sincronização');
-          return;
-        }
+        console.log('Weekly Budget: Iniciando sincronização com transações');
         
-        const transactions = JSON.parse(storedTransactions);
+        // Obter transações locais do localStorage
+        const storedTransactions = localStorage.getItem('local_transactions') || '[]';
+        const localTransactions = JSON.parse(storedTransactions);
+        
+        // Obter transações do banco de dados através do transactionStore
+        const dbTransactions = useTransactionStore.getState().transactions || [];
+        
+        // Combinar todas as transações
+        const allTransactions = [...localTransactions, ...dbTransactions];
+        
+        console.log(`Weekly Budget: Total de ${allTransactions.length} transações encontradas para sincronização`);
         
         // Filtrar apenas transações de income
-        const incomeTransactions = transactions.filter((t: any) => 
+        const incomeTransactions = allTransactions.filter((t: any) => 
           (t.category === 'Income' || t.type === 'income')
         );
         
         if (incomeTransactions.length === 0) {
-          console.log('Nenhuma transação de income encontrada para sincronização');
+          console.log('Weekly Budget: Nenhuma transação de income encontrada para sincronização');
           return;
         }
         
-        console.log(`Encontradas ${incomeTransactions.length} trasações de income para sincronização`);
+        console.log(`Weekly Budget: Encontradas ${incomeTransactions.length} transações de income para sincronização`);
+        
+        // Remover duplicatas baseado no ID
+        const uniqueTransactions = Array.from(
+          new Map(incomeTransactions.map(t => [t.id, t])).values()
+        );
+        
+        console.log(`Weekly Budget: ${uniqueTransactions.length} transações únicas após remoção de duplicatas`);
         
         // Obter entradas existentes
         const existingEntries = get().entries;
         let entriesAdded = false;
         
         // Para cada transação de income, verificar se já existe uma entrada correspondente
-        incomeTransactions.forEach((transaction: any) => {
+        uniqueTransactions.forEach((transaction: any) => {
           // Pular transações que já foram criadas a partir do Weekly Budget
           // para evitar duplicação cíclica
           if (transaction.metadata && transaction.metadata.sourceEntryId && 
               transaction.metadata.sourceEntryId.startsWith('wb-')) {
-            console.log('Pulando transação que já foi criada a partir do Weekly Budget:', transaction);
+            console.log('Weekly Budget: Pulando transação que já foi criada a partir do Weekly Budget:', transaction.id);
             return;
           }
           
@@ -455,12 +468,12 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             // Se a transação tem metadados de semana, usar esses valores
             week = transaction.metadata.week;
             month = transaction.metadata.month || '';
-            year = transaction.metadata.year || 0;
+            year = parseInt(transaction.metadata.year) || 0;
           } else if (transaction.metadata && transaction.metadata.sourceWeek) {
             // Compatibilidade com formato anterior
             week = transaction.metadata.sourceWeek;
             month = transaction.metadata.sourceMonth || '';
-            year = transaction.metadata.sourceYear || 0;
+            year = parseInt(transaction.metadata.sourceYear) || 0;
           } else {
             // Caso contrário, determinar com base na data da transação
             const transactionDate = new Date(transaction.date);
@@ -485,6 +498,8 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           if (!year || year === 0) {
             year = new Date().getFullYear();
           }
+          
+          console.log(`Weekly Budget: Processando transação ${transaction.id} para ${week}, ${month}, ${year}`);
           
           // Verificar se já existe uma entrada com a mesma descrição, valor e semana
           const existingEntry = existingEntries.find(entry => 
@@ -512,8 +527,10 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
               entries: [...state.entries, newEntry]
             }));
             
-            console.log('Adicionada nova entrada ao Weekly Budget a partir de transação:', newEntry);
+            console.log('Weekly Budget: Adicionada nova entrada ao Weekly Budget a partir de transação:', newEntry);
             entriesAdded = true;
+          } else {
+            console.log(`Weekly Budget: Entrada já existe para transação ${transaction.id}`);
           }
         });
         
@@ -521,9 +538,11 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         if (entriesAdded) {
           window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
           console.log('Weekly Budget: Entradas atualizadas a partir de transações');
+        } else {
+          console.log('Weekly Budget: Nenhuma nova entrada adicionada durante a sincronização');
         }
       } catch (error) {
-        console.error('Erro ao sincronizar com transações:', error);
+        console.error('Weekly Budget: Erro ao sincronizar com transações:', error);
       }
     }
   };
