@@ -239,6 +239,7 @@ export default function Home() {
           // Garantir que o valor seja positivo
           amount: Math.abs(Number(t.amount || 0))
         };
+
         uniqueMap.set(t.id, normalizedTransaction);
       }
     });
@@ -264,11 +265,6 @@ export default function Home() {
 
   // Obter transações limpas e normalizadas
   const cleanTransactions = getCleanTransactions(allTransactions);
-  
-  // Usar refreshKey para garantir que os cálculos sejam atualizados
-  useEffect(() => {
-    console.log('Dashboard atualizado com novas transações:', cleanTransactions.length);
-  }, [refreshKey, cleanTransactions.length]);
 
   // Efeito para atualizar quando o período selecionado mudar
   useEffect(() => {
@@ -313,6 +309,8 @@ export default function Home() {
     return months.indexOf(monthName);
   };
 
+ 
+
   // Filtrar transações com base no período selecionado
   const filteredTransactionsByPeriod = cleanTransactions.filter(transaction => {
     const transactionDate = new Date(transaction.date);
@@ -356,12 +354,12 @@ export default function Home() {
   });
 
   // Cálculo do Total Income - APENAS entradas de receita (Income) do período selecionado
-  const totalIncome = filteredTransactionsByPeriod
+  const totalIncome = cleanTransactions
     .filter(t => t.type === 'income' && t.category === 'Income')
     .reduce((sum, t) => sum + t.amount, 0);
 
   // Cálculo do Total Expenses - APENAS despesas (todas as categorias exceto Income) do período selecionado
-  const totalExpenses = filteredTransactionsByPeriod
+  const totalExpenses = cleanTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
     
