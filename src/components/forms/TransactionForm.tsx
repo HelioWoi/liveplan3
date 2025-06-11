@@ -11,6 +11,7 @@ import { TransactionCategory, TRANSACTION_CATEGORIES, isIncomeCategory } from '.
 import { useNavigate } from 'react-router-dom';
 import { transactionFormSchema } from '../../lib/validations/schemas';
 import FormInput from '../common/FormInput';
+import { registerIncomeEntry } from '../../utils/incomeEntryUtils';
 
 interface TransactionFormProps {
   onSuccess?: () => void;
@@ -114,14 +115,34 @@ export default function TransactionForm({
           throw new Error('Invalid category');
         }
 
-        await addTransaction({
-          origin: data.description, // Mantendo compatibilidade com a interface existente
-          amount: parseFloat(data.amount),
-          date: data.date,
-          category: category,
-          type: data.type,
-          user_id: user?.id || ''
-        });
+        // Se for uma categoria de receita, usar a função centralizada registerIncomeEntry
+        if (isIncomeCategory(category)) {
+          const amount = parseFloat(data.amount);
+          const date = new Date(data.date);
+          const currentMonth = date.toLocaleString('default', { month: 'long' });
+          const currentYear = date.getFullYear();
+          const currentWeek = `${Math.ceil((date.getDate()) / 7)}`;
+          
+          await registerIncomeEntry('floating', {
+            description: data.description,
+            amount,
+            month: currentMonth,
+            year: currentYear,
+            week: currentWeek,
+            category: category,
+            addAsTransaction: true
+          });
+        } else {
+          // Para despesas, manter o fluxo original
+          await addTransaction({
+            origin: data.description, // Mantendo compatibilidade com a interface existente
+            amount: parseFloat(data.amount),
+            date: data.date,
+            category: category,
+            type: data.type,
+            user_id: user?.id || ''
+          });
+        }
         
         reset();
         setAmountValue('');

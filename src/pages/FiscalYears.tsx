@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import jsPDF from 'jspdf';
 import { PageHeader } from '../components/layout/PageHeader';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { ChevronDown, ChevronUp, Download, Eye, FileBarChart } from 'lucide-react';
@@ -88,9 +89,48 @@ const FiscalYears: React.FC = () => {
   };
 
   const handleViewDetails = (year: number) => {
-    // In a real application, this would navigate to a detailed view of the fiscal year
-    console.log(`View details for year ${year}`);
-    // navigate(`/fiscal-year/${year}`);
+    // Generate PDF for the fiscal year
+    const fiscalYear = fiscalYearsData.find(fy => fy.year === year);
+    if (!fiscalYear) return;
+    
+    // Create a new PDF document
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text(`Fiscal Year ${year} Report`, 20, 20);
+    
+    // Add summary information
+    doc.setFontSize(12);
+    doc.text(`Total Transactions: ${fiscalYear.transactions}`, 20, 40);
+    doc.text(`Total Income: ${formatCurrency(fiscalYear.income)}`, 20, 50);
+    doc.text(`Total Expenses: ${formatCurrency(fiscalYear.expenses)}`, 20, 60);
+    doc.text(`Total Savings: ${formatCurrency(fiscalYear.savings)}`, 20, 70);
+    
+    // Add quarterly data
+    doc.setFontSize(16);
+    doc.text('Quarterly Breakdown', 20, 90);
+    
+    doc.setFontSize(10);
+    // Table headers
+    doc.text('Quarter', 20, 100);
+    doc.text('Transactions', 60, 100);
+    doc.text('Income', 100, 100);
+    doc.text('Expenses', 140, 100);
+    doc.text('Savings', 180, 100);
+    
+    // Table data
+    fiscalYear.quarters.forEach((quarter, index) => {
+      const y = 110 + (index * 10);
+      doc.text(`Q${quarter.quarter}`, 20, y);
+      doc.text(`${quarter.transactions}`, 60, y);
+      doc.text(`${formatCurrency(quarter.income)}`, 100, y);
+      doc.text(`${formatCurrency(quarter.expenses)}`, 140, y);
+      doc.text(`${formatCurrency(quarter.income - quarter.expenses)}`, 180, y);
+    });
+    
+    // Save the PDF
+    doc.save(`fiscal-year-${year}-report.pdf`);
   };
 
   const handleExportData = (year: number) => {

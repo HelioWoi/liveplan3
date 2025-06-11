@@ -8,6 +8,7 @@ import { usePWAUpdate } from './hooks/usePWAUpdate';
 import BottomNavigation from './components/layout/BottomNavigation';
 import QuickActions from './components/layout/QuickActions';
 import AddEntryModal from './components/home/AddEntryModal';
+import { registerIncomeEntry } from './utils/incomeEntryUtils';
 import SwipeableView from './components/layout/SwipeableView';
 import { FeedbackProvider } from './components/feedback/FeedbackProvider';
 import { syncService } from './utils/syncService';

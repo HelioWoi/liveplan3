@@ -4,13 +4,14 @@ import { useTransactionStore } from '../stores/transactionStore';
 import { ArrowLeft, MoreVertical, Minus, Plus, Check, DollarSign } from 'lucide-react';
 import classNames from 'classnames';
 import { format } from 'date-fns';
-import { TransactionCategory, TransactionType } from '../types/transaction';
+import { TransactionCategory } from '../types/transaction';
+import { registerIncomeEntry } from '../utils/incomeEntryUtils';
 
 const AMOUNT_PRESETS = [1000, 5000, 10000, 25000, 50000, 75000, 100000];
 
 export default function IncomePage() {
   const navigate = useNavigate();
-  const { transactions, addTransaction, fetchTransactions } = useTransactionStore();
+  const { transactions, fetchTransactions } = useTransactionStore();
   const [amount, setAmount] = useState<string>('150.00');
   const [manualAmount, setManualAmount] = useState<string>('');
   const [origin, setOrigin] = useState('');
@@ -67,7 +68,7 @@ export default function IncomePage() {
     try {
       // Obter a data atual para determinar a semana
       const currentDate = new Date();
-      const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+      const currentMonth = currentDate.toLocaleString('default', { month: 'short' }).substring(0, 3);
       const currentYear = currentDate.getFullYear();
       
       // Determinar a semana atual (1-4) com base no dia do mês
@@ -82,32 +83,15 @@ export default function IncomePage() {
         currentWeek = 'Week 2';
       }
       
-      // Adicionar a transação
-      const newTransaction = {
-        origin: origin.trim(),
+      // Usar a função centralizada para registrar a receita
+      await registerIncomeEntry('header', {
+        description: origin.trim(),
         amount: parseFloat(amount),
-        category: 'Income' as TransactionCategory,
-        type: 'income' as TransactionType,
-        date: currentDate.toISOString(),
-        user_id: 'current-user',
-        description: origin.trim() // Adicionar descrição para sincronização
-      };
-      
-      // Adicionar a transação ao store
-      await addTransaction(newTransaction);
-      
-      // Disparar um único evento para sincronizar com o Weekly Budget
-      window.dispatchEvent(new CustomEvent('income-added-to-week', { 
-        detail: { 
-          transaction: {
-            ...newTransaction,
-            id: Date.now().toString() // Gerar um ID temporário para a transação
-          }, 
-          week: currentWeek,
-          month: currentMonth, 
-          year: currentYear 
-        }
-      }));
+        week: currentWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+        month: currentMonth,
+        year: currentYear,
+        category: 'Income' as TransactionCategory
+      });
 
       setShowError(false);
       setShowSuccessModal(true);
