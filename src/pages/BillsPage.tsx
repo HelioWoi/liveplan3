@@ -2,37 +2,51 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useNotificationStore } from '../stores/notificationStore';
-import { ArrowLeft, Calendar, X, Download, CheckCircle2, AlertCircle, Bell } from 'lucide-react';
-import NotificationModal from '../components/notifications/NotificationModal';
+import { Calendar, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { formatCurrency } from '../utils/formatters';
 import { Transaction, TransactionCategory } from '../types/transaction';
 import BillDetailsModal from '../components/bills/BillDetailsModal';
 import PeriodSelector from '../components/common/PeriodSelector';
 import BottomNavigation from '../components/layout/BottomNavigation';
+import PageHeader from '../components/layout/PageHeader';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
 type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
+type WeekNumber = '1' | '2' | '3' | '4' | '5';
 
 const CATEGORIES = [
   { value: 'Fixed', label: 'Fixed' },
   { value: 'Variable', label: 'Variable' },
   { value: 'Extra', label: 'Extra' },
-  { value: 'Additional', label: 'Additional' },
-  { value: 'Tax', label: 'Tax' },
-  { value: 'Invoices', label: 'Invoices' },
-  { value: 'Contribution', label: 'Contribution' },
-  { value: 'Goal', label: 'Goal' }
+  { value: 'Additional', label: 'Additional' }
 ];
 
 export default function BillsPage() {
-  const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const navigate = useNavigate(); // Required for PageHeader component to work properly
   const { transactions, addTransaction, updateTransaction } = useTransactionStore();
+  // Initialize notification store to ensure it's available
+  useNotificationStore();
+  
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear().toString();
+  const months: Month[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const currentMonth = months[currentDate.getMonth()] as Month;
+  
+  // Calculate current week of the month (1-5)
+  const getWeekOfMonth = (): WeekNumber => {
+    const date = new Date();
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    const dayOfMonth = date.getDate();
+    const weekNumber = Math.ceil((dayOfMonth + firstDay.getDay() - 1) / 7);
+    return (weekNumber > 5 ? '5' : weekNumber.toString()) as WeekNumber;
+  };
+  
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Month');
-  const [selectedMonth, setSelectedMonth] = useState<Month>('January');
-  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  const { unreadCount } = useNotificationStore();
-  const [selectedYear, setSelectedYear] = useState('2025');
+  const [selectedMonth, setSelectedMonth] = useState<Month>(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedWeek, setSelectedWeek] = useState<WeekNumber>(getWeekOfMonth());
   const [showAddModal, setShowAddModal] = useState(false);
   const [billToMarkAsPaid, setBillToMarkAsPaid] = useState<Transaction | null>(null);
   const [selectedBill, setSelectedBill] = useState<Transaction | null>(null);
@@ -147,59 +161,23 @@ export default function BillsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="bg-[#120B39] text-white">
-        <div className="relative">
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-[#120B39] rounded-b-[40px]"></div>
-          <div className="relative px-4 pt-12 pb-6">
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </button>
-              <h1 className="text-2xl font-bold">Bills</h1>
-              <button 
-                onClick={() => setIsNotificationModalOpen(true)}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors relative"
-                aria-label="Notifications"
-              >
-                <Bell className="h-6 w-6" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center text-xs text-white bg-red-500 rounded-full">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader 
+        title="Bills" 
+        showBackButton={true}
+      />
       
       <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">Bills</h1>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-gray-700">Manage Your Bills</h2>
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => {}}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Download className="h-5 w-5" />
-              </button>
-              <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                className="flex items-center gap-1 bg-[#120B39] text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition-colors"
               >
-                Add Bill
+                <span className="text-sm font-medium">Add Bill</span>
               </button>
             </div>
           </div>
@@ -212,9 +190,11 @@ export default function BillsPage() {
               selectedPeriod={selectedPeriod}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              selectedWeek={selectedWeek}
               onPeriodChange={setSelectedPeriod}
               onMonthChange={setSelectedMonth}
               onYearChange={setSelectedYear}
+              onWeekChange={setSelectedWeek}
             />
           </div>
         </div>
@@ -515,11 +495,7 @@ export default function BillsPage() {
 
         <BottomNavigation />
       </div>
-      {/* Notification Modal */}
-      <NotificationModal 
-        isOpen={isNotificationModalOpen} 
-        onClose={() => setIsNotificationModalOpen(false)} 
-      />
+      {/* NotificationModal is now handled by PageHeader */}
     </div>
   );
 }
