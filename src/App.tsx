@@ -8,7 +8,7 @@ import { usePWAUpdate } from './hooks/usePWAUpdate';
 import BottomNavigation from './components/layout/BottomNavigation';
 import QuickActions from './components/layout/QuickActions';
 import AddEntryModal from './components/home/AddEntryModal';
-import { registerIncomeEntry } from './utils/incomeEntryUtils';
+
 import SwipeableView from './components/layout/SwipeableView';
 import { FeedbackProvider } from './components/feedback/FeedbackProvider';
 import { syncService } from './utils/syncService';
@@ -17,7 +17,7 @@ import { clearOldBasiqApiKey } from './utils/basiqUtils';
 // SimpleSyncStatus import removed as requested
 import SimplePrivacyDashboard from './components/security/SimplePrivacyDashboard';
 import { useSimpleSecurityState } from './hooks/useSimpleSecurityState';
-import Home from './pages/Home';
+import Home from './pages/Home/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/signup';
 import Onboarding from './pages/onboarding/OnboardingPage';
