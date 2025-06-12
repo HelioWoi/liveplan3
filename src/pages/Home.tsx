@@ -82,35 +82,10 @@ export default function Home() {
     }
   }, [user]);
   
-  // Estado para armazenar os totais do orçamento semanal
-  const [weeklyBudgetTotals, setWeeklyBudgetTotals] = useState({
-    totalIncome: 0,
-    totalExpenses: 0,
-    month: '',
-    year: 0
-  });
-
   // Carrega os dados na montagem inicial do componente
   useEffect(() => {
     console.log('Home component mounted - Loading initial data');
     fetchTransactions();
-    
-    // Carregar totais do orçamento semanal do localStorage, se existirem
-    try {
-      const savedTotals = localStorage.getItem('weekly_budget_totals');
-      if (savedTotals) {
-        const parsedTotals = JSON.parse(savedTotals);
-        setWeeklyBudgetTotals({
-          totalIncome: parsedTotals.totalIncome || 0,
-          totalExpenses: parsedTotals.totalExpenses || 0,
-          month: selectedMonth,
-          year: parseInt(selectedYear)
-        });
-        console.log('Home: Carregados totais do orçamento semanal do localStorage', parsedTotals);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar totais do orçamento semanal:', error);
-    }
     
     // Listener para atualizações do Weekly Budget
     const handleWeeklyBudgetUpdate = () => {
@@ -119,33 +94,14 @@ export default function Home() {
       setDataRefreshed(true);
     };
     
-    // Listener para atualizações dos totais do Weekly Budget
-    const handleWeeklyBudgetTotalsUpdate = (event: any) => {
-      console.log('Home detected weekly-budget-totals-updated event', event.detail);
-      const { totalIncome, totalExpenses, month, year } = event.detail;
-      
-      // Atualizar os totais apenas se o mês e ano corresponderem ao período selecionado
-      if (month === selectedMonth && year.toString() === selectedYear) {
-        setWeeklyBudgetTotals({
-          totalIncome,
-          totalExpenses,
-          month,
-          year
-        });
-        console.log('Home: Totais do orçamento semanal atualizados', { totalIncome, totalExpenses });
-      }
-    };
-    
-    // Adicionar listeners para os eventos
+    // Adicionar listener para o evento weekly-budget-updated
     window.addEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
-    window.addEventListener('weekly-budget-totals-updated', handleWeeklyBudgetTotalsUpdate);
     
-    // Remover listeners quando o componente for desmontado
+    // Remover listener quando o componente for desmontado
     return () => {
       window.removeEventListener('weekly-budget-updated', handleWeeklyBudgetUpdate);
-      window.removeEventListener('weekly-budget-totals-updated', handleWeeklyBudgetTotalsUpdate);
     };
-  }, [fetchTransactions, selectedMonth, selectedYear]);
+  }, [fetchTransactions]);
 
   // Check for data refresh flags and reload data as needed
   useEffect(() => {
@@ -239,6 +195,7 @@ export default function Home() {
           // Garantir que o valor seja positivo
           amount: Math.abs(Number(t.amount || 0))
         };
+
         uniqueMap.set(t.id, normalizedTransaction);
       }
     });
@@ -264,47 +221,6 @@ export default function Home() {
 
   // Obter transações limpas e normalizadas
   const cleanTransactions = getCleanTransactions(allTransactions);
-  
-  // Usar refreshKey para garantir que os cálculos sejam atualizados
-  useEffect(() => {
-    console.log('Dashboard atualizado com novas transações:', cleanTransactions.length);
-  }, [refreshKey, cleanTransactions.length]);
-
-  // Efeito para atualizar quando o período selecionado mudar
-  useEffect(() => {
-    // Quando o período mudar, recarregar as transações
-    fetchTransactions();
-    
-    // Disparar evento para notificar o WeeklyBudget sobre a mudança de período
-    window.dispatchEvent(new CustomEvent('home-period-changed', {
-      detail: {
-        period: selectedPeriod,
-        month: selectedMonth,
-        year: selectedYear,
-        week: selectedWeek
-      }
-    }));
-    
-    // Carregar totais do orçamento semanal do localStorage, se existirem
-    try {
-      const savedTotals = localStorage.getItem('weekly_budget_totals');
-      if (savedTotals) {
-        const parsedTotals = JSON.parse(savedTotals);
-        // Verificar se o mês e ano correspondem ao período selecionado
-        if (selectedMonth === parsedTotals.month && selectedYear === parsedTotals.year?.toString()) {
-          setWeeklyBudgetTotals({
-            totalIncome: parsedTotals.totalIncome || 0,
-            totalExpenses: parsedTotals.totalExpenses || 0,
-            month: selectedMonth,
-            year: parseInt(selectedYear)
-          });
-          console.log('Home: Atualizados totais do orçamento semanal para o período selecionado', parsedTotals);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao carregar totais do orçamento semanal:', error);
-    }
-  }, [selectedPeriod, selectedMonth, selectedYear, selectedWeek, fetchTransactions]);
 
   // Converter nome do mês para número (0-11)
   const getMonthNumber = (monthName: string): number => {
@@ -516,13 +432,25 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Total Income</h3>
-              <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+
+              {isLoading ? (
+                <Skeleton height={28} />
+              ) : (
+                <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+              )}
+              
               <p className="text-xs text-gray-500">All income in the period</p>
             </div>
 
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Total Expenses</h3>
-              <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+
+              {isLoading ? (
+                <Skeleton height={28} />
+              ) : (
+                <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+              )}
+
               <p className="text-xs text-gray-500">All expenses in the period</p>
             </div>
           </div>
