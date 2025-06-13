@@ -20,12 +20,9 @@ import AnimatedCard from '../../components/common/AnimatedCard';
 import { Skeleton } from '../../components';
 import { supabase } from '../../lib/supabase/supabaseClient';
 
-const months: Month[] = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+import { MONTHS_FULL } from '../../constants';
 
-const getCurrentMonth = () => months[new Date().getMonth()];
+const getCurrentMonth = () => MONTHS_FULL[new Date().getMonth()];
 const getCurrentYear = (): string => new Date().getFullYear().toString();
 const getCurrentWeek = (): WeekNumber => {
   const date = new Date();
@@ -39,6 +36,10 @@ function Home() {
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isSpreadsheetModalOpen, setIsSpreadsheetModalOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  
+  // State para as transações filtradas do banco
+  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // State agrupado para o período selecionado
   const [selectedPeriodState, setSelectedPeriodState] = useState<{
@@ -57,9 +58,13 @@ function Home() {
     setSelectedPeriodState(prev => ({ ...prev, ...partial }));
   }
 
-  // State para as transações filtradas do banco
-  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+     window.addEventListener('transactions-updated', fetchTransactionsByPeriod);
+    
+    return () => {
+      window.removeEventListener('transactions-updated', fetchTransactionsByPeriod);
+    };
+  }, []);
 
   // Buscar transações do banco conforme o período selecionado
   async function fetchTransactionsByPeriod() {
@@ -81,11 +86,11 @@ function Home() {
       startDate = new Date(Number(year), 0, 1);
       endDate = new Date(Number(year), 11, 31, 23, 59, 59, 999);
     } else if (period === 'Month' && month && year) {
-      const monthIndex = months.indexOf(month);
+      const monthIndex = MONTHS_FULL.indexOf(month);
       startDate = new Date(Number(year), monthIndex, 1);
       endDate = new Date(Number(year), monthIndex + 1, 0, 23, 59, 59, 999);
     } else if (period === 'Week' && week && month && year) {
-      const monthIndex = months.indexOf(month);
+      const monthIndex = MONTHS_FULL.indexOf(month);
 
       const weekNumber = Number(week);
       const startDay = (weekNumber - 1) * 7 + 1;

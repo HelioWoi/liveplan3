@@ -4,10 +4,9 @@ import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
 import { useAuthStore } from '../../stores/authStore';
-// Removemos a dependência de react-beautiful-dnd para evitar erros de hooks
+import { CATEGORY_DESCRIPTIONS, YEARS, MONTHS, MONTHS_SHORT, CATEGORIES } from '../../constants';
 
 type Period = 'Month' | 'Year';
-
 interface TooltipProps {
   children: React.ReactNode;
   content: string;
@@ -24,32 +23,7 @@ function Tooltip({ children, content }: TooltipProps) {
   );
 }
 
-// Anos fixos de 2022 a 2025
-const years = [2022, 2023, 2024, 2025];
-
-const categories = ['Income', 'Fixed', 'Variable', 'Extra', 'Additional'];
-
-const monthsShort = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-];
-
-const months = [
-  { full: 'January', short: 'Jan' },
-  { full: 'February', short: 'Feb' },
-  { full: 'March', short: 'Mar' },
-  { full: 'April', short: 'Apr' },
-  { full: 'May', short: 'May' },
-  { full: 'June', short: 'Jun' },
-  { full: 'July', short: 'Jul' },
-  { full: 'August', short: 'Aug' },
-  { full: 'September', short: 'Sep' },
-  { full: 'October', short: 'Oct' },
-  { full: 'November', short: 'Nov' },
-  { full: 'December', short: 'Dec' }
-];
-
-const getCurrentMonth = () => monthsShort[new Date().getMonth()];
+const getCurrentMonth = () => MONTHS_SHORT[new Date().getMonth()];
 const getCurrentYear = () => new Date().getFullYear();
 
 const getCurrentWeek = () => {
@@ -57,15 +31,6 @@ const getCurrentWeek = () => {
   const dayOfMonth = now.getDate();
   const weekNumber = Math.ceil(dayOfMonth / 7);
   return `Week ${weekNumber}`;
-};
-
-// Categoria descriptions for tooltips
-const categoryDescriptions: Record<string, string> = {
-  Fixed: 'Mandatory and recurring expenses, such as rent, school, health insurance, etc.',
-  Variable: 'Flexible and monthly expenses, such as groceries, fuel, delivery.',
-  Extra: 'Non-standard costs, such as unexpected repairs or last-minute travel. Should be used with caution.',
-  Additional: 'Non-essential expenses that you chose to make, such as gifts or parties. Ideally, these should be planned.',
-  Income: 'Money received from salary, freelance work, or other sources.'
 };
 
 export default function WeeklyBudget() {
@@ -248,7 +213,7 @@ export default function WeeklyBudget() {
   const getWeekBalance = (week: string) => {
     // Filtrar entradas para a semana, mês e ano atual
     const weekEntries = entries.filter(entry => {
-      const month = months.find(month => month.short === selectedMonth);
+      const month = MONTHS.find(month => month.short === selectedMonth);
 
       return entry.week === week && 
       entry.month === month?.short &&
@@ -302,7 +267,7 @@ export default function WeeklyBudget() {
 
         {selectedPeriod === 'Year' && showYears && (
           <div className="flex gap-2">
-            {years.map(year => (
+            {YEARS.map(year => (
               <button
                 key={year}
                 onClick={() => {
@@ -323,7 +288,7 @@ export default function WeeklyBudget() {
 
         {selectedPeriod === 'Month' && showMonths && (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-12">
-            {months.map(({ full, short }) => (
+            {MONTHS.map(({ full, short }) => (
               <button
                 key={short}
                 onClick={() => {
@@ -369,12 +334,12 @@ export default function WeeklyBudget() {
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
-              {categories.map(category => (
+              {CATEGORIES.map(category => (
                 <tr key={category} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center">
                       {category}
-                      <Tooltip content={categoryDescriptions[category] || ''}>
+                      <Tooltip content={CATEGORY_DESCRIPTIONS[category] || ''}>
                         <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
                       </Tooltip>
                     </div>
@@ -384,7 +349,7 @@ export default function WeeklyBudget() {
                     
                     // Encontrar todas as entradas desta categoria e semana
                     const weekEntries = entries.filter(entry => {
-                      const month = months.find(month => month.short === selectedMonth);
+                      const month = MONTHS.find(month => month.short === selectedMonth);
                     
                       return entry.week === week && 
                         entry.category === category && 

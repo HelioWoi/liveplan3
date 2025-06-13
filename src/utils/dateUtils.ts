@@ -1,6 +1,4 @@
-/**
- * Date utility functions for the application
- */
+import { MONTHS, MONTHS_FULL } from '../constants';
 
 /**
  * Converts a week string (e.g., "Week 1") to a date in the specified month and year
@@ -10,7 +8,8 @@
  * Week 4: Days 22-end of month
  */
 export function weekToDate(week: string, month: string, year: number): Date {
-  const monthIndex = getMonthIndex(month);
+  const monthFull = MONTHS.filter(m => m.full === month || m.short === month);
+  const monthIndex = getMonthIndex(monthFull[0].full);
   let day = 1;
   
   // Determine the day based on the week
@@ -30,32 +29,15 @@ export function weekToDate(week: string, month: string, year: number): Date {
     default:
       day = 1;
   }
-  
+
   return new Date(year, monthIndex, day);
 }
 
 /**
  * Converts a month name to its index (0-11)
  */
-export function getMonthIndex(month: string): number {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-  
-  return months.indexOf(month);
-}
-
-/**
- * Returns the month name for a given date
- */
-export function getMonthName(date: Date): string {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-  
-  return months[date.getMonth()];
+export function getMonthIndex(month: any): number {
+  return MONTHS_FULL.indexOf(month);
 }
 
 /**
