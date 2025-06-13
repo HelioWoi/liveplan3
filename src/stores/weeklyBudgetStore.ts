@@ -150,7 +150,11 @@ export async function addWeeklyBudgetEntry(entry: any) {
       }
     ])
     .single();
+
   if (error) throw error;
+
+  window.dispatchEvent(new Event('transactions-updated'));
+
   return data;
 }
 
@@ -161,6 +165,8 @@ export async function updateWeeklyBudgetEntry(id: string, updates: any) {
     .eq('id', id)
     .single();
   if (error) throw error;
+
+  window.dispatchEvent(new Event('transactions-updated'));
   return data;
 }
 
@@ -170,6 +176,8 @@ export async function deleteWeeklyBudgetEntry(id: string) {
     .delete()
     .eq('id', id);
   if (error) throw error;
+
+  window.dispatchEvent(new Event('transactions-updated'));
 }
 
 export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
@@ -228,14 +236,6 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
             if (success) {
               console.log('Transação criada automaticamente a partir da nova entrada do orçamento');
               // Atualiza o transactionStore
-              try {
-                const transactionStore = useTransactionStore.getState();
-                if (transactionStore && transactionStore.fetchTransactions) {
-                  transactionStore.fetchTransactions();
-                }
-              } catch (error) {
-                console.error('Erro ao atualizar o transactionStore:', error);
-              }
             }
           })
           .catch(error => {
@@ -252,6 +252,8 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         
         // Converter a semana para uma data aproximada
         const weekDate = weekToDate(entry.week, entry.month, entry.year);
+
+        console.log('Criando transação a partir da entrada do Weekly Budget:', entry.week, entry.month, entry.year);
         
         // Criar uma nova transação
         const newTransaction = {
