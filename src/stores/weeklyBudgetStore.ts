@@ -415,10 +415,15 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     
     deleteEntry: async (id: string) => {
       // Obter a entrada antes de excluí-la para poder excluir a transação associada
-      const entryToDelete = get().entries.find(entry => entry.id === id);
+      // const entryToDelete = get().entries.find(entry => entry.id === id);
 
       try {
         await deleteWeeklyBudgetEntry(id);
+
+        await supabase
+          .from('transactions')
+          .delete()
+          .eq('weekly_budget_entry_id', id);
       } catch (error) {
         console.error('Erro ao excluir entrada no Supabase:', error);
         return;
@@ -432,6 +437,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       });
       
       // Se a entrada foi encontrada, excluir também a transação associada
+      /*
       if (entryToDelete) {
         try {
           const storedTransactions = localStorage.getItem('local_transactions');
@@ -454,6 +460,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           console.error('Erro ao excluir transação associada:', error);
         }
       }
+      */
     },
     
     moveEntryToWeek: (entryId: string, targetWeek: string) => {
