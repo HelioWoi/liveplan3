@@ -442,7 +442,7 @@ export default function EmergencyFund({ setShowForm }: { setShowForm: (show: boo
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {contributions.map((contribution, index) => (
-                  <tr key={index}>
+                  <tr key={`${index}-${contribution.month}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {contribution.month}
                     </td>

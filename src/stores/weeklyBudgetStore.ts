@@ -19,7 +19,7 @@ export interface WeeklyBudgetEntry {
 interface WeeklyBudgetState {
   entries: WeeklyBudgetEntry[];
   addEntry: (entry: WeeklyBudgetEntry) => void;
-  createTransactionFromEntry: (entry: WeeklyBudgetEntry) => Promise<boolean>;
+  createTransactionFromEntry: (entry: WeeklyBudgetEntry, uuid: any) => Promise<boolean>;
   updateEntry: (id: string, entry: Partial<WeeklyBudgetEntry>) => void;
   deleteEntry: (id: string) => void;
   moveEntryToWeek: (entryId: string, targetWeek: string) => void;
@@ -139,12 +139,12 @@ async function fetchWeeklyBudgetEntries(userId: string) {
 }
 
 export async function addWeeklyBudgetEntry(entry: any) {
-  console.log('WeeklyBudget: Fetching entries for user', entry);
+  const uuid = uuidv4();
   const { data, error } = await supabase
     .from('weekly_budget_entries')
     .insert([
       { ...entry,
-        id: uuidv4(),
+        id: uuid,
         user_id: entry.id,
         week: entry.week.replace(/[^\d.-]+/g, '')
       }
@@ -155,7 +155,10 @@ export async function addWeeklyBudgetEntry(entry: any) {
 
   window.dispatchEvent(new Event('transactions-updated'));
 
-  return data;
+  return {
+    data,
+    uuid // Retorna o ID gerado
+  };
 }
 
 export async function updateWeeklyBudgetEntry(id: string, updates: any) {
@@ -192,6 +195,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     entries: [],
     
     addEntry: async (entry: WeeklyBudgetEntry) => {
+      let uuid = null;
       // Verificar se já existe uma entrada com o mesmo valor e descrição na mesma semana
       const state = useWeeklyBudgetStore.getState();
       const existingEntry = state.entries.find(e => 
@@ -212,7 +216,9 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       try {
         entry.week = entry.week.replace(/[^\d.-]+/g, '') as any; // Remove caracteres não numéricos
 
-        await addWeeklyBudgetEntry(entry);
+        const result = await addWeeklyBudgetEntry(entry);
+
+        uuid = result.uuid; // Obtém o ID gerado pelo Supabase
       } catch (e) {
         console.error('Erro ao adicionar entrada no Supabase:', e);
       }
@@ -231,7 +237,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
       // mas apenas se não for uma entrada de sincronização (para evitar loop)
       if (!entry.id.startsWith('wb-')) {
         const state = useWeeklyBudgetStore.getState();
-        state.createTransactionFromEntry(entry)
+        state.createTransactionFromEntry(entry, uuid)
           .then(success => {
             if (success) {
               console.log('Transação criada automaticamente a partir da nova entrada do orçamento');
@@ -245,7 +251,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     // Cria uma transação a partir de uma entrada do Weekly Budget
-    createTransactionFromEntry: async (entry: WeeklyBudgetEntry): Promise<boolean> => {
+    createTransactionFromEntry: async (entry: WeeklyBudgetEntry, uuid: any): Promise<boolean> => {
       try {
         // Obter o store de transações
         const transactionStore = useTransactionStore.getState();
@@ -264,6 +270,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           type: entry.category === 'Income' ? 'income' as TransactionType : 'expense' as TransactionType,
           date: weekDate.toISOString(),
           user_id: 'local-user',
+          weekly_budget_entry_id: uuid,
           metadata: {
             sourceEntryId: entry.id,
             sourceWeek: entry.week,
