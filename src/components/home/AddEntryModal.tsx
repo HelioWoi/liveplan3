@@ -7,7 +7,6 @@ import { useAuthStore } from '../../stores/authStore';
 interface AddEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedMonth?: string;
   selectedYear?: number;
 }
 
@@ -41,9 +40,9 @@ const months = [
   { full: 'December', short: 'Dec' }
 ];
 
-export default function AddEntryModal({ isOpen, onClose, selectedMonth = 'April', selectedYear }: AddEntryModalProps) {
+export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntryModalProps) {
   const { addEntry } = useWeeklyBudgetStore();
-  const [month, setMonth] = useState(selectedMonth);
+  const [month, setMonth] = useState('Jan');
   const [week, setWeek] = useState('Week 1');
   const [category, setCategory] = useState('Extra');
   const [description, setDescription] = useState('');

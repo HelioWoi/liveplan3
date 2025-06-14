@@ -104,7 +104,6 @@ function AppContent() {
         <AddEntryModal 
           isOpen={isAddEntryModalOpen} 
           onClose={handleCloseAddEntryModal} 
-          selectedMonth={new Date().toLocaleString('default', { month: 'long' })} 
           selectedYear={new Date().getFullYear()}
         />
         
