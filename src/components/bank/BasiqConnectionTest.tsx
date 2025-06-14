@@ -89,7 +89,7 @@ export default function BasiqConnectionTest() {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <h2 className="text-xl font-bold mb-4">Basiq API Connection Test</h2>
@@ -230,7 +230,7 @@ export default function BasiqConnectionTest() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {accounts.map((account) => (
-                  <tr key={account.id}>
+                  <tr key={`${account.id}-${account.name}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {account.name}
                     </td>
