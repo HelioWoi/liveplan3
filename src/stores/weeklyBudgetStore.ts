@@ -358,9 +358,16 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     },
     
     updateEntry: async (id: string, updatedEntry: Partial<WeeklyBudgetEntry>) => {
+      const { uuid_weekly_budget, ...rest } = updatedEntry as any;
       try {
         // Atualizar a entrada no Supabase
-        await updateWeeklyBudgetEntry(id, updatedEntry);
+        await updateWeeklyBudgetEntry(uuid_weekly_budget, rest);
+
+        await supabase
+          .from('transactions')
+          .update(rest)
+          .eq('weekly_budget_entry_id', uuid_weekly_budget); 
+        
       } catch (error) {
         console.error('Erro ao atualizar entrada no Supabase:', error);
         return;

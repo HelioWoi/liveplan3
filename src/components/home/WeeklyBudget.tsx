@@ -117,6 +117,21 @@ export default function WeeklyBudget() {
       }
     }
   };
+
+   // Função para salvar as edições
+  const handleSaveEdit = (updatedEntry: any) => {
+    if (entryToEdit) {
+      updateEntry(entryToEdit.id, updatedEntry);
+      setIsEditModalOpen(false);
+      setEntryToEdit(null);
+      setSelectedEntry(null);
+      setShowOptions(false);
+      
+      // Notificar outras partes do app que os dados foram atualizados
+      // Sem sincronização automática para evitar adição de valores aleatórios
+      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+    }
+  };
   
   // Função para abrir o modal de confirmação de deleção
   const handleDeleteEntry = (selectedEntry: any) => {
@@ -141,20 +156,7 @@ export default function WeeklyBudget() {
     }
   };
   
-  // Função para salvar as edições
-  const handleSaveEdit = (updatedEntry: any) => {
-    if (entryToEdit) {
-      updateEntry(entryToEdit.id, updatedEntry);
-      setIsEditModalOpen(false);
-      setEntryToEdit(null);
-      setSelectedEntry(null);
-      setShowOptions(false);
-      
-      // Notificar outras partes do app que os dados foram atualizados
-      // Sem sincronização automática para evitar adição de valores aleatórios
-      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
-    }
-  };
+ 
   
   // Nota: As funções de sincronização manual e limpeza foram removidas
   // pois agora a sincronização é feita automaticamente via eventos
@@ -465,14 +467,21 @@ export default function WeeklyBudget() {
               const description = (form.elements.namedItem('description') as HTMLInputElement).value;
               const amount = parseFloat((form.elements.namedItem('amount') as HTMLInputElement).value);
               const category = (form.elements.namedItem('category') as HTMLSelectElement).value;
+              const uuid_weekly_budget = (form.elements.namedItem('uuid_weekly_budget') as HTMLInputElement).value;
               
               handleSaveEdit({
                 description,
                 amount,
-                category
+                category,
+                uuid_weekly_budget
               });
             }}>
               <div className="mb-4">
+                <input
+                  type="hidden"
+                  name="uuid_weekly_budget"
+                  value={entryToEdit.id}
+                />
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <input 
                   type="text" 
