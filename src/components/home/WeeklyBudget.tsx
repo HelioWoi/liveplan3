@@ -119,7 +119,7 @@ export default function WeeklyBudget() {
   };
   
   // Função para abrir o modal de confirmação de deleção
-  const handleDeleteEntry = () => {
+  const handleDeleteEntry = (selectedEntry: any) => {
     if (selectedEntry) {
       setEntryToDelete(selectedEntry);
       setIsDeleteModalOpen(true);
@@ -137,7 +137,7 @@ export default function WeeklyBudget() {
       
       // Notificar outras partes do app que os dados foram atualizados
       // Sem sincronização automática para evitar adição de valores aleatórios
-      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+      // window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
     }
   };
   
@@ -378,7 +378,7 @@ export default function WeeklyBudget() {
                                 >
                                   {formatCurrency(weekEntries[0].amount)}
                                 </div>
-                                
+
                                 {/* Options for edit and delete */}
                                 {selectedEntry === weekEntries[0].id && showOptions && (
                                   <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
@@ -390,7 +390,7 @@ export default function WeeklyBudget() {
                                       <Edit size={16} />
                                     </button>
                                     <button 
-                                      onClick={handleDeleteEntry}
+                                      onClick={() => handleDeleteEntry(selectedEntry)}
                                       className="p-1 text-red-600 hover:bg-red-100 rounded"
                                       title="Delete"
                                     >
@@ -601,7 +601,6 @@ export default function WeeklyBudget() {
                     </button>
                     <button
                       onClick={() => {
-                        setEntryToDelete(entry.id);
                         setIsDeleteModalOpen(true);
                         setIsDetailsModalOpen(false);
                       }}
