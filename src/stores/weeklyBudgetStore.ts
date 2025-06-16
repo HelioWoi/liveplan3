@@ -299,7 +299,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           type: entry.category === 'Income' ? 'income' as TransactionType : 'expense' as TransactionType,
           date: weekDate.toISOString(),
           user_id: 'local-user',
-          weekly_budget_entry_id: uuid,
+          // weekly_budget_entry_id: uuid,
           metadata: {
             sourceEntryId: entry.id,
             sourceWeek: entry.week,
