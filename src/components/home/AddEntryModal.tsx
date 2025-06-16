@@ -1,5 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import { useWeeklyBudgetStore, WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
 import { TransactionCategory } from '../../types/transaction';
 import { useAuthStore } from '../../stores/authStore';
@@ -40,8 +42,66 @@ const months = [
   { full: 'December', short: 'Dec' }
 ];
 
+type WeekLabel = '1' | '2' | '3' | '4';
+
+function getWeekOfMonth(date: Date): WeekLabel {
+  const day = date.getDate();
+  if (day <= 7) return '1';
+  if (day <= 14) return '2';
+  if (day <= 21) return '3';
+  return '4';
+}
+
+function getWeeksInMonth(year: number, monthIndex: number): WeekLabel[] {
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+  const weeks: WeekLabel[] = [];
+  if (lastDay > 0) weeks.push('1');
+  if (lastDay > 7) weeks.push('2');
+  if (lastDay > 14) weeks.push('3');
+  if (lastDay > 21) weeks.push('4');
+  return weeks;
+}
+
+function generateWeeklyEntriesFromNowToEndOfYear(baseEntry: any): any {
+  const today = new Date();
+  const currentMonthIndex = today.getMonth();
+  const currentYear = today.getFullYear();
+  const currentWeek = getWeekOfMonth(today);
+
+  const entries: { month: string; week: WeekLabel }[] = [];
+
+  // Mês atual: apenas semanas restantes (incluindo a atual)
+  const weeksThisMonth = getWeeksInMonth(currentYear, currentMonthIndex);
+  const currentWeekIndex = weeksThisMonth.indexOf(currentWeek);
+  for (let i = currentWeekIndex; i < weeksThisMonth.length; i++) {
+    entries.push({
+      ...baseEntry,
+      user_id: baseEntry.id,
+      id: uuidv4(),
+      month: months[currentMonthIndex].short,
+      week: weeksThisMonth[i]
+    });
+  }
+
+  // Próximos meses até dezembro: todas as semanas do mês
+  for (let m = currentMonthIndex + 1; m < 12; m++) {
+    const weeks = getWeeksInMonth(currentYear, m);
+    for (const week of weeks) {
+      entries.push({
+        ...baseEntry,
+        user_id: baseEntry.id,
+        id: uuidv4(),
+        month: months[m].short,
+        week
+      });
+    }
+  }
+
+  return entries;
+}
+
 export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntryModalProps) {
-  const { addEntry } = useWeeklyBudgetStore();
+  const { addEntry, insertMultipleEntries } = useWeeklyBudgetStore();
   const [month, setMonth] = useState('Jan');
   const [week, setWeek] = useState('Week 1');
   const [category, setCategory] = useState('Extra');
@@ -57,7 +117,7 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
   const user_id = useAuthStore((state) => state.user?.id)?.toString() || '';
 
   // Função para gerar entradas recorrentes com base na opção selecionada
-  const generateRecurringEntries = (baseEntry: WeeklyBudgetEntry) => {
+  const generateRecurringEntries = async (baseEntry: WeeklyBudgetEntry) => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const futureEntries: WeeklyBudgetEntry[] = [];
@@ -157,6 +217,7 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
         
       case 'Every weekday':
         // Gerar entradas para os próximos 30 dias úteis (seg-sex)
+        /*
         let daysAdded = 0;
         let dayCounter = 1;
         
@@ -171,7 +232,6 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
           
           daysAdded++;
           
-          const futureMonth = futureDate.toLocaleString('default', { month: 'long' });
           const futureYear = futureDate.getFullYear();
           const dayOfMonth = futureDate.getDate();
           
@@ -184,24 +244,29 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
           } else if (dayOfMonth > 7) {
             futureWeek = 'Week 2';
           }
-          
+          const now = new Date();
+          const currentMonth = months[now.getMonth()]["short"];
+
           futureEntries.push({
             ...baseEntry,
-            id: `${baseEntry.id}-weekday-${daysAdded}`,
             week: futureWeek as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
-            month: futureMonth,
+            month: currentMonth,
             year: futureYear
           });
+          
         }
+        */
+        const weeklyEntriesFromCurrentWeek = generateWeeklyEntriesFromNowToEndOfYear(baseEntry);
+        futureEntries.push(...weeklyEntriesFromCurrentWeek);
+
         break;
     }
     
     // Adicionar todas as entradas futuras geradas
-    futureEntries.forEach(entry => {
-      addEntry(entry);
-    });
+    const response = await insertMultipleEntries(futureEntries);
+
+    console.log(`Entradas recorrentes geradas:`,response,  futureEntries);
     
-    console.log(`Geradas ${futureEntries.length} entradas recorrentes para ${repeatOption}`);
     return futureEntries;
   };
 
@@ -220,16 +285,19 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
       year: selectedYear || new Date().getFullYear()
     };
 
-    // Adiciona a entrada ao orçamento semanal
-    addEntry(entry);
-    
     // Se a opção de repetição for diferente de 'Does not repeat', gerar entradas futuras
     if (repeatOption !== 'Does not repeat') {
-      generateRecurringEntries(entry);
+      await generateRecurringEntries(entry);
+
+      setDescription('');
+      setAmount('');
+      onClose();
+
+      return;
     }
-    
-    // Não precisamos criar a transação aqui, pois o weeklyBudgetStore já faz isso
-    // A criação duplicada estava causando problemas de cálculo
+
+    // Adiciona a entrada ao orçamento semanal
+    addEntry(entry);
 
     // Reset form
     setDescription('');
