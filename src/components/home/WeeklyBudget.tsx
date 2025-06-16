@@ -595,6 +595,7 @@ export default function WeeklyBudget() {
                         setIsDetailsModalOpen(false);
                       }}
                       className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded flex items-center"
+                      data-entry-id={entry.id}
                     >
                       <Edit size={14} className="mr-1" /> Edit
                     </button>
@@ -605,15 +606,18 @@ export default function WeeklyBudget() {
                         setIsDetailsModalOpen(false);
                       }}
                       className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded flex items-center"
+                      data-entry-id={entry.id}
                     >
                       <ArrowRight size={14} className="mr-1" /> Move
                     </button>
                     <button
                       onClick={() => {
+                        setEntryToDelete(entry.id);
                         setIsDeleteModalOpen(true);
                         setIsDetailsModalOpen(false);
                       }}
                       className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded flex items-center"
+                      data-entry-id={entry.id}
                     >
                       <Trash2 size={14} className="mr-1" /> Delete
                     </button>
@@ -679,7 +683,6 @@ export default function WeeklyBudget() {
       <AddEntryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        selectedMonth={selectedMonth}
         selectedYear={currentYear}
       />
     </div>
