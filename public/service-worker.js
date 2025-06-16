@@ -2,7 +2,6 @@
 const CACHE_NAME = 'liveplan3-v1';
 const urlsToCache = [
   '/',
-  '/index.html',
   '/favicon.svg',
   '/logo/logo LivePlan3.svg',
   '/logo/logo LivePlan3-slogan.svg',
