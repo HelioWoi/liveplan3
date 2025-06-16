@@ -28,6 +28,7 @@ interface WeeklyBudgetState {
   syncWithTransactions: () => void;
   clearAllEntries: () => void;
   fetchEntries: (userId: string) => Promise<void>;
+  insertMultipleEntries: (entries: any) => void;
 }
 
 const currentYear = 2025;
@@ -143,7 +144,8 @@ export async function addWeeklyBudgetEntry(entry: any) {
   const { data, error } = await supabase
     .from('weekly_budget_entries')
     .insert([
-      { ...entry,
+      { 
+        ...entry,
         id: uuid,
         user_id: entry.id,
         week: entry.week.replace(/[^\d.-]+/g, '')
@@ -193,7 +195,34 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
     currentYear,
     setCurrentYear: (year: number) => set({ currentYear: year }),
     entries: [],
-    
+    insertMultipleEntries: async (entries: any) => {
+      const { data, error } = await supabase
+        .from('weekly_budget_entries')
+        .upsert(entries)
+        .select();
+
+      if (error) {
+        console.error('Erro ao inserir múltiplas entradas na tabela weekly_budget_entries:', error);
+        return false;
+      }
+
+      console.log('Múltiplas entradas inseridas com sucesso:', data);
+
+      const { error: errorTransactions } = await supabase
+        .from('transactions')
+        .upsert(entries)
+        .select();
+
+      if (errorTransactions) {
+        console.error('Erro ao inserir múltiplas entradas na tabela transactions:', error);
+        return false;
+      }
+
+      window.dispatchEvent(new CustomEvent('weekly-budget-updated'));
+      window.dispatchEvent(new Event('transactions-updated'));
+
+      return true;
+    },
     addEntry: async (entry: WeeklyBudgetEntry) => {
       let uuid = null;
       // Verificar se já existe uma entrada com o mesmo valor e descrição na mesma semana
