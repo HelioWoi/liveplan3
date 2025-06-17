@@ -1,0 +1,17 @@
+{
+  "appId": "com.liveplan3.app",
+  "appName": "LivePlan³",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https",
+    "hostname": "liveplan3.netlify.app",
+    "cleartext": true
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": true,
+    "scrollEnabled": true,
+    "backgroundColor": "#0A2647"
+  }
+}

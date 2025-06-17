@@ -13,7 +13,7 @@ const routeMap: Record<string, string> = {
   'goals': 'Goals',
   'investments': 'Investments',
   'bills': 'Bills',
-  'simulator': 'Simulator',
+  'simulator': 'Calculator',
   'profile': 'Profile',
   'statement': 'Statement',
   'income': 'Income',

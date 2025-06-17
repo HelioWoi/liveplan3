@@ -31,7 +31,9 @@ import ExpensesPage from './pages/ExpensesPage';
 import IncomePage from './pages/IncomePage';
 import VariablesPage from './pages/VariablesPage';
 import InvestmentPortfolioPage from './pages/InvestmentPortfolioPage';
-import { PassiveIncome } from './pages/PassiveIncome';
+import { PassiveIncome } from './pages/PassiveIncome'; // Usado na rota /passive-income
+import SimulatorPage from './pages/SimulatorPage';
+import EmergencyFundPage from './pages/EmergencyFundPage';
 import InvoicesPage from './pages/InvoicesPage';
 import TaxPage from './pages/TaxPage';
 import HelpPage from './pages/HelpPage';
@@ -260,7 +262,23 @@ function AppContent() {
             path="/simulator"
             element={
               <PrivateRoute>
+                <SimulatorPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/passive-income"
+            element={
+              <PrivateRoute>
                 <PassiveIncome />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/emergency-fund"
+            element={
+              <PrivateRoute>
+                <EmergencyFundPage />
               </PrivateRoute>
             }
           />

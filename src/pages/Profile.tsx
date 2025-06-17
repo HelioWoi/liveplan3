@@ -191,8 +191,8 @@ export default function Profile() {
                         Help & Support
                       </span>
                     </Link>
-                    {/* Link removido e transformado em elemento não clicável, mas com cor azul */}
-                    <div className="flex items-center justify-between py-2 text-sm text-primary-600">
+                    {/* Link removido e oculto temporariamente */}
+                    <div className="hidden flex items-center justify-between py-2 text-sm text-primary-600">
                       <span className="flex items-center">
                         <Landmark className="h-4 w-4 mr-2" />
                         Connect Bank Account

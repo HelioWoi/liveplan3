@@ -84,10 +84,10 @@ export default function OnboardingChoicePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* Bank Connection Option */}
+            {/* Bank Connection Option - Hidden for now */}
             <div 
               onClick={handleBankConnection}
-              className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1 border-2 border-blue-200 relative"
+              className="hidden bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1 border-2 border-blue-200 relative"
             >
               {/* Badge "Coming Soon" com tamanho reduzido */}
               <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full text-xs font-medium">
@@ -163,50 +163,11 @@ export default function OnboardingChoicePage() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-medium text-lg text-gray-800 mb-2">Not ready to connect yet?</h3>
+                <h3 className="font-medium text-lg text-gray-800 mb-2">Not ready to send your spreadsheet yet?</h3>
                 <p className="text-gray-700 mb-4">
-                  No problem! You can always connect your bank account or import data later from your dashboard.
+                  No problem! You can always import it later from your Profile page.
+                  Just click "Import Data" from the dashboard when you're ready.
                 </p>
-                <div className="bg-white p-4 rounded-lg border border-blue-100">
-                  <div className="grid grid-cols-12 gap-2 mb-2">
-                    <div className="col-span-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div className="col-span-11">
-                      <p className="text-gray-700">
-                        Go to your <span className="font-medium">Profile</span> and select <span className="font-medium">Connect Bank Account</span>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-12 gap-2 mb-2">
-                    <div className="col-span-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div className="col-span-11">
-                      <p className="text-gray-700">
-                        Click on <span className="font-medium">Import Data</span> from the dashboard
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-12 gap-2">
-                    <div className="col-span-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div className="col-span-11">
-                      <p className="text-gray-700">
-                        Access <span className="font-medium">Settings</span> &rarr; <span className="font-medium">Data Sources</span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/cli": "^7.3.0",
+    "@capacitor/core": "^7.3.0",
+    "@capacitor/ios": "^7.3.0",
     "@headlessui/react": "^2.2.2",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-dialog": "^1.1.11",

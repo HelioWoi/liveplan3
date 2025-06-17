@@ -5,11 +5,13 @@ import App from './App';
 import './index.css';
 import { SupabaseProvider } from './lib/supabase/SupabaseProvider';
 import { registerServiceWorker } from './registerServiceWorker';
+import ScrollToTop from './components/layout/ScrollToTop';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SupabaseProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <App />
       </BrowserRouter>
     </SupabaseProvider>
