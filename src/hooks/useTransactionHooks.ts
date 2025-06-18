@@ -20,5 +20,16 @@ export function useTransactions(user_id: string, month?: string, year?: string, 
     toast.error((query.error as Error).message);
   }
 
-  return query;
+  return {
+    ...query,
+    data: query.data?.map((item) => {
+      return {
+        ...item,
+        type: (item as any).category === "Income" ? "income" : "expense",
+      }
+    }) || [],
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+  };
 }
