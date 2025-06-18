@@ -51,3 +51,13 @@ export function getWeekOfMonth(date: Date): 'Week 1' | 'Week 2' | 'Week 3' | 'We
   if (day <= 21) return 'Week 3';
   return 'Week 4';
 }
+
+
+export function getCurrentWeekOfMonth(date = new Date()): number {
+  const day = date.getDate();
+
+  if (day <= 7) return 1;
+  if (day <= 14) return 2;
+  if (day <= 21) return 3;
+  return 4;
+}
