@@ -79,8 +79,8 @@ export default function TopGoals() {
             </div>
             <p className="text-gray-600 mb-4 text-sm">{goal.description}</p>
             <div className="flex justify-between text-sm mb-1">
-              <span>${formatCurrency(goal.current_amount)}</span>
-              <span>${formatCurrency(goal.target_amount)}</span>
+              <span>{formatCurrency(goal.current_amount)}</span>
+              <span>{formatCurrency(goal.target_amount)}</span>
             </div>
             <div className="progress-bar mb-2">
               <div 

@@ -206,7 +206,7 @@ export default function WeeklyBudget() {
               : 'text-gray-700 hover:text-purple-600'
           }`}
         >
-          Year
+          {currentYear || '2025'}
         </button>
       </>
     );

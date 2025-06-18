@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import WeeklyBudget from '../components/home/WeeklyBudget';
 import Formula3 from '../components/home/Formula3';
-import TopGoals from '../components/TopGoals';
+import TopGoals from '../components/home/TopGoals';
 import UpcomingBills from '../components/home/UpcomingBills';
 import TransactionModal from '../components/modals/TransactionModal';
 import { useTransactionStore } from '../stores/transactionStore';

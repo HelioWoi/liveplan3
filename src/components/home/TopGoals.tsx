@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Target } from 'lucide-react';
 import { useGoalsStore } from '../../stores/goalsStore';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function TopGoals() {
   const { goals } = useGoalsStore();
@@ -50,10 +51,10 @@ export default function TopGoals() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">
-                        ${goal.current_amount.toLocaleString()}
+                        {formatCurrency(goal.current_amount)}
                       </span>
                       <span className="text-gray-600">
-                        ${goal.target_amount.toLocaleString()}
+                        {formatCurrency(goal.target_amount)}
                       </span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
