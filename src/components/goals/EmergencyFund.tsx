@@ -35,21 +35,26 @@ export default function EmergencyFund() {
     fetchTotalIncome();
   }, [fetchTotalIncome]);
 
-  // Calculate effective income based on custom or total income
-  const effectiveIncome = customIncome !== null ? customIncome : totalIncome;
+  // Calculate effective income based on custom or total income with safety checks
+  const effectiveIncome = customIncome !== null ? customIncome : (totalIncome || 0);
   const targetAmount = effectiveIncome * multiplier;
 
   // Find or create emergency fund goal
   useEffect(() => {
+    // Skip if goals is undefined or empty
+    if (!goals || goals.length === 0) return;
+    
     const findEmergencyFundGoal = () => {
       const foundGoal = goals.find(g => g.title === "Emergency Fund");
+      const safeEffectiveIncome = effectiveIncome || 0;
+      
       if (foundGoal) {
         setEmergencyFundGoal(foundGoal);
-        generateContributionsTable(effectiveIncome * multiplier, foundGoal.current_amount);
+        generateContributionsTable(safeEffectiveIncome * multiplier, foundGoal.current_amount);
       } else {
         setEmergencyFundGoal(null);
         // Gerar tabela de contribuições mesmo sem um goal existente
-        generateContributionsTable(effectiveIncome * multiplier, 0);
+        generateContributionsTable(safeEffectiveIncome * multiplier, 0);
       }
     };
 
@@ -58,18 +63,20 @@ export default function EmergencyFund() {
   
   // Gerar tabela de contribuições quando o componente montar ou quando income/multiplier mudar
   useEffect(() => {
+    const safeEffectiveIncome = effectiveIncome || 0;
+    
     if (emergencyFundGoal) {
-      generateContributionsTable(effectiveIncome * multiplier, emergencyFundGoal.current_amount);
+      generateContributionsTable(safeEffectiveIncome * multiplier, emergencyFundGoal.current_amount);
     } else {
-      generateContributionsTable(effectiveIncome * multiplier, 0);
+      generateContributionsTable(safeEffectiveIncome * multiplier, 0);
     }
   }, [effectiveIncome, multiplier, emergencyFundGoal]);
 
   // Generate contributions table
   const generateContributionsTable = (target: number, current: number) => {
-    const monthlyContribution = effectiveIncome * 0.1; // Suggest saving 10% of monthly income
+    const safeEffectiveIncome = effectiveIncome || 0;
+    const monthlyContribution = safeEffectiveIncome * 0.1; // Suggest saving 10% of monthly income
     const months = [];
-    let accumulated = current;
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
@@ -78,18 +85,27 @@ export default function EmergencyFund() {
     const currentDate = new Date();
     let currentMonth = currentDate.getMonth();
     
-    for (let i = 0; i < 12; i++) {
+    // Primeiro mês mostra o valor atual acumulado e a contribuição feita
+    // Aqui é onde mostramos o valor atual da contribuição
+    months.push({
+      month: monthNames[currentMonth],
+      suggestedAmount: monthlyContribution,
+      contributedAmount: current, // Mostra o valor atual como contribuído
+      accumulated: current,
+      progress: Math.min(100, (current / target) * 100)
+    });
+    
+    // Próximos meses mostram projeções
+    let accumulated = current;
+    for (let i = 1; i < 12; i++) {
       const monthIndex = (currentMonth + i) % 12;
-      const suggestedAmount = monthlyContribution;
-      const contributedAmount = i === 0 ? 0 : 0; // Only the first month might have contributions
-      
-      accumulated = i === 0 ? accumulated : accumulated + suggestedAmount;
+      accumulated = accumulated + monthlyContribution;
       const progress = Math.min(100, (accumulated / target) * 100);
       
       months.push({
         month: monthNames[monthIndex],
-        suggestedAmount,
-        contributedAmount,
+        suggestedAmount: monthlyContribution,
+        contributedAmount: 0, // Contribuições futuras são zero
         accumulated,
         progress
       });
@@ -139,14 +155,15 @@ export default function EmergencyFund() {
     }
   };
   
-  // Função para deletar o fundo de emergência e criar um novo
+  // Função para deletar o fundo de emergência
   const deleteAndCreateNew = async () => {
     if (!emergencyFundGoal) return;
     
     try {
       await deleteGoal(emergencyFundGoal.id);
-      // Após deletar, cria um novo goal
-      createEmergencyFundGoal();
+      // Clear the local state immediately to provide feedback
+      setEmergencyFundGoal(null);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Failed to delete emergency fund', error);
     }
@@ -177,14 +194,24 @@ export default function EmergencyFund() {
     if (!emergencyFundGoal || amount <= 0) return;
     
     try {
+      // Calcular o novo valor total após a contribuição
       const newCurrentAmount = emergencyFundGoal.current_amount + amount;
       
+      // Atualizar o objetivo no banco de dados
       await updateGoal(emergencyFundGoal.id, {
         current_amount: newCurrentAmount
       });
       
-      // Regenerate the contributions table with the new current amount
+      // Atualizar o estado local imediatamente para feedback visual
+      setEmergencyFundGoal({
+        ...emergencyFundGoal,
+        current_amount: newCurrentAmount
+      });
+      
+      // Regenerar a tabela de contribuições com o novo valor atual
       generateContributionsTable(emergencyFundGoal.target_amount, newCurrentAmount);
+      
+      // Mostrar modal de sucesso
       setShowSuccessModal(true);
       
     } catch (error) {
@@ -223,7 +250,8 @@ export default function EmergencyFund() {
     }
     
     const remaining = emergencyFundGoal.target_amount - emergencyFundGoal.current_amount;
-    const monthlyContribution = effectiveIncome * 0.1; // Assuming 10% of income
+    const safeEffectiveIncome = effectiveIncome || 0;
+    const monthlyContribution = safeEffectiveIncome * 0.1; // Assuming 10% of income
     
     if (monthlyContribution <= 0) return 0;
     
