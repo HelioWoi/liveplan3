@@ -1,20 +1,23 @@
-
-function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
 type Entry = {
   id: string;
   category: string;
   week: number;
   amount: number;
+  description?: string;
+};
+
+type BudgetItem = {
+  amount: number;
+  id: string | null;
+  category: string;
+  type: "income" | "expense" | "balance";
+  count: number;
+  entries: Entry[];
+  week: number;
 };
 
 export function formatBudgets(entries: Entry[]) {
-  const result: Record<
-    string,
-    any
-  > = {};
+  const result: Record<string, Record<number, BudgetItem>> = {};
 
   const weeks = [1, 2, 3, 4];
   const categories = [
@@ -30,27 +33,35 @@ export function formatBudgets(entries: Entry[]) {
   for (const category of categories) {
     result[category] = {};
     for (const week of weeks) {
-      result[category][week] = { amount: 0, id: null, category };
+      result[category][week] = {
+        amount: 0,
+        id: null,
+        category,
+        type:
+          category === "Income"
+            ? "income"
+            : category === "Balance"
+            ? "balance"
+            : "expense",
+        count: 0,
+        entries: [],
+        week,
+      };
     }
   }
 
-  // Preenche os dados reais com amount e id
+  // Agrupa e acumula valores
   for (const entry of entries) {
     const { category, week, amount, id } = entry;
+    const item = result[category][week];
 
-    if (!result[category]) {
-      result[category] = {};
-    }
-
-    result[category][week] = {
-      amount,
-      id,
-      category,
-      type: category === 'Income' ? 'income' : 'expense'
-    };
+    item.amount += amount;
+    item.count += 1;
+    item.id = item.id ?? id;
+    item.entries.push(entry);
   }
 
-  // Calcula o Balance por semana
+  // Calcula o Balance
   for (const week of weeks) {
     const weekEntries = entries.filter((entry) => entry.week === week);
 
@@ -64,12 +75,14 @@ export function formatBudgets(entries: Entry[]) {
       )
       .reduce((total, e) => total + Math.abs(e.amount), 0);
 
-    const balance = income - expenses;
-
     result["Balance"][week] = {
-      amount: balance,
+      amount: income - expenses,
       id: null,
       category: "Balance",
+      type: "balance",
+      count: 0,
+      entries: [],
+      week,
     };
   }
 
