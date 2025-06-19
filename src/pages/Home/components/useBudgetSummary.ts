@@ -4,7 +4,8 @@ import { totalIncomeFn, totalExpensesFn} from './helper';
 
 export const useBudgetSummary = (selectedPeriodState: any) => {
   const { user } = useAuthStore();
-  const { data: transactions, isLoading } = useTransactions(user?.id ?? "", selectedPeriodState.month, selectedPeriodState.year, selectedPeriodState.week);
+  const month = selectedPeriodState.month.length === 3 ? selectedPeriodState.month : selectedPeriodState.month.slice(0, 3);
+  const { data: transactions, isLoading } = useTransactions(user?.id ?? "", month, selectedPeriodState.year, selectedPeriodState.week);
 
   // Cálculo do Total Income - APENAS entradas de receita (Income) do período selecionado
   const totalIncome = totalIncomeFn(transactions || []);

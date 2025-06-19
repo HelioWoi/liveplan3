@@ -8,6 +8,7 @@ import { formatCurrency } from '../../../utils/formatters';
 import { getCurrentMonth, getCurrentWeek, getCurrentYear } from "./helper";
 import PeriodSelector from "../../../components/common/PeriodSelector";
 import { useBudgetSummary } from "./useBudgetSummary";
+import { FullScreenLoader } from "./FullScreenLoader";
 
 export function BudgetSummary() {
   const [selectedPeriodState, setSelectedPeriodState] = useState<{
@@ -29,41 +30,45 @@ export function BudgetSummary() {
   const { isLoading, totalIncome, totalExpenses } = useBudgetSummary(selectedPeriodState);
   
   return (
-    <div className="max-w-3xl mx-auto px-4 space-y-6 mt-6">
-      <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
-        <PeriodSelector
-          selectedPeriod={selectedPeriodState.period}
-          selectedMonth={selectedPeriodState.month}
-          selectedYear={selectedPeriodState.year}
-          selectedWeek={selectedPeriodState.week}
-          onPeriodChange={period => updateSelectedPeriod({ period })}
-          onMonthChange={month => updateSelectedPeriod({ month })}
-          onYearChange={year => updateSelectedPeriod({ year })}
-          onWeekChange={week => updateSelectedPeriod({ week })}
-          useShortMonthNames={true}
-        />
-      </div>
+    <>
+      {isLoading && <FullScreenLoader />}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm text-gray-500 mb-1">Total Income</h3>
-          {isLoading ? (
-            <Skeleton height={28} />
-          ) : (
-            <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
-          )}
-          <p className="text-xs text-gray-500">All income in the period</p>
+      <div className="max-w-3xl mx-auto px-4 space-y-6 mt-6">
+        <div className="bg-white rounded-xl p-4 mb-6 shadow-card">
+          <PeriodSelector
+            selectedPeriod={selectedPeriodState.period}
+            selectedMonth={selectedPeriodState.month}
+            selectedYear={selectedPeriodState.year}
+            selectedWeek={selectedPeriodState.week}
+            onPeriodChange={period => updateSelectedPeriod({ period })}
+            onMonthChange={month => updateSelectedPeriod({ month })}
+            onYearChange={year => updateSelectedPeriod({ year })}
+            onWeekChange={week => updateSelectedPeriod({ week })}
+            useShortMonthNames={true}
+          />
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm text-gray-500 mb-1">Total Expenses</h3>
-          {isLoading ? (
-            <Skeleton height={28} />
-          ) : (
-            <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
-          )}
-          <p className="text-xs text-gray-500">All expenses in the period</p>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <h3 className="text-sm text-gray-500 mb-1">Total Income</h3>
+            {isLoading ? (
+              <Skeleton height={28} />
+            ) : (
+              <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+            )}
+            <p className="text-xs text-gray-500">All income in the period</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <h3 className="text-sm text-gray-500 mb-1">Total Expenses</h3>
+            {isLoading ? (
+              <Skeleton height={28} />
+            ) : (
+              <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+            )}
+            <p className="text-xs text-gray-500">All expenses in the period</p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
