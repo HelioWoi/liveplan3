@@ -20,8 +20,6 @@ export async function getTransactionsWithFilters(
 
   const { data, error } = await query;
 
-  console.log("getTransactionsWithFilters", data);
-
   if (error) throw new Error("Erro ao buscar transações");
 
   return data as Transaction[];
