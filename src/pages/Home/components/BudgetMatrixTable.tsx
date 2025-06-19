@@ -6,9 +6,8 @@ import { formatCurrency } from "../../../utils/formatters";
 import { CATEGORY_DESCRIPTIONS } from "../../../constants";
 import { ModalMultipleEntries } from "./ModalMultipleEntries";
 import { EditModal } from "./EditModal";
-import { useDeleteWeeklyBudget } from "../../../hooks/useCreateWeeklyBudget";
+import { useDeleteWeeklyBudget, useUpdateWeeklyBudget } from "../../../hooks/useCreateWeeklyBudget";
 import { FullScreenLoader } from "./FullScreenLoader";
-
 
 type Props = {
   // data: Record<string, any>;
@@ -21,26 +20,43 @@ const textGreen = ['Income', 'Balance'];
 
 export function BudgetMatrixTable({ data, activeWeek }: Props) {
   const { mutate: deleteBudget, isPending } = useDeleteWeeklyBudget();
+  const { mutate: updateBudget, isPending: isUpdating } = useUpdateWeeklyBudget();
+
+  const isLoading = isPending || isUpdating;
 
   const [detailsData, setDetailsData] = useState<{category: string, week: number, entries: any[]}>({category: '', week: 1, entries: []});
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [entryToEdit, setEntryToEdit] = useState<any>(null);
-  // Estado para controlar a entrada selecionada para movimentação
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+ const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
+
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
-  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   const [entryToMove, setEntryToMove] = useState<string | null>(null);
 
    const handleSaveEdit = (updatedEntry: any) => {
     if (entryToEdit) {
-      console.log('Saving edit for entry:', updatedEntry);
+      const { uuid_weekly_budget, ...rest } = updatedEntry;
+      
+      const updatedData = {
+        id: entryToEdit.id,
+        updates: {
+          ...rest,
+        },
+        relatedTransactionsUpdate: {
+          ...rest,
+        },
+      } as any;
+
+      updateBudget(updatedData);
       setIsEditModalOpen(false);
       setEntryToEdit(null);
+      setSelectedEntry(null);
+      setShowOptions(false);
     }
   };
 
@@ -89,7 +105,7 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
   
   return (
     <>
-      { isPending && <FullScreenLoader /> }
+      { isLoading && <FullScreenLoader /> }
       <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">

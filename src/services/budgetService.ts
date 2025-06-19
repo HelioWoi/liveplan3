@@ -65,7 +65,7 @@ export async function updateWeeklyBudget(
     const { error: txUpdateError } = await supabase
       .from("transactions")
       .update(relatedTransactionsUpdate)
-      .eq("weekly_budget_id", id);
+      .eq("weekly_budget_entry_id", id);
 
     if (txUpdateError) throw new Error("Erro ao atualizar transações relacionadas");
   }
