@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit, HelpCircle, Info, Trash2 } from "lucide-react";
+import { ArrowRight, Edit, HelpCircle, Info, Trash2 } from "lucide-react";
 
 import Tooltip from "./Tooltip";
 import { formatCurrency } from "../../../utils/formatters";
@@ -31,10 +31,7 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
- const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
-
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [entryToMove, setEntryToMove] = useState<string | null>(null);
 
@@ -67,6 +64,7 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
       if (entry) {
         setEntryToEdit(entry);
         setIsEditModalOpen(true);
+        setShowOptions(false);
       }
     }
   };
@@ -102,6 +100,29 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
       setShowOptions(false);
     }
   };
+
+  const moveEntryToWeek = (entryId: string, week: string) => {
+    if (entryId && week) {
+
+      const updatedData = {
+        id: entryId,
+        updates: {
+          week: parseInt(week.replace('Week ', '').trim(), 10),
+        },
+        relatedTransactionsUpdate: {
+          week: parseInt(week.replace('Week ', '').trim(), 10),
+        },
+      } as any;
+
+      console.log('Moving entry to week:', updatedData);
+
+      updateBudget(updatedData);
+      setEntryToMove(null);
+      setIsMoveModalOpen(false);
+      setSelectedEntry(null);
+      setShowOptions(false);
+    }
+  }
   
   return (
     <>
@@ -258,12 +279,49 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
         </div>
       </div>
     
+      {/* Move Entry Modal */}
+      {isMoveModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Move to Week</h2>
+            <p className="mb-6 text-gray-600">Select the week you want to move this entry to:</p>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
+                <button
+                  key={week}
+                  onClick={() => {
+                    if (entryToMove) {
+                      moveEntryToWeek(entryToMove, week);
+                      setEntryToMove(null);
+                      setIsMoveModalOpen(false);
+                    }
+                  }}
+                  className="px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md flex items-center justify-center"
+                >
+                  <ArrowRight size={16} className="mr-2" />
+                  {week}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <button 
+                onClick={() => setIsMoveModalOpen(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {isEditModalOpen && (
         <EditModal 
           handleSaveEdit={handleSaveEdit}
           entryToEdit={entryToEdit}
           setIsEditModalOpen={setIsEditModalOpen}
           setEntryToEdit={setEntryToEdit}
+          setShowOptions={setShowOptions}
         />
       )}
 

@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase/supabaseClient';
 import { WeeklyBudgetEntry, Transaction } from "./types";
+import { getDateFromYearMonthWeek } from '../pages/Home/components/helper/getDateFromYearMonthWeek';
+import { monthMap } from '../constants';
 
 export async function createWeeklyBudgetWithTransactions(
   budgetData: Omit<WeeklyBudgetEntry, "id" | "created_at">,
@@ -53,18 +55,28 @@ export async function updateWeeklyBudget(
   updates: Partial<Omit<WeeklyBudgetEntry, "id" | "created_at">>,
   relatedTransactionsUpdate?: Partial<Transaction>
 ) {
-  const { error: updateError } = await supabase
+  const { data: budget, error: updateError } = await supabase
     .from("weekly_budget_entries")
     .update(updates)
-    .eq("id", id);
+    .eq("id", id)
+    .select()
+    .single();
 
   if (updateError) throw new Error("Erro ao atualizar orçamento");
 
   // Se atualizações em transações forem necessárias
   if (relatedTransactionsUpdate && Object.keys(relatedTransactionsUpdate).length > 0) {
+    const monthNumber = monthMap[(budget as any)?.month as keyof typeof monthMap];
+    const date = getDateFromYearMonthWeek((budget as any)?.year, monthNumber, (budget as any)?.week);
+
     const { error: txUpdateError } = await supabase
       .from("transactions")
-      .update(relatedTransactionsUpdate)
+      .update({
+        amount: (budget as any)?.amount,
+        description: (budget as any)?.description,
+        category: (budget as any)?.category,
+        date,
+      })
       .eq("weekly_budget_entry_id", id);
 
     if (txUpdateError) throw new Error("Erro ao atualizar transações relacionadas");

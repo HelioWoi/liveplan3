@@ -1,10 +1,10 @@
-import { Calendar, PlusCircle, HelpCircle, Edit, Trash2, X, ArrowRight, Info } from 'lucide-react';
+import { Calendar, PlusCircle, Edit, Trash2, X, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useWeeklyBudgetStore } from '../../stores/weeklyBudgetStore';
 import { formatCurrency } from '../../utils/formatters';
 import AddEntryModal from './AddEntryModal';
 import { useAuthStore } from '../../stores/authStore';
-import { CATEGORY_DESCRIPTIONS, YEARS, MONTHS, MONTHS_SHORT, CATEGORIES } from '../../constants';
+import { YEARS, MONTHS, MONTHS_SHORT } from '../../constants';
 
 import { useWeeklyBudgetsByMonth } from '../../hooks/useWeeklyBudgetHooks';
 import { formatBudgets } from '../../pages/Home/components/helper/formatBudgets';
@@ -32,13 +32,6 @@ function Tooltip({ children, content }: TooltipProps) {
 const getCurrentMonth = () => MONTHS_SHORT[new Date().getMonth()];
 const getCurrentYear = () => new Date().getFullYear();
 
-const getCurrentWeek = () => {
-  const now = new Date();
-  const dayOfMonth = now.getDate();
-  const weekNumber = Math.ceil(dayOfMonth / 7);
-  return `Week ${weekNumber}`;
-};
-
 export default function WeeklyBudget() {
   const { user } = useAuthStore();
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
@@ -46,10 +39,6 @@ export default function WeeklyBudget() {
 
   const currentWeek = getCurrentWeekOfMonth(new Date());
   const formatted = formatBudgets(budgets ?? []);
-  console.log('WeeklyBudget: Orçamentos carregados', formatted);
-   
-
-
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -333,152 +322,7 @@ export default function WeeklyBudget() {
 
         <BudgetMatrixTable data={formatted} activeWeek={currentWeek} />
 
-        {/* Budget Table */}
-        <div className="bg-white rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
-                    <th 
-                      key={week} 
-                      className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider 
-                        ${week === getCurrentWeek() ? 'bg-purple-50' : 'bg-gray-50'} 
-                        ${selectedEntry ? 'cursor-pointer hover:bg-blue-50' : ''}`}
-                      onClick={() => selectedEntry && handleMoveToWeek(week)}
-                    >
-                      {week}
-                      {selectedEntry && (
-                        <span className="ml-1 text-blue-600 text-xs">→</span>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-
-              <tbody className="bg-white divide-y divide-gray-200">
-                {CATEGORIES.map(category => (
-                  <tr key={category} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <div className="flex items-center">
-                        {category}
-                        <Tooltip content={CATEGORY_DESCRIPTIONS[category] || ''}>
-                          <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
-                        </Tooltip>
-                      </div>
-                    </td>
-                    {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => {
-                      const isCurrentWeek = week === getCurrentWeek();
-                      
-                      // Encontrar todas as entradas desta categoria e semana
-                      const weekEntries = entries.filter(entry => {
-                        const month = MONTHS.find(month => month.short === selectedMonth);
-                      
-                        return entry.week === week && 
-                          entry.category === category && 
-                          entry.month === month?.short &&
-                          entry.year === currentYear
-                        }
-                      );
-                      
-                      return (
-                        <td 
-                          key={`${category}-${week}`}
-                          className={`px-6 py-4 whitespace-nowrap text-sm ${isCurrentWeek ? 'bg-purple-50' : ''} ${selectedEntry && 'hover:bg-blue-50 cursor-pointer'}`}
-                          onClick={() => selectedEntry && handleMoveToWeek(week)}
-                        >
-                          {weekEntries.length > 0 ? (
-                            <div>
-                              {weekEntries.length === 1 ? (
-                                // Single entry - show as before
-                                <div key={weekEntries[0].id} className="relative">
-                                  <div
-                                    onClick={() => handleSelectEntry(weekEntries[0].id)}
-                                    className={`mb-1 p-1 rounded cursor-pointer 
-                                      ${selectedEntry === weekEntries[0].id ? 'bg-blue-100 shadow-lg' : 'hover:bg-gray-100'} 
-                                      ${(category === 'Fixed' || category === 'Variable' || category === 'Extra' || category === 'Additional') ? 'text-yellow-600' : 
-                                        weekEntries[0].amount > 0 ? 'text-green-600' : 'text-red-600'}`}
-                                  >
-                                    {formatCurrency(weekEntries[0].amount)}
-                                  </div>
-
-                                  {/* Options for edit and delete */}
-                                  {selectedEntry === weekEntries[0].id && showOptions && (
-                                    <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
-                                      <button 
-                                        onClick={handleEditEntry}
-                                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                                        title="Edit"
-                                      >
-                                        <Edit size={16} />
-                                      </button>
-                                      <button 
-                                        onClick={() => handleDeleteEntry(selectedEntry)}
-                                        className="p-1 text-red-600 hover:bg-red-100 rounded"
-                                        title="Delete"
-                                      >
-                                        <Trash2 size={16} />
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                // Multiple entries - show total with info button
-                                <div className="relative">
-                                  <div 
-                                    className={`mb-1 p-1 rounded cursor-pointer hover:bg-gray-100 flex items-center justify-between
-                                      ${(category === 'Fixed' || category === 'Variable' || category === 'Extra' || category === 'Additional') ? 'text-yellow-600' : 
-                                        weekEntries.reduce((total, entry) => total + entry.amount, 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
-                                    onClick={() => {
-                                      setDetailsData({
-                                        category,
-                                        week,
-                                        entries: weekEntries
-                                      });
-                                      setIsDetailsModalOpen(true);
-                                    }}
-                                  >
-                                    <div className="flex items-center">
-                                      <span>{formatCurrency(weekEntries.reduce((total, entry) => total + entry.amount, 0))}</span>
-                                      <span className="ml-2 text-gray-500 text-xs">({weekEntries.length})</span>
-                                    </div>
-                                    <Info size={16} className="text-blue-500 ml-1" />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-gray-500">{formatCurrency(0)}</span>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-                <tr className="bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    Balance
-                  </td>
-                  {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => {
-                    const balance = getWeekBalance(week);
-                    const isCurrentWeek = week === getCurrentWeek();
-                    return (
-                      <td key={`balance-${week}`} className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isCurrentWeek ? 'bg-purple-100' : ''}`}>
-                        <span className={`${balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                          {formatCurrency(balance)}
-                        </span>
-                      </td>
-                    );
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          {/* Removed the bottom panel as requested */}
-        </div>
+        
 
         {/* Edit Modal */}
         {isEditModalOpen && entryToEdit && (

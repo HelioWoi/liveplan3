@@ -1,6 +1,6 @@
 
 
-export const EditModal = ({ handleSaveEdit, entryToEdit, setIsEditModalOpen, setEntryToEdit }: any) => {
+export const EditModal = ({ handleSaveEdit, entryToEdit, setIsEditModalOpen, setEntryToEdit, setShowOptions }: any) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -67,6 +67,7 @@ export const EditModal = ({ handleSaveEdit, entryToEdit, setIsEditModalOpen, set
               onClick={() => {
                 setIsEditModalOpen(false);
                 setEntryToEdit(null);
+                setShowOptions(false);
               }}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md"
             >
