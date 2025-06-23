@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoalsStore } from '../stores/goalsStore';
 import { useTransactionStore } from '../stores/transactionStore';
-import { Calculator, DollarSign, HelpCircle, PlusCircle, TrendingUp, ChevronDown, Trash2 } from 'lucide-react';
+import { useAuthStore } from '../stores/authStore';
+import { Calculator, DollarSign, HelpCircle, TrendingUp, ChevronDown } from 'lucide-react';
 import { formatCurrency, parseNumericInput } from '../utils/formatters';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNavigation from '../components/layout/BottomNavigation';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import classNames from 'classnames';
-import { TaxType, TAX_TYPES } from '../types/transaction';
+
 
 type Period = 'weekly' | 'monthly' | 'yearly';
 
@@ -24,20 +25,13 @@ const TAX_BRACKETS = [
 export default function TaxPage() {
   const navigate = useNavigate();
   const { addGoal } = useGoalsStore();
-  const { transactions, taxEntries, fetchTaxEntries, addTaxEntry, deleteTaxEntry } = useTransactionStore();
+  const { transactions } = useTransactionStore();
+  const { user } = useAuthStore();
   const [showTaxTips, setShowTaxTips] = useState(false);
-  const [showAddEntry, setShowAddEntry] = useState(false);
   const [showSaveGoalModal, setShowSaveGoalModal] = useState(false);
   const [period, setPeriod] = useState<Period>('yearly');
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  // Tax Entry Form State
-  const [newEntry, setNewEntry] = useState({
-    date: new Date().toISOString().split('T')[0],
-    amount: '',
-    type: 'Withheld' as TaxType,
-    notes: '',
-  });
+
 
   // Tax Calculator State
   const [income, setIncome] = useState('');
@@ -51,9 +45,7 @@ export default function TaxPage() {
     setIncome(totalIncome.toFixed(2));
   }, [transactions]);
 
-  useEffect(() => {
-    fetchTaxEntries();
-  }, [fetchTaxEntries]);
+
 
   const calculateTax = (annualIncome: number): number => {
     let tax = 0;
@@ -95,22 +87,22 @@ export default function TaxPage() {
   const netIncome = annualIncome - estimatedTax;
   const effectiveRate = annualIncome > 0 ? (estimatedTax / annualIncome) * 100 : 0;
 
-  const totalTaxPaid = taxEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalTaxPaid = 0; // Valor zerado pois removemos a seção de Tax Payments
   const totalIncome = transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const handleSaveGoal = async () => {
-    if (estimatedTax <= 0) return;
+    if (estimatedTax <= 0 || !user?.id) return;
 
     try {
       await addGoal({
         title: 'Tax Savings',
         description: `Save for ${new Date().getFullYear()} tax payment`,
-        targetAmount: estimatedTax,
-        currentAmount: 0,
-        targetDate: new Date(new Date().getFullYear(), 6, 30).toISOString(),
-        userId: 'current-user',
+        target_amount: estimatedTax,
+        current_amount: 0,
+        target_date: new Date(new Date().getFullYear(), 6, 30).toISOString(),
+        user_id: user.id,
       });
       
       setShowSaveGoalModal(false);
@@ -120,38 +112,7 @@ export default function TaxPage() {
     }
   };
 
-  const handleAddTaxEntry = async () => {
-    if (!newEntry.amount || !newEntry.type) return;
 
-    try {
-      await addTaxEntry({
-        ...newEntry,
-        amount: Number(newEntry.amount),
-        userId: 'current-user',
-      });
-
-      setNewEntry({
-        date: new Date().toISOString().split('T')[0],
-        amount: '',
-        type: 'Withheld',
-        notes: '',
-      });
-      setShowAddEntry(false);
-    } catch (error) {
-      console.error('Failed to add tax entry:', error);
-    }
-  };
-
-  const handleDeleteEntry = async (id: string) => {
-    setIsDeleting(id);
-    try {
-      await deleteTaxEntry(id);
-    } catch (error) {
-      console.error('Failed to delete tax entry:', error);
-    } finally {
-      setIsDeleting(null);
-    }
-  };
 
   // Prepare chart data
   const chartData = transactions
@@ -197,7 +158,7 @@ export default function TaxPage() {
               </div>
               <h3 className="font-semibold">On Track</h3>
             </div>
-            <p className="text-2xl font-bold">{(totalTaxPaid / totalIncome * 100).toFixed(1)}%</p>
+            <p className="text-2xl font-bold">{totalIncome > 0 ? (totalTaxPaid / totalIncome * 100).toFixed(1) : '0.0'}%</p>
           </div>
         </div>
 
@@ -327,58 +288,7 @@ export default function TaxPage() {
           </div>
         </div>
 
-        {/* Tax Tracker */}
-        <div className="bg-white rounded-xl shadow-card overflow-hidden mb-6">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">Tax Payments</h2>
-              <button
-                onClick={() => setShowAddEntry(true)}
-                className="btn btn-primary"
-              >
-                <PlusCircle className="h-5 w-5 mr-2" />
-                Add Tax Payment
-              </button>
-            </div>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {taxEntries.map(entry => (
-                  <tr key={entry.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {new Date(entry.date).toLocaleDateString('en-AU')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{entry.type}</td>
-                    <td className="px-6 py-4 text-sm">{entry.notes || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                      {formatCurrency(entry.amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <button
-                        onClick={() => handleDeleteEntry(entry.id)}
-                        disabled={isDeleting === entry.id}
-                        className="text-error-600 hover:text-error-800"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
         {/* Income vs Tax Chart */}
         <div className="bg-white rounded-xl p-6 shadow-card mb-6">
@@ -432,77 +342,7 @@ export default function TaxPage() {
         </div>
       </div>
 
-      {/* Add Tax Entry Modal */}
-      {showAddEntry && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full animate-slide-up">
-            <h2 className="text-xl font-bold mb-4">Add Tax Payment</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="label">Date</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={newEntry.date}
-                  onChange={(e) => setNewEntry({ ...newEntry, date: e.target.value })}
-                />
-              </div>
 
-              <div>
-                <label className="label">Type</label>
-                <select
-                  className="input"
-                  value={newEntry.type}
-                  onChange={(e) => setNewEntry({ ...newEntry, type: e.target.value as TaxType })}
-                >
-                  {TAX_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="label">Amount</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-gray-500">$</span>
-                  <input
-                    type="text"
-                    className="input pl-8"
-                    value={newEntry.amount}
-                    onChange={(e) => setNewEntry({ ...newEntry, amount: e.target.value })}
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="label">Notes (Optional)</label>
-                <textarea
-                  className="input"
-                  value={newEntry.notes}
-                  onChange={(e) => setNewEntry({ ...newEntry, notes: e.target.value })}
-                  placeholder="Add any additional details..."
-                  rows={3}
-                />
-              </div>
-
-              <button
-                onClick={handleAddTaxEntry}
-                className="btn btn-primary w-full"
-              >
-                Add Payment
-              </button>
-              <button
-                onClick={() => setShowAddEntry(false)}
-                className="btn btn-outline w-full"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Save Goal Modal */}
       {showSaveGoalModal && (

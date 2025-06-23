@@ -177,8 +177,8 @@ export default function PeriodSelector({
             {period === 'Week' && selectedWeek ? 
               (selectedWeek === '5' ? 'View More' : `Week ${selectedWeek}`) :
              period === 'Month' ? (useShortMonthNames ? SHORT_MONTHS[selectedMonth] : selectedMonth) :
-             period === 'Year' ? (selectedYear || new Date().getFullYear().toString()) :
-             period}
+             period === 'Year' ? (selectedYear || new Date().getFullYear().toString()) : 
+            period}
           </PeriodButton>
         ))}
       </div>
