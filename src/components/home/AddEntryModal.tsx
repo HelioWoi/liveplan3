@@ -5,6 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { useWeeklyBudgetStore, WeeklyBudgetEntry } from '../../stores/weeklyBudgetStore';
 import { TransactionCategory } from '../../types/transaction';
 import { useAuthStore } from '../../stores/authStore';
+import { useCreateWeeklyBudget } from '../../hooks/useCreateWeeklyBudget';
+
+import { getDateFromYearMonthWeek } from '../../pages/Home/components/helper/getDateFromYearMonthWeek';
+import { monthMap } from '../../constants';
 
 interface AddEntryModalProps {
   isOpen: boolean;
@@ -101,6 +105,7 @@ function generateWeeklyEntriesFromNowToEndOfYear(baseEntry: any): any {
 }
 
 export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntryModalProps) {
+  const { mutate: createBudget } = useCreateWeeklyBudget();
   const { addEntry, insertMultipleEntries } = useWeeklyBudgetStore();
   const [month, setMonth] = useState('Jan');
   const [week, setWeek] = useState('Week 1');
@@ -280,7 +285,7 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
       description,
       amount: parseFloat(amount),
       category: category as TransactionCategory,
-      week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
+      week: week.replace(/[^\d.-]+/g, '') as any,
       month: months.find(m => m.short === month)?.short || month,
       year: selectedYear || new Date().getFullYear()
     };
@@ -296,8 +301,33 @@ export default function AddEntryModal({ isOpen, onClose, selectedYear }: AddEntr
       return;
     }
 
+    const { id, ...rest } = entry;
+
+    const budgetData = {
+      ...rest,
+      user_id: id,
+    } as any;
+    
+    const monthNumber = monthMap[rest.month as keyof typeof monthMap];
+    const date = getDateFromYearMonthWeek(rest.year, monthNumber, Number(rest.week));
+
+    console.log("Budget Data", monthNumber);
+    const transactionsData = [{
+      origin: rest.category,
+      description: rest.description,
+      amount: rest.amount,
+      category: rest.category,
+      type: rest.amount,
+      date,
+      user_id: id,
+    }];
+
     // Adiciona a entrada ao orçamento semanal
-    addEntry(entry);
+    // addEntry(entry);
+    createBudget({
+      budgetData,
+      transactionsData,
+    })
 
     // Reset form
     setDescription('');

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PeriodButton from './PeriodButton';
+import type { Month } from '../../pages/Home/types';
+import { SHORT_MONTHS } from '../../constants';
 
 type Period = 'Day' | 'Week' | 'Month' | 'Year';
-type Month = 'January' | 'February' | 'March' | 'April' | 'May' | 'June' | 'July' | 'August' | 'September' | 'October' | 'November' | 'December';
+
 type WeekNumber = '1' | '2' | '3' | '4' | '5';
 
 interface PeriodSelectorProps {
@@ -13,7 +15,7 @@ interface PeriodSelectorProps {
   onWeekChange?: (week: WeekNumber) => void;
   selectedPeriod: Period;
   selectedMonth: Month;
-  selectedYear?: string;
+  selectedYear?: number | string;
   selectedWeek?: WeekNumber;
   useShortMonthNames?: boolean;
 }
@@ -39,21 +41,7 @@ export default function PeriodSelector({
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
-  
-  const shortMonths: Record<Month, string> = {
-    'January': 'Jan',
-    'February': 'Feb',
-    'March': 'Mar',
-    'April': 'Apr',
-    'May': 'May',
-    'June': 'Jun',
-    'July': 'Jul',
-    'August': 'Aug',
-    'September': 'Sep',
-    'October': 'Oct',
-    'November': 'Nov',
-    'December': 'Dec'
-  };
+
   
   const years = Array.from({ length: 4 }, (_, i) => (2022 + i).toString());
   
@@ -84,7 +72,7 @@ export default function PeriodSelector({
   // Ensure the selected week is valid for the current month
   useEffect(() => {
     // If Week 5 is selected but the current month doesn't have 5 weeks, reset to Week 4
-    if (selectedWeek === '5' && !hasFiveWeeks(selectedMonth, selectedYear || new Date().getFullYear().toString())) {
+    if (selectedWeek === '5' && !hasFiveWeeks(selectedMonth, selectedYear?.toString() || new Date().getFullYear().toString())) {
       if (onWeekChange) {
         onWeekChange('4');
       }
@@ -94,7 +82,7 @@ export default function PeriodSelector({
   // Determine available weeks based on the selected month
   const getAvailableWeeks = (): WeekNumber[] => {
     const baseWeeks: WeekNumber[] = ['1', '2', '3', '4'];
-    if (hasFiveWeeks(selectedMonth, selectedYear || new Date().getFullYear().toString())) {
+    if (hasFiveWeeks(selectedMonth, selectedYear?.toString() || new Date().getFullYear().toString())) {
       return [...baseWeeks, '5'];
     }
     return baseWeeks;
@@ -188,9 +176,9 @@ export default function PeriodSelector({
           >
             {period === 'Week' && selectedWeek ? 
               (selectedWeek === '5' ? 'View More' : `Week ${selectedWeek}`) :
-             period === 'Month' ? (useShortMonthNames ? shortMonths[selectedMonth] : selectedMonth) :
-             period === 'Year' ? (selectedYear || '2025') :
-             period}
+             period === 'Month' ? (useShortMonthNames ? SHORT_MONTHS[selectedMonth] : selectedMonth) :
+             period === 'Year' ? (selectedYear || new Date().getFullYear().toString()) : 
+            period}
           </PeriodButton>
         ))}
       </div>
@@ -230,7 +218,7 @@ export default function PeriodSelector({
                     : 'border border-gray-200 text-gray-700 hover:border-purple-200'
                 }`}
               >
-                {useShortMonthNames ? shortMonths[month] : month}
+                {useShortMonthNames ? SHORT_MONTHS[month] : month}
               </button>
             ))}
           </div>
