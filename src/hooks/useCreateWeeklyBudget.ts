@@ -24,7 +24,7 @@ export function useCreateWeeklyBudget() {
     }) => createWeeklyBudgetWithTransactions(budgetData, transactionsData),
 
     onSuccess: () => {
-      toast.success("Orçamento criado com sucesso");
+      toast.success("Budget entries completed successfully");
       queryClient.invalidateQueries({ queryKey: ["weekly_budget_entries"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
@@ -65,7 +65,7 @@ export function useUpdateWeeklyBudget() {
     }) => updateWeeklyBudget(id, updates, relatedTransactionsUpdate),
 
     onSuccess: () => {
-      toast.success("Orçamento atualizado");
+      toast.success("Budget updated successfully");
       queryClient.invalidateQueries({ queryKey: ["weekly_budget_entries"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
@@ -83,7 +83,7 @@ export function useDeleteWeeklyBudget() {
     mutationFn: (id: string) => deleteWeeklyBudget(id),
 
     onSuccess: () => {
-      toast.success("Orçamento excluído");
+      toast.success("Budget deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["weekly_budget_entries"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },

@@ -32,6 +32,7 @@ interface WeeklyBudgetState {
 }
 
 const currentYear = 2025;
+const uuid = uuidv4(); // Gerar um UUID válido para o campo `id`
 
 // Função para inicializar os listeners de eventos
 const initializeEventListeners = (store: WeeklyBudgetState) => {
@@ -53,7 +54,7 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
     if (!existingEntry) {
       // Criar uma nova entrada no Weekly Budget para a semana específica
       const newEntry: WeeklyBudgetEntry = {
-        id: `wb-${Date.now()}`, // Usar timestamp para garantir ID único
+        id: uuid, // Substituir o ID por um UUID válido
         week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
         description: transaction.description || transaction.origin,
         amount: transaction.amount,
@@ -105,7 +106,7 @@ const initializeEventListeners = (store: WeeklyBudgetState) => {
       if (!existingEntry) {
         // Criar uma nova entrada no Weekly Budget para a semana específica
         const newEntry: WeeklyBudgetEntry = {
-          id: `wb-${Date.now()}`, // Usar timestamp para garantir ID único
+          id: uuid, // Substituir o ID por um UUID válido
           week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
           description: transaction.description || transaction.origin,
           amount: transaction.amount,
@@ -140,14 +141,18 @@ async function fetchWeeklyBudgetEntries(userId: string) {
 }
 
 export async function addWeeklyBudgetEntry(entry: any) {
-  const uuid = uuidv4();
+  const authSessionUserId = localStorage.getItem('supabase-user-id') || '';
+  const user_id = authSessionUserId || entry.id;
+
+  console.log('Weekly Budget: Added new entry: fc(addWeeklyBudgetEntry)', { entry, user_id });
+
   const { data, error } = await supabase
     .from('weekly_budget_entries')
     .insert([
       { 
         ...entry,
         id: uuid,
-        user_id: entry.id,
+        user_id: user_id,
         week: entry.week.replace(/[^\d.-]+/g, '')
       }
     ])
@@ -241,6 +246,8 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         return;
       }
 
+      console.log('Segue para a entrada Weekly Budget', { entry });
+
       // Salva no supabase (ou ignora erro)
       try {
         entry.week = entry.week.replace(/[^\d.-]+/g, '') as any; // Remove caracteres não numéricos
@@ -249,6 +256,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
 
         uuid = result.uuid; // Obtém o ID gerado pelo Supabase
       } catch (e) {
+        console.error('Erro ao adicionar entrada Weekly Budget no Supabase:', entry);
         console.error('Erro ao adicionar entrada no Supabase:', e);
       }
       
@@ -315,7 +323,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
           
           const nextMonthTransaction = {
-            id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 10)}-next1`,
+            id: uuid, // Substituir o ID por um UUID válido
             origin: entry.description,
             description: entry.description,
             amount: entry.amount,
@@ -334,7 +342,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           nextTwoMonthDate.setMonth(nextTwoMonthDate.getMonth() + 2);
           
           const nextTwoMonthTransaction = {
-            id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 10)}-next2`,
+            id: uuid, // Substituir o ID por um UUID válido
             origin: entry.description,
             description: entry.description,
             amount: entry.amount,
@@ -370,6 +378,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
         
         // Adicionar a transação usando o transactionStore
         await transactionStore.addTransaction(newTransaction);
+        console.log('Transação criada a partir da entrada do Weekly Budget:', {newTransaction});
         
         // Disparar eventos para atualizar a UI
         window.dispatchEvent(new CustomEvent('transactions-updated'));
@@ -611,7 +620,7 @@ export const useWeeklyBudgetStore = create<WeeklyBudgetState>((set, get) => {
           if (!existingEntry) {
             // Criar uma nova entrada no Weekly Budget
             const newEntry: WeeklyBudgetEntry = {
-              id: `wb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              id: `wb-${Date.now()}`, // Usar timestamp para garantir ID único
               week: week as 'Week 1' | 'Week 2' | 'Week 3' | 'Week 4',
               description: transaction.description || transaction.origin,
               amount: transaction.amount,
