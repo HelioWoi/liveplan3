@@ -8,7 +8,40 @@ import {
   getWeeklyBudgets,
   updateWeeklyBudget,
   deleteWeeklyBudget,
+  createBudgetWithRecurrence,
 } from "../services/budgetService";
+
+export function useCreateBudgetWithRecurrence() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      budgetData,
+      transactionsData,
+      recurrence = "None"
+    }: {
+      budgetData: Omit<WeeklyBudgetEntry, "id" | "created_at">;
+      transactionsData: Omit<Transaction, "id" | "created_at" | "weekly_budget_id">[];
+      recurrence?:  "None" | "Weekly" | "Monthly" | "Annually";
+      occurrences?: number;
+    }) =>
+      createBudgetWithRecurrence(
+        budgetData,
+        transactionsData,
+        recurrence
+      ),
+
+    onSuccess: () => {
+      toast.success("Budget entries completed successfully");
+      queryClient.invalidateQueries({ queryKey: ["weekly_budget_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
 
 // Exemplo: criação
 export function useCreateWeeklyBudget() {
