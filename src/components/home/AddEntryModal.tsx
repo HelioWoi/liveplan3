@@ -101,7 +101,7 @@ export default function AddEntryModal({
         amount: rest.amount,
         category: rest.category,
         type: rest.category.toLowerCase(),
-        date,
+        date: repeatOption === 'Annually' ? new Date(annualDate).toISOString() : date,
         user_id: id,
       },
     ] as any;
