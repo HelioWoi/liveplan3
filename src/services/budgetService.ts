@@ -1,7 +1,105 @@
+import { isAfter, setMonth, setYear } from "date-fns";
+
 import { supabase } from '../lib/supabase/supabaseClient';
 import { WeeklyBudgetEntry, Transaction } from "./types";
 import { getDateFromYearMonthWeek } from '../pages/Home/components/helper/getDateFromYearMonthWeek';
 import { monthMap } from '../constants';
+
+function getWeekFromDate(date: Date): number {
+  const day = date.getDate();
+  return Math.ceil(day / 7);
+}
+
+function capitalizeFirstLetter(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function getFormattedMonthShort(date: Date): string {
+  const rawMonth = date
+    .toLocaleString("en-US", { month: "short" })
+    .replace(".", "");
+  return capitalizeFirstLetter(rawMonth);
+}
+
+export async function createBudgetWithRecurrence(
+  budgetData: Omit<WeeklyBudgetEntry, "id" | "created_at">,
+  transactionsData: Omit<Transaction, "id" | "created_at" | "weekly_budget_id">[],
+  recurrence: "None" | "Weekly" | "Monthly" | "Annually" = "None"
+) {
+  
+  const createdBudgets = [];
+  const baseDate = new Date(transactionsData[0].date);
+  const startMonth = baseDate.getMonth();
+  const selectedWeek = budgetData.week;
+  const endOfYear = new Date(new Date().getFullYear(), 11, 31);
+
+  let i = 0;
+  while (true) {
+    let recurrenceDate: Date;
+
+    if (recurrence === "Weekly" || recurrence === "Monthly") {
+      recurrenceDate = setMonth(new Date(baseDate), startMonth + i);
+      if (isAfter(recurrenceDate, endOfYear)) break;
+      recurrenceDate.setDate(1); // início do mês
+      const targetDay = 1 + (selectedWeek - 1) * 7;
+      recurrenceDate.setDate(targetDay);
+    } else if (recurrence === "Annually") {
+      recurrenceDate = setYear(new Date(baseDate), baseDate.getFullYear() + i);
+      if (isAfter(recurrenceDate, endOfYear)) break;
+    } else {
+      recurrenceDate = new Date(baseDate);
+    }
+
+    if (recurrence !== "None") i++;
+
+    const monthShort = getFormattedMonthShort(recurrenceDate);
+    const week = getWeekFromDate(recurrenceDate);
+
+    const newBudgetData = {
+      ...budgetData,
+      week: recurrence === "Annually" ? week : selectedWeek,
+      month: monthShort,
+      year: recurrenceDate.getFullYear(),
+    };
+
+    const { data: budget, error } = await supabase
+      .from("weekly_budget_entries")
+      .insert(newBudgetData)
+      .select()
+      .single();
+
+    if (error) {
+      await Promise.all(
+        createdBudgets.map((b: any) =>
+          supabase.from("weekly_budget_entries").delete().eq("id", b.id)
+        )
+      );
+      throw new Error(`Erro ao criar orçamento: ${error.message}`);
+    }
+
+    if (transactionsData.length > 0) {
+      const transactionsWithDate = transactionsData.map((t: any) => ({
+        ...t,
+        weekly_budget_entry_id: budget.id,
+      }));
+
+      const { error: txError } = await supabase
+        .from("transactions")
+        .insert(transactionsWithDate);
+
+      if (txError) {
+        await supabase.from("weekly_budget_entries").delete().eq("id", budget.id);
+        throw new Error(`Erro ao criar transações: ${txError.message}`);
+      }
+    }
+
+    createdBudgets.push(newBudgetData);
+
+    if (recurrence === "None") break;
+  }
+
+  return createdBudgets;
+}
 
 export async function createWeeklyBudgetWithTransactions(
   budgetData: Omit<WeeklyBudgetEntry, "id" | "created_at">,

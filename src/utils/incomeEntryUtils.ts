@@ -22,14 +22,13 @@ export async function registerIncomeEntry(source: IncomeEntrySource, data: Entry
   
   // Criar objeto de transação com todos os campos necessários
   const transaction = {
-    origin: data.description,
+    origin: (data?.category || 'Income') as TransactionCategory,
     description: data.description,
     amount: data.amount,
-    category: 'Income' as TransactionCategory,
+    category: (data?.category || 'Income') as TransactionCategory,
     type: 'income' as TransactionType,
     date: new Date().toISOString(),
     user_id: 'local-user',
-    is_local: true,
     metadata: {
       source,
       week: data.week || '',
@@ -41,7 +40,7 @@ export async function registerIncomeEntry(source: IncomeEntrySource, data: Entry
 
   // Adicionar a transação ao store
   await transactionStore.addTransaction(transaction);
-  console.log(`Income entry registered from ${source}:`, transaction);
+  console.log(`Income entry registered from ${source}:`, transaction, {data});
 
   // Disparar eventos para atualizar outros componentes
   window.dispatchEvent(new CustomEvent('transactions-updated'));
