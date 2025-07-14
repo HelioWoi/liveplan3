@@ -167,11 +167,10 @@ const determineType = (type: string): TransactionType => {
 export const generateTemplateFile = (): string => {
   const headers = ['Date', 'Month', 'Type', 'Category', 'Description', 'Amount', 'Frequency'];
   const sampleData = [
-    ['2025-06-01', 'June', 'income', 'Income', 'Monthly salary', '5000.00', 'Monthly'],
-    ['2025-06-15', 'June', 'salary', 'Fixed', 'Apartment rent', '1500.00', 'Monthly'],
-    ['2025-06-05', 'June', 'expense', 'Variable', 'Supermarket', '300.00', 'Weekly'],
-    ['2025-06-10', 'June', 'bonus', 'Extra', 'Birthday gift', '100.00', 'Once'],
-    ['2025-06-25', 'June', 'invoices', 'Additional', 'Additional', '800.00', 'Yearly']
+    ['07/01/2025', 'June', 'income', 'Income', 'Monthly salary', '5000.00', 'Monthly'],
+    ['07/07/2025', 'June', 'salary', 'Fixed', 'Apartment rent', '1500.00', 'Monthly'],
+    ['07/15/2025', 'June', 'expense', 'Variable', 'Supermarket', '300.00', 'Weekly'],
+    ['07/30/2025', 'June', 'invoices', 'Additional', 'Additional', '800.00', 'Yearly']
   ];
 
   return [

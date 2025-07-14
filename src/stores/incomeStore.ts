@@ -75,8 +75,7 @@ export const useIncomeStore = create<IncomeState>((set, get) => {
       
       try {
         // Fetch transactions from database
-        let dbTotal = 0;
-        
+        let dbTotal = 0;        
         try {
           const { data: sessionData } = await supabase.auth.getSession();
           const user = sessionData.session?.user;
