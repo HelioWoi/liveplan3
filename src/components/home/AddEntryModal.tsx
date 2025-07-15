@@ -10,7 +10,7 @@ import {
 } from "../../hooks/useCreateWeeklyBudget";
 
 import { getDateFromYearMonthWeek } from "../../pages/helper/getDateFromYearMonthWeek";
-import { monthMap } from "../../constants";
+import { monthMap, MONTHS } from "../../constants";
 import { FullScreenLoader } from "../common/FullScreenLoader";
 
 interface AddEntryModalProps {
@@ -24,20 +24,6 @@ const categories = ["Income", "Fixed", "Variable", "Extra", "Additional"];
 
 const repeatOptions = ["Does not repeat", "Weekly", "Monthly", "Annually"];
 
-const months = [
-  { full: "January", short: "Jan" },
-  { full: "February", short: "Feb" },
-  { full: "March", short: "Mar" },
-  { full: "April", short: "Apr" },
-  { full: "May", short: "May" },
-  { full: "June", short: "Jun" },
-  { full: "July", short: "Jul" },
-  { full: "August", short: "Aug" },
-  { full: "September", short: "Sep" },
-  { full: "October", short: "Oct" },
-  { full: "November", short: "Nov" },
-  { full: "December", short: "Dec" },
-];
 
 export default function AddEntryModal({
   isOpen,
@@ -70,7 +56,7 @@ export default function AddEntryModal({
       amount: parseFloat(amount),
       category: category as TransactionCategory,
       week: week.replace(/[^\d.-]+/g, "") as any,
-      month: months.find((m) => m.short === month)?.short || month,
+      month: MONTHS.find((m) => m.short === month)?.short || month,
       year: selectedYear || new Date().getFullYear(),
     };
 
@@ -177,7 +163,7 @@ export default function AddEntryModal({
                         onChange={(e) => setMonth(e.target.value)}
                         className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
                       >
-                        {months.map((m) => (
+                        {MONTHS.map((m) => (
                           <option key={m.full} value={m.short}>
                             {m.full}
                           </option>
