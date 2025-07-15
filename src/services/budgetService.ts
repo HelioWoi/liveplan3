@@ -2,7 +2,7 @@ import { isAfter, setMonth, setYear } from "date-fns";
 
 import { supabase } from '../lib/supabase/supabaseClient';
 import { WeeklyBudgetEntry, Transaction } from "./types";
-import { getDateFromYearMonthWeek } from '../pages/Home/components/helper/getDateFromYearMonthWeek';
+import { getDateFromYearMonthWeek } from '../pages/helper/getDateFromYearMonthWeek';
 import { monthMap } from '../constants';
 
 function getWeekFromDate(date: Date): number {

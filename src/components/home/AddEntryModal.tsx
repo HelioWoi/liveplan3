@@ -1,16 +1,17 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 
-import {
-  WeeklyBudgetEntry,
-} from "../../stores/weeklyBudgetStore";
+import { WeeklyBudgetEntry } from "../../stores/weeklyBudgetStore";
 import { TransactionCategory } from "../../types/transaction";
 import { useAuthStore } from "../../stores/authStore";
-import { useCreateBudgetWithRecurrence, useCreateWeeklyBudget } from "../../hooks/useCreateWeeklyBudget";
+import {
+  useCreateBudgetWithRecurrence,
+  useCreateWeeklyBudget,
+} from "../../hooks/useCreateWeeklyBudget";
 
-import { getDateFromYearMonthWeek } from "../../pages/Home/components/helper/getDateFromYearMonthWeek";
-import { monthMap } from "../../constants";
-import { FullScreenLoader } from "../../pages/Home/components/FullScreenLoader";
+import { getDateFromYearMonthWeek } from "../../pages/helper/getDateFromYearMonthWeek";
+import { monthMap, MONTHS } from "../../constants";
+import { FullScreenLoader } from "../common/FullScreenLoader";
 
 interface AddEntryModalProps {
   isOpen: boolean;
@@ -21,27 +22,8 @@ interface AddEntryModalProps {
 const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
 const categories = ["Income", "Fixed", "Variable", "Extra", "Additional"];
 
-const repeatOptions = [
-  "Does not repeat",
-  "Weekly",
-  "Monthly",
-  "Annually",
-];
+const repeatOptions = ["Does not repeat", "Weekly", "Monthly", "Annually"];
 
-const months = [
-  { full: "January", short: "Jan" },
-  { full: "February", short: "Feb" },
-  { full: "March", short: "Mar" },
-  { full: "April", short: "Apr" },
-  { full: "May", short: "May" },
-  { full: "June", short: "Jun" },
-  { full: "July", short: "Jul" },
-  { full: "August", short: "Aug" },
-  { full: "September", short: "Sep" },
-  { full: "October", short: "Oct" },
-  { full: "November", short: "Nov" },
-  { full: "December", short: "Dec" },
-];
 
 export default function AddEntryModal({
   isOpen,
@@ -49,7 +31,8 @@ export default function AddEntryModal({
   selectedYear,
 }: AddEntryModalProps) {
   const { mutate: createBudget } = useCreateWeeklyBudget();
-  const { mutate: createBudgetWithRecurrence, isPending } = useCreateBudgetWithRecurrence();
+  const { mutate: createBudgetWithRecurrence, isPending } =
+    useCreateBudgetWithRecurrence();
 
   const [month, setMonth] = useState("Jan");
   const [week, setWeek] = useState("Week 1");
@@ -58,9 +41,6 @@ export default function AddEntryModal({
   const [amount, setAmount] = useState("");
   const [syncToTransactions, setSyncToTransactions] = useState(true);
   const [repeatOption, setRepeatOption] = useState("Does not repeat");
-  const [weeklyDay, setWeeklyDay] = useState("Monday");
-  const [monthlyWeek, setMonthlyWeek] = useState("First");
-  const [monthlyDay, setMonthlyDay] = useState("Monday");
   const [annualDate, setAnnualDate] = useState("");
 
   const user_id = useAuthStore((state) => state.user?.id)?.toString() || "";
@@ -76,7 +56,7 @@ export default function AddEntryModal({
       amount: parseFloat(amount),
       category: category as TransactionCategory,
       week: week.replace(/[^\d.-]+/g, "") as any,
-      month: months.find((m) => m.short === month)?.short || month,
+      month: MONTHS.find((m) => m.short === month)?.short || month,
       year: selectedYear || new Date().getFullYear(),
     };
 
@@ -101,7 +81,10 @@ export default function AddEntryModal({
         amount: rest.amount,
         category: rest.category,
         type: rest.category.toLowerCase(),
-        date: repeatOption === 'Annually' ? new Date(annualDate).toISOString() : date,
+        date:
+          repeatOption === "Annually"
+            ? new Date(annualDate).toISOString()
+            : date,
         user_id: id,
       },
     ] as any;
@@ -111,7 +94,7 @@ export default function AddEntryModal({
       createBudgetWithRecurrence({
         budgetData,
         transactionsData,
-        recurrence: repeatOption as any
+        recurrence: repeatOption as any,
       });
 
       setDescription("");
@@ -180,7 +163,7 @@ export default function AddEntryModal({
                         onChange={(e) => setMonth(e.target.value)}
                         className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900"
                       >
-                        {months.map((m) => (
+                        {MONTHS.map((m) => (
                           <option key={m.full} value={m.short}>
                             {m.full}
                           </option>
@@ -297,7 +280,9 @@ export default function AddEntryModal({
                         type="checkbox"
                         id="syncTransactions"
                         checked={syncToTransactions}
-                        onChange={(e) => setSyncToTransactions(e.target.checked)}
+                        onChange={(e) =>
+                          setSyncToTransactions(e.target.checked)
+                        }
                         className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                       />
                       <label

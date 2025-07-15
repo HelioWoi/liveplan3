@@ -3,7 +3,6 @@ export function getDateFromYearMonthWeek(
   monthNumber: number,
   week: number
 ): string {
-  console.log('getDateFromYearMonthWeek', { year, monthNumber, week });
   const jsMonth = monthNumber - 1;
 
   // Calcula a data da semana: adiciona (semana - 1) * 7 dias

@@ -1,4 +1,4 @@
-import type { Month } from '../pages/Home/types';
+import type { Month } from '../pages/@types/period-selection';
 
 // Anos fixos de 2022 a 2025
 export const YEARS = [2022, 2023, 2024, 2025];
