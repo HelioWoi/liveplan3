@@ -10,6 +10,8 @@ import { useAuthStore } from '../../stores/authStore';
 import { MONTHS } from '../../constants';
 import { getWeekNumberFromDate } from '../../pages/helper/getWeekNumberFromDate';
 
+import { useCreateBudgetWithRecurrence } from '../../hooks/useCreateWeeklyBudget';
+
 interface SpreadsheetUploaderProps {
   onClose: (uploadCompleted?: boolean) => void;
 }
@@ -24,6 +26,8 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const { mutate: createBudgetWithRecurrence } = useCreateBudgetWithRecurrence();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -62,8 +66,6 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
     document.body.removeChild(link);
   };
 
-
-
   const handleMappedData = async (mappedTransactions: Partial<Transaction>[]) => {
     setIsProcessing(true);
     setError(null);
@@ -85,14 +87,15 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
             category: transaction.category || 'Variable',
             type: transaction.type || 'expense',
             date: transaction.date || new Date().toISOString(),
-            user_id: id
+            user_id: id,
+            frequency: (transaction as any).frequency || 'Weekly',
           },
           entry: {
-            id,
+            user_id: id,
+            category: transaction.category || 'Variable',
             description: transaction.description || '',
             amount: parseFloat(transaction.amount?.toString() || '0'),
-            category: transaction.category || 'Variable',
-            week: getWeekNumberFromDate(new Date((transaction as any).date)),
+            week: getWeekNumberFromDate(new Date((transaction as any).date)).toString(),
             month: MONTHS.find((m) => m.short === monthShort)?.short || monthShort,
             year: new Date(transaction.date || new Date()).getFullYear(),
           }
@@ -112,9 +115,28 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
         }
       });
 
-
-      console.log('Transactions to be added:', transactions, entries);
-
+      // Processa cada item individualmente em sequência
+      for (let i = 0; i < transactionsData.length; i++) {
+        const { entry, transaction } = transactionsData[i];
+        const { frequency, ...rest } = transaction as any;
+        
+        try {
+          console.log(`Processing item ${i + 1}/${transactionsData.length}: ${entry.description} with frequency: ${transaction.frequency}`);
+          
+          await createBudgetWithRecurrence({
+            budgetData: entry,
+            transactionsData: [rest],
+            recurrence: frequency
+         });
+          
+          console.log(`✅ Successfully processed: ${entry.description}`);
+        } catch (itemError) {
+          console.error(`❌ Failed to process item ${i + 1}: ${entry.description}`, itemError);
+          // Continua processando os próximos itens mesmo se um falhar
+          // Ou você pode fazer throw itemError; se quiser parar no primeiro erro
+        }
+      }
+     
       // Add new transactions from spreadsheet
       await bulkAddTransactions(mappedTransactions.map(transaction => ({
         date: transaction.date || new Date().toISOString(),
