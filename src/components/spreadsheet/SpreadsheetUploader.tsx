@@ -7,6 +7,10 @@ import { Transaction } from '../../types/transaction';
 import SmartSpreadsheetConverter from './SmartSpreadsheetConverter';
 import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
+import { MONTHS } from '../../constants';
+import { getWeekNumberFromDate } from '../../pages/helper/getWeekNumberFromDate';
+
+import { useCreateBudgetWithRecurrence } from '../../hooks/useCreateWeeklyBudget';
 
 interface SpreadsheetUploaderProps {
   onClose: (uploadCompleted?: boolean) => void;
@@ -22,6 +26,8 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const { mutate: createBudgetWithRecurrence } = useCreateBudgetWithRecurrence();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -60,18 +66,79 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
     document.body.removeChild(link);
   };
 
-
-
-  const handleMappedData = async (mappedData: Partial<Transaction>[]) => {
+  const handleMappedData = async (mappedTransactions: Partial<Transaction>[]) => {
     setIsProcessing(true);
     setError(null);
 
     try {
       // Clear existing transactions first
       await clearTransactions();
+      
+      const transactionsData = mappedTransactions.map(transaction => {
+        const id = user?.id || 'current-user';
+        const month = transaction.date ? new Date(transaction.date).getMonth() : new Date().getMonth();
+        const monthShort = MONTHS[month]?.short || 'Jan';
 
+        return {
+          transaction: {
+            origin: transaction.category || '',
+            description: transaction.description || '',
+            amount: transaction.amount || 0,
+            category: transaction.category || 'Variable',
+            type: transaction.type || 'expense',
+            date: transaction.date || new Date().toISOString(),
+            user_id: id,
+            frequency: (transaction as any).frequency || 'Weekly',
+          },
+          entry: {
+            user_id: id,
+            category: transaction.category || 'Variable',
+            description: transaction.description || '',
+            amount: parseFloat(transaction.amount?.toString() || '0'),
+            week: getWeekNumberFromDate(new Date((transaction as any).date)).toString(),
+            month: MONTHS.find((m) => m.short === monthShort)?.short || monthShort,
+            year: new Date(transaction.date || new Date()).getFullYear(),
+          }
+        }
+      }) as any;
+
+      const transactions: any[] = [];
+      const entries: any[] = [];
+
+      transactionsData.forEach((item: any) => {
+        if (item.transaction) {
+          transactions.push(item.transaction);
+        }
+
+        if (item.entry) {
+          entries.push(item.entry);
+        }
+      });
+
+      // Processa cada item individualmente em sequência
+      for (let i = 0; i < transactionsData.length; i++) {
+        const { entry, transaction } = transactionsData[i];
+        const { frequency, ...rest } = transaction as any;
+        
+        try {
+          console.log(`Processing item ${i + 1}/${transactionsData.length}: ${entry.description} with frequency: ${transaction.frequency}`);
+          
+          await createBudgetWithRecurrence({
+            budgetData: entry,
+            transactionsData: [rest],
+            recurrence: frequency
+         });
+          
+          console.log(`✅ Successfully processed: ${entry.description}`);
+        } catch (itemError) {
+          console.error(`❌ Failed to process item ${i + 1}: ${entry.description}`, itemError);
+          // Continua processando os próximos itens mesmo se um falhar
+          // Ou você pode fazer throw itemError; se quiser parar no primeiro erro
+        }
+      }
+     
       // Add new transactions from spreadsheet
-      await bulkAddTransactions(mappedData.map(transaction => ({
+      await bulkAddTransactions(mappedTransactions.map(transaction => ({
         date: transaction.date || new Date().toISOString(),
         amount: transaction.amount || 0,
         category: transaction.category || 'Variable',
@@ -102,7 +169,7 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
         // Set all refresh flags to ensure data is updated across the entire app
         setAllRefreshFlags();
         // Redirect to home page with cache-busting parameter
-        window.location.href = '/home?refresh=' + Date.now();
+        // window.location.href = '/home?refresh=' + Date.now();
       }, 2000);
     } catch (err) {
       console.error('Error importing transactions:', err);

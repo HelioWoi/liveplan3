@@ -1,42 +1,83 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTransactionStore } from '../stores/transactionStore';
-import { Transaction } from '../types/transaction';
-import { ArrowLeft } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import BottomNavigation from '../components/layout/BottomNavigation';
-import { formatCurrency } from '../utils/formatters';
-import PeriodSelector from '../components/common/PeriodSelector';
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTransactionStore } from "../stores/transactionStore";
+import { Transaction } from "../types/transaction";
+import { ArrowLeft } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from "recharts";
+import BottomNavigation from "../components/layout/BottomNavigation";
+import { formatCurrency } from "../utils/formatters";
+import PeriodSelector from "../components/common/PeriodSelector";
 
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
 
 export default function InvestmentPortfolioPage() {
   const navigate = useNavigate();
   const { transactions } = useTransactionStore();
-  const [selectedPeriod, setSelectedPeriod] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
-  const [selectedMonth, setSelectedMonth] = useState<typeof months[number]>(months[new Date().getMonth()]);
-  const [selectedYear, setSelectedYear] = useState('2022');
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    "Day" | "Week" | "Month" | "Year"
+  >("Month");
+  const [selectedMonth, setSelectedMonth] = useState<(typeof months)[number]>(
+    months[new Date().getMonth()]
+  );
+  const [selectedYear, setSelectedYear] = useState("2022");
 
-  const COLORS = ['#A855F7', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#EC4899', '#8B5CF6', '#14B8A6'];
+  const COLORS = [
+    "#A855F7",
+    "#F59E0B",
+    "#10B981",
+    "#3B82F6",
+    "#EF4444",
+    "#EC4899",
+    "#8B5CF6",
+    "#14B8A6",
+  ];
 
-  const filterInvestmentsByPeriod = (transactions: Transaction[], period: string, selectedMonth: typeof months[number], selectedYear: string) => {
+  const filterInvestmentsByPeriod = (
+    transactions: Transaction[],
+    period: string,
+    selectedMonth: (typeof months)[number],
+    selectedYear: string
+  ) => {
     const now = new Date();
-    return transactions.filter(t => {
+    return transactions.filter((t) => {
       const date = new Date(t.date);
-      const isInvestment = t.category === 'Investimento';
-      
+      const isInvestment = t.category === "Investment";
+
       if (!isInvestment) return false;
 
       switch (period) {
-        case 'Day':
+        case "Day":
           return date.toDateString() === now.toDateString();
-        case 'Week':
+        case "Week":
           const weekStart = new Date(now);
           weekStart.setDate(now.getDate() - now.getDay());
           return date >= weekStart && date <= now;
-        case 'Month':
-          return date.getMonth() === months.indexOf(selectedMonth) && date.getFullYear().toString() === selectedYear;
-        case 'Year':
+        case "Month":
+          return (
+            date.getMonth() === months.indexOf(selectedMonth) &&
+            date.getFullYear().toString() === selectedYear
+          );
+        case "Year":
           return date.getFullYear().toString() === selectedYear;
         default:
           return false;
@@ -49,12 +90,17 @@ export default function InvestmentPortfolioPage() {
   };
 
   const filteredInvestments = useMemo(() => {
-    return filterInvestmentsByPeriod(transactions, selectedPeriod, selectedMonth, selectedYear);
+    return filterInvestmentsByPeriod(
+      transactions,
+      selectedPeriod,
+      selectedMonth,
+      selectedYear
+    );
   }, [transactions, selectedPeriod, selectedMonth, selectedYear]);
 
   const investmentsByOrigin = useMemo(() => {
     const groupedInvestments = filteredInvestments.reduce((acc, t) => {
-      const origin = t.origin || 'Other';
+      const origin = t.origin || "Other";
       if (!acc[origin]) {
         acc[origin] = 0;
       }
@@ -64,7 +110,7 @@ export default function InvestmentPortfolioPage() {
 
     return Object.entries(groupedInvestments).map(([name, value]) => ({
       name,
-      value
+      value,
     }));
   }, [filteredInvestments]);
 
@@ -74,7 +120,10 @@ export default function InvestmentPortfolioPage() {
       <div className="bg-white shadow">
         <div className="px-4 py-6">
           <div className="flex items-center gap-4 mb-6">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
               <ArrowLeft className="w-6 h-6" />
             </button>
             <h1 className="text-2xl font-bold">Investment Portfolio</h1>
@@ -100,7 +149,16 @@ export default function InvestmentPortfolioPage() {
             <div>
               <h2 className="text-xl font-bold">Weekly</h2>
               <p className="text-2xl font-bold text-primary-600 mt-1">
-                {formatCurrency(calculateTotal(filterInvestmentsByPeriod(transactions, 'Week', selectedMonth, selectedYear)))}
+                {formatCurrency(
+                  calculateTotal(
+                    filterInvestmentsByPeriod(
+                      transactions,
+                      "Week",
+                      selectedMonth,
+                      selectedYear
+                    )
+                  )
+                )}
               </p>
             </div>
           </div>
@@ -113,7 +171,16 @@ export default function InvestmentPortfolioPage() {
             <div>
               <h2 className="text-xl font-bold">Monthly</h2>
               <p className="text-2xl font-bold text-secondary-600 mt-1">
-                {formatCurrency(calculateTotal(filterInvestmentsByPeriod(transactions, 'Month', selectedMonth, selectedYear)))}
+                {formatCurrency(
+                  calculateTotal(
+                    filterInvestmentsByPeriod(
+                      transactions,
+                      "Month",
+                      selectedMonth,
+                      selectedYear
+                    )
+                  )
+                )}
               </p>
             </div>
           </div>
@@ -126,7 +193,16 @@ export default function InvestmentPortfolioPage() {
             <div>
               <h2 className="text-xl font-bold">Annual</h2>
               <p className="text-2xl font-bold text-accent-600 mt-1">
-                {formatCurrency(calculateTotal(filterInvestmentsByPeriod(transactions, 'Year', selectedMonth, selectedYear)))}
+                {formatCurrency(
+                  calculateTotal(
+                    filterInvestmentsByPeriod(
+                      transactions,
+                      "Year",
+                      selectedMonth,
+                      selectedYear
+                    )
+                  )
+                )}
               </p>
             </div>
           </div>
@@ -151,12 +227,13 @@ export default function InvestmentPortfolioPage() {
                   dataKey="value"
                 >
                   {investmentsByOrigin.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
-                />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -182,7 +259,9 @@ export default function InvestmentPortfolioPage() {
                         <ArrowLeft className="w-5 h-5 text-primary-600" />
                       </div>
                       <div>
-                        <h3 className="font-medium">{transaction.origin || 'Other'}</h3>
+                        <h3 className="font-medium">
+                          {transaction.origin || "Other"}
+                        </h3>
                         <p className="text-sm text-gray-500">
                           {new Date(transaction.date).toLocaleDateString()}
                         </p>

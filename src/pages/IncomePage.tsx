@@ -1,15 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreVertical, Minus, Plus, Check, DollarSign } from 'lucide-react';
-import classNames from 'classnames';
-import { format } from 'date-fns';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  MoreVertical,
+  Minus,
+  Plus,
+  Check,
+  DollarSign,
+} from "lucide-react";
+import classNames from "classnames";
+import { format } from "date-fns";
 
-import { useAllTransactions } from '../hooks/useAllTransactions';
-import { useAuthStore } from '../stores/authStore';
-import { useCreateWeeklyBudget } from '../hooks/useCreateWeeklyBudget';
-import { getDateFromYearMonthWeek } from './Home/components/helper/getDateFromYearMonthWeek';
-import { monthMap } from '../constants';
-import { FullScreenLoader } from './Home/components/FullScreenLoader';
+import { useAllTransactions } from "../hooks/useAllTransactions";
+import { useAuthStore } from "../stores/authStore";
+import { useCreateWeeklyBudget } from "../hooks/useCreateWeeklyBudget";
+import { getDateFromYearMonthWeek } from "./helper/getDateFromYearMonthWeek";
+import { monthMap } from "../constants";
+import { FullScreenLoader } from "../components/common/FullScreenLoader";
 
 const AMOUNT_PRESETS = [1000, 5000, 10000, 25000, 50000, 75000, 100000];
 
@@ -27,17 +34,16 @@ export default function IncomePage() {
   const { mutate: createBudget, isPending } = useCreateWeeklyBudget();
 
   const navigate = useNavigate();
-  
-  const [amount, setAmount] = useState<string>('150.00');
-  const [manualAmount, setManualAmount] = useState<string>('');
-  const [origin, setOrigin] = useState('');
+
+  const [amount, setAmount] = useState<string>("150.00");
+  const [manualAmount, setManualAmount] = useState<string>("");
+  const [origin, setOrigin] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showError, setShowError] = useState(false);
 
-
   const handleAmountChange = (value: number) => {
     const currentAmount = parseFloat(amount);
-    const newAmount = Math.max(0, Math.min(currentAmount + value, 100000.00));
+    const newAmount = Math.max(0, Math.min(currentAmount + value, 100000.0));
     setAmount(newAmount.toFixed(2));
     setManualAmount(newAmount.toFixed(2));
   };
@@ -49,8 +55,8 @@ export default function IncomePage() {
   };
 
   const handleManualAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9.]/g, '');
-    if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+    const value = e.target.value.replace(/[^0-9.]/g, "");
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
       setManualAmount(value);
       if (value) {
         const numValue = parseFloat(value);
@@ -70,13 +76,15 @@ export default function IncomePage() {
     try {
       // Obter a data atual para determinar a semana
       const currentDate = new Date();
-      const currentMonth = currentDate.toLocaleString('default', { month: 'short' }).substring(0, 3);
+      const currentMonth = currentDate
+        .toLocaleString("default", { month: "short" })
+        .substring(0, 3);
       const currentYear = currentDate.getFullYear();
-      
+
       // Determinar a semana atual (1-4) com base no dia do mês
       const dayOfMonth = currentDate.getDate();
       let currentWeek = 1;
-      
+
       if (dayOfMonth > 21) {
         currentWeek = 4;
       } else if (dayOfMonth > 14) {
@@ -85,7 +93,8 @@ export default function IncomePage() {
         currentWeek = 2;
       }
 
-      const monthNumber = monthMap[capitalize(currentMonth) as keyof typeof monthMap];
+      const monthNumber =
+        monthMap[capitalize(currentMonth) as keyof typeof monthMap];
       const date = getDateFromYearMonthWeek(
         currentYear,
         monthNumber,
@@ -98,16 +107,17 @@ export default function IncomePage() {
         week: currentWeek,
         month: capitalize(currentMonth),
         year: currentYear,
-        category: 'Income',
+        category: "Income",
         user_id: userId,
-      }
+      };
 
-      const transactionsData = [{
+      const transactionsData = [
+        {
           origin: origin.trim(),
           description: origin.trim(),
           amount: parseFloat(amount),
-          category: 'Income',
-          type: 'Income',
+          category: "Income",
+          type: "income",
           date,
           user_id: userId,
         },
@@ -121,7 +131,7 @@ export default function IncomePage() {
       setShowError(false);
       setShowSuccessModal(true);
     } catch (error) {
-      console.error('Failed to add income:', error);
+      console.error("Failed to add income:", error);
     }
   };
 
@@ -153,13 +163,17 @@ export default function IncomePage() {
                 <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
                 <p className="mt-2 text-gray-600">Loading transactions...</p>
               </div>
-            ) : transactions.filter((t: any) => t.category === 'Income').length > 0 ? (
+            ) : transactions.filter((t: any) => t.category === "Income")
+                .length > 0 ? (
               <div className="space-y-4">
                 {transactions
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .sort(
+                    (a, b) =>
+                      new Date(b.date).getTime() - new Date(a.date).getTime()
+                  )
                   .slice(0, 2)
                   .map((transaction: any) => (
-                    <div 
+                    <div
                       key={transaction.id}
                       className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                     >
@@ -168,9 +182,11 @@ export default function IncomePage() {
                           <DollarSign className="h-5 w-5 text-[#5B3FFB]" />
                         </div>
                         <div>
-                          <h3 className="font-medium text-gray-900">{transaction.origin}</h3>
+                          <h3 className="font-medium text-gray-900">
+                            {transaction.origin}
+                          </h3>
                           <p className="text-sm text-gray-500">
-                            {format(new Date(transaction.date), 'MMM d, yyyy')}
+                            {format(new Date(transaction.date), "MMM d, yyyy")}
                           </p>
                         </div>
                       </div>
@@ -178,8 +194,7 @@ export default function IncomePage() {
                         +${transaction.amount.toLocaleString()}
                       </p>
                     </div>
-                  ))
-                }
+                  ))}
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
@@ -205,13 +220,15 @@ export default function IncomePage() {
                 }}
                 className={classNames(
                   "w-full px-4 py-3 bg-gray-50 rounded-xl text-lg border transition-colors",
-                  showError 
-                    ? "border-error-300 focus:border-error-500 focus:ring-error-500" 
+                  showError
+                    ? "border-error-300 focus:border-error-500 focus:ring-error-500"
                     : "border-gray-200 focus:border-[#120B39] focus:ring-[#120B39]"
                 )}
               />
               {showError && (
-                <p className="mt-1 text-sm text-error-600">Origin is required</p>
+                <p className="mt-1 text-sm text-error-600">
+                  Origin is required
+                </p>
               )}
             </div>
 
@@ -275,10 +292,10 @@ export default function IncomePage() {
                       setManualAmount(preset.toFixed(2));
                     }}
                     className={classNames(
-                      'py-4 rounded-xl font-medium text-lg transition-colors',
+                      "py-4 rounded-xl font-medium text-lg transition-colors",
                       parseFloat(amount) === preset
-                        ? 'bg-[#120B39] text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? "bg-[#120B39] text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     )}
                   >
                     ${preset.toLocaleString()}
@@ -316,7 +333,8 @@ export default function IncomePage() {
                 Income Added Successfully
               </h2>
               <p className="text-gray-600 mb-8">
-                Your income has been recorded and will be reflected in your Formula³ calculations
+                Your income has been recorded and will be reflected in your
+                Formula³ calculations
               </p>
               <button
                 onClick={() => navigate(-1)}

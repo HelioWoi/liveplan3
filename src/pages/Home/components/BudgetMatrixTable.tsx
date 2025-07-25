@@ -6,25 +6,45 @@ import { formatCurrency } from "../../../utils/formatters";
 import { CATEGORY_DESCRIPTIONS } from "../../../constants";
 import { ModalMultipleEntries } from "./ModalMultipleEntries";
 import { EditModal } from "./EditModal";
-import { useDeleteWeeklyBudget, useUpdateWeeklyBudget } from "../../../hooks/useCreateWeeklyBudget";
-import { FullScreenLoader } from "./FullScreenLoader";
+import {
+  useDeleteWeeklyBudget,
+  useUpdateWeeklyBudget,
+} from "../../../hooks/useCreateWeeklyBudget";
+import { FullScreenLoader } from "../../../components/common/FullScreenLoader";
 
 type Props = {
   // data: Record<string, any>;
-  data: Record<string, { [week: number]: { id: string | null; amount: number; week: number; category: string, count: number, entries: any } }>; 
+  data: Record<
+    string,
+    {
+      [week: number]: {
+        id: string | null;
+        amount: number;
+        week: number;
+        category: string;
+        count: number;
+        entries: any;
+      };
+    }
+  >;
   activeWeek: number;
 };
 
 const weeks = [1, 2, 3, 4];
-const textGreen = ['Income', 'Balance'];
+const textGreen = ["Income", "Balance"];
 
 export function BudgetMatrixTable({ data, activeWeek }: Props) {
   const { mutate: deleteBudget, isPending } = useDeleteWeeklyBudget();
-  const { mutate: updateBudget, isPending: isUpdating } = useUpdateWeeklyBudget();
+  const { mutate: updateBudget, isPending: isUpdating } =
+    useUpdateWeeklyBudget();
 
   const isLoading = isPending || isUpdating;
 
-  const [detailsData, setDetailsData] = useState<{category: string, week: number, entries: any[]}>({category: '', week: 1, entries: []});
+  const [detailsData, setDetailsData] = useState<{
+    category: string;
+    week: number;
+    entries: any[];
+  }>({ category: "", week: 1, entries: [] });
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [entryToEdit, setEntryToEdit] = useState<any>(null);
@@ -35,10 +55,10 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [entryToMove, setEntryToMove] = useState<string | null>(null);
 
-   const handleSaveEdit = (updatedEntry: any) => {
+  const handleSaveEdit = (updatedEntry: any) => {
     if (entryToEdit) {
       const { uuid_weekly_budget, ...rest } = updatedEntry;
-      
+
       const updatedData = {
         id: entryToEdit.id,
         updates: {
@@ -103,18 +123,17 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
 
   const moveEntryToWeek = (entryId: string, week: string) => {
     if (entryId && week) {
-
       const updatedData = {
         id: entryId,
         updates: {
-          week: parseInt(week.replace('Week ', '').trim(), 10),
+          week: parseInt(week.replace("Week ", "").trim(), 10),
         },
         relatedTransactionsUpdate: {
-          week: parseInt(week.replace('Week ', '').trim(), 10),
+          week: parseInt(week.replace("Week ", "").trim(), 10),
         },
       } as any;
 
-      console.log('Moving entry to week:', updatedData);
+      console.log("Moving entry to week:", updatedData);
 
       updateBudget(updatedData);
       setEntryToMove(null);
@@ -122,11 +141,11 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
       setSelectedEntry(null);
       setShowOptions(false);
     }
-  }
-  
+  };
+
   return (
     <>
-      { isLoading && <FullScreenLoader /> }
+      {isLoading && <FullScreenLoader />}
       <div className="bg-white rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -136,30 +155,36 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
                   Category
                 </th>
                 {weeks.map((week) => (
-                <th
+                  <th
                     key={week}
                     className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider 
-                      ${week === activeWeek ? 'bg-purple-50' : 'bg-gray-50'}`}
-                >
+                      ${week === activeWeek ? "bg-purple-50" : "bg-gray-50"}`}
+                  >
                     WEEK {week}
-                </th>
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {Object.entries(data).map(([category, values]) => {
                 return (
-                  <tr key={category} className={category === 'Balance' ? 'bg-gray-50' : 'hover:bg-gray-50'}>
+                  <tr
+                    key={category}
+                    className={
+                      category === "Balance" ? "bg-gray-50" : "hover:bg-gray-50"
+                    }
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       <div className="flex items-center">
                         {category}
 
-                        {category !== 'Balance' &&
-                          <Tooltip content={CATEGORY_DESCRIPTIONS[category] || ''}>
+                        {category !== "Balance" && (
+                          <Tooltip
+                            content={CATEGORY_DESCRIPTIONS[category] || ""}
+                          >
                             <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
                           </Tooltip>
-                        }
-                        
+                        )}
                       </div>
                     </td>
 
@@ -167,31 +192,51 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
                       const isCurrentWeek = week === activeWeek;
 
                       return (
-                      <td
-                        data-id={values[week].id || ''}
-                        data-category={values[week].category}
-                        data-week={values[week].week}
-                        data-amount={values[week].amount}
-                        key={week}
-                        className={`px-6 py-4 whitespace-nowrap text-sm ${isCurrentWeek ? 'bg-purple-50' : ''}`}
-                      >
-                        
-                          {values[week].count > 1 ?
-
+                        <td
+                          data-id={values[week].id || ""}
+                          data-category={values[week].category}
+                          data-week={values[week].week}
+                          data-amount={values[week].amount}
+                          key={week}
+                          className={`px-6 py-4 whitespace-nowrap text-sm ${
+                            isCurrentWeek ? "bg-purple-50" : ""
+                          }`}
+                        >
+                          {values[week].count > 1 ? (
                             <div
                               className={`text-gray-500 
-                                ${values[week].amount < 1 ? '' : 'hover:bg-gray-100'}
-                                ${!textGreen.includes(values[week].category) && values[week].amount > 0 ? 'mb-1 p-1 rounded cursor-pointer text-yellow-600' : ''}
-                                ${textGreen.includes(values[week].category) && values[week].amount > 0 ? 'mb-1 p-1 rounded cursor-pointer text-green-600' : ''}
-                                ${values[week].category === 'Balance' && values[week].amount < 0 ? 'mb-1 p-1 rounded cursor-pointer text-red-600' : ''}
+                                ${
+                                  values[week].amount < 1
+                                    ? ""
+                                    : "hover:bg-gray-100"
+                                }
+                                ${
+                                  !textGreen.includes(values[week].category) &&
+                                  values[week].amount > 0
+                                    ? "mb-1 p-1 rounded cursor-pointer text-yellow-600"
+                                    : ""
+                                }
+                                ${
+                                  textGreen.includes(values[week].category) &&
+                                  values[week].amount > 0
+                                    ? "mb-1 p-1 rounded cursor-pointer text-green-600"
+                                    : ""
+                                }
+                                ${
+                                  values[week].category === "Balance" &&
+                                  values[week].amount < 0
+                                    ? "mb-1 p-1 rounded cursor-pointer text-red-600"
+                                    : ""
+                                }
                               `}
                             >
-                              <div className="flex items-center relative" 
+                              <div
+                                className="flex items-center relative"
                                 onClick={() => {
                                   setDetailsData({
                                     category: values[week].category,
                                     week: values[week].week,
-                                    entries: values[week].entries || []
+                                    entries: values[week].entries || [],
                                   });
                                   setIsDetailsModalOpen(true);
                                 }}
@@ -204,89 +249,127 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
                                       ({values[week].count})
                                     </span>
 
-                                    <Info size={16} className="text-blue-500 ml-1" />
+                                    <Info
+                                      size={16}
+                                      className="text-blue-500 ml-1"
+                                    />
                                   </>
                                 )}
 
                                 {/* Options for edit and delete */}
-                                  {selectedEntry === values[week].id && showOptions && (
+                                {selectedEntry === values[week].id &&
+                                  showOptions && (
                                     <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
-                                    <button 
-                                      onClick={() => handleEditEntry(values[week].entries)}
-                                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                                      title="Edit"
-                                    >
-                                      <Edit size={16} />
-                                    </button>
-                                    <button 
-                                      onClick={() => handleDeleteEntry(values[week].entries)}
-                                      className="p-1 text-red-600 hover:bg-red-100 rounded"
-                                      title="Delete"
-                                    >
-                                      <Trash2 size={16} />
-                                    </button>
-                                  </div>
-                                  
-                                )}
+                                      <button
+                                        onClick={() =>
+                                          handleEditEntry(values[week].entries)
+                                        }
+                                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                                        title="Edit"
+                                      >
+                                        <Edit size={16} />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteEntry(
+                                            values[week].entries
+                                          )
+                                        }
+                                        className="p-1 text-red-600 hover:bg-red-100 rounded"
+                                        title="Delete"
+                                      >
+                                        <Trash2 size={16} />
+                                      </button>
+                                    </div>
+                                  )}
                               </div>
                             </div>
-                          :
+                          ) : (
                             // Single entry - show as before
                             <div key={values[week].id} className="relative">
                               <div
-                                onClick={() => handleSelectEntry(values[week].id || '')}
-                                data-id={values[week].id || ''}
+                                onClick={() =>
+                                  handleSelectEntry(values[week].id || "")
+                                }
+                                data-id={values[week].id || ""}
                                 data-category={values[week].category}
                                 className={`text-gray-500 
-                                  ${values[week].amount < 1 ? '' : 'hover:bg-gray-100'}
-                                  ${!textGreen.includes(values[week].category) && values[week].amount > 0 ? 'mb-1 p-1 rounded cursor-pointer text-yellow-600' : ''}
-                                  ${textGreen.includes(values[week].category) && values[week].amount > 0 ? 'mb-1 p-1 rounded cursor-pointer text-green-600' : ''}
-                                  ${values[week].category === 'Balance' && values[week].amount < 0 ? 'mb-1 p-1 rounded cursor-pointer text-red-600' : ''}
+                                  ${
+                                    values[week].amount < 1
+                                      ? ""
+                                      : "hover:bg-gray-100"
+                                  }
+                                  ${
+                                    !textGreen.includes(
+                                      values[week].category
+                                    ) && values[week].amount > 0
+                                      ? "mb-1 p-1 rounded cursor-pointer text-yellow-600"
+                                      : ""
+                                  }
+                                  ${
+                                    textGreen.includes(values[week].category) &&
+                                    values[week].amount > 0
+                                      ? "mb-1 p-1 rounded cursor-pointer text-green-600"
+                                      : ""
+                                  }
+                                  ${
+                                    values[week].category === "Balance" &&
+                                    values[week].amount < 0
+                                      ? "mb-1 p-1 rounded cursor-pointer text-red-600"
+                                      : ""
+                                  }
                                 `}
                               >
                                 {formatCurrency(values[week].amount)}
                               </div>
 
                               {/* Options for edit and delete */}
-                              {selectedEntry === values[week].id && showOptions && (
-                                <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
-                                  <button 
-                                    onClick={() => handleEditEntry(values[week].entries)}
-                                    className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                                    title="Edit"
-                                  >
-                                    <Edit size={16} />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDeleteEntry(selectedEntry)}
-                                    className="p-1 text-red-600 hover:bg-red-100 rounded"
-                                    title="Delete"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
-                              )}
+                              {selectedEntry === values[week].id &&
+                                showOptions && (
+                                  <div className="absolute right-0 top-0 bg-white shadow-lg rounded-md p-1 z-10 flex space-x-1">
+                                    <button
+                                      onClick={() =>
+                                        handleEditEntry(values[week].entries)
+                                      }
+                                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                                      title="Edit"
+                                    >
+                                      <Edit size={16} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteEntry(selectedEntry)
+                                      }
+                                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                                      title="Delete"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+                                )}
                             </div>
-                          }
-                      </td>
-                    )
+                          )}
+                        </td>
+                      );
                     })}
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
         </div>
       </div>
-    
+
       {/* Move Entry Modal */}
       {isMoveModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Move to Week</h2>
-            <p className="mb-6 text-gray-600">Select the week you want to move this entry to:</p>
+            <p className="mb-6 text-gray-600">
+              Select the week you want to move this entry to:
+            </p>
             <div className="grid grid-cols-2 gap-3 mb-6">
-              {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(week => (
+              {["Week 1", "Week 2", "Week 3", "Week 4"].map((week) => (
                 <button
                   key={week}
                   onClick={() => {
@@ -304,7 +387,7 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
               ))}
             </div>
             <div className="flex justify-end">
-              <button 
+              <button
                 onClick={() => setIsMoveModalOpen(false)}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md"
               >
@@ -314,9 +397,9 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
           </div>
         </div>
       )}
-      
+
       {isEditModalOpen && (
-        <EditModal 
+        <EditModal
           handleSaveEdit={handleSaveEdit}
           entryToEdit={entryToEdit}
           setIsEditModalOpen={setIsEditModalOpen}
@@ -330,15 +413,17 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
-            <p className="mb-6 text-gray-600">Are you sure you want to delete this entry?</p>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to delete this entry?
+            </p>
             <div className="flex justify-end space-x-2">
-              <button 
+              <button
                 onClick={() => setIsDeleteModalOpen(false)}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
               >
@@ -349,7 +434,7 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
         </div>
       )}
 
-      {isDetailsModalOpen &&
+      {isDetailsModalOpen && (
         <ModalMultipleEntries
           detailsData={detailsData}
           setIsDetailsModalOpen={setIsDetailsModalOpen}
@@ -360,8 +445,7 @@ export function BudgetMatrixTable({ data, activeWeek }: Props) {
           setEntryToDelete={setEntryToDelete}
           setIsDeleteModalOpen={setIsDeleteModalOpen}
         />
-      }
-      
+      )}
     </>
   );
 }

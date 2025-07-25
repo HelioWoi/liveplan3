@@ -1,14 +1,14 @@
 import { useState } from "react";
 
-import type { Month, Period, WeekNumber } from "../types";
+import type { Month, Period, WeekNumber } from "../../@types/period-selection";
 
-import { Skeleton } from '../../../components';
+import { Skeleton } from "../../../components";
 
-import { formatCurrency } from '../../../utils/formatters';
-import { getCurrentMonth, getCurrentWeek, getCurrentYear } from "./helper";
+import { formatCurrency } from "../../../utils/formatters";
+import { getCurrentMonth, getCurrentWeek, getCurrentYear } from "../../helper";
 import PeriodSelector from "../../../components/common/PeriodSelector";
 import { useBudgetSummary } from "./useBudgetSummary";
-import { FullScreenLoader } from "./FullScreenLoader";
+import { FullScreenLoader } from "../../../components/common/FullScreenLoader";
 
 export function BudgetSummary() {
   const [selectedPeriodState, setSelectedPeriodState] = useState<{
@@ -17,18 +17,19 @@ export function BudgetSummary() {
     year: string;
     week: WeekNumber;
   }>({
-    period: 'Week',
+    period: "Week",
     month: getCurrentMonth(), // "Jun" - Value for testing
     year: getCurrentYear(), // 2025 - Value for testing
     week: getCurrentWeek(), // 3 - Value for testing
   });
 
   function updateSelectedPeriod(partial: Partial<typeof selectedPeriodState>) {
-    setSelectedPeriodState(prev => ({ ...prev, ...partial }));
+    setSelectedPeriodState((prev) => ({ ...prev, ...partial }));
   }
 
-  const { isLoading, totalIncome, totalExpenses } = useBudgetSummary(selectedPeriodState);
-  
+  const { isLoading, totalIncome, totalExpenses } =
+    useBudgetSummary(selectedPeriodState);
+
   return (
     <>
       {isLoading && <FullScreenLoader />}
@@ -40,10 +41,10 @@ export function BudgetSummary() {
             selectedMonth={selectedPeriodState.month}
             selectedYear={selectedPeriodState.year}
             selectedWeek={selectedPeriodState.week}
-            onPeriodChange={period => updateSelectedPeriod({ period })}
-            onMonthChange={month => updateSelectedPeriod({ month })}
-            onYearChange={year => updateSelectedPeriod({ year })}
-            onWeekChange={week => updateSelectedPeriod({ week })}
+            onPeriodChange={(period) => updateSelectedPeriod({ period })}
+            onMonthChange={(month) => updateSelectedPeriod({ month })}
+            onYearChange={(year) => updateSelectedPeriod({ year })}
+            onWeekChange={(week) => updateSelectedPeriod({ week })}
             useShortMonthNames={true}
           />
         </div>
@@ -63,7 +64,9 @@ export function BudgetSummary() {
             {isLoading ? (
               <Skeleton height={28} />
             ) : (
-              <p className="text-xl font-bold">{formatCurrency(totalExpenses)}</p>
+              <p className="text-xl font-bold">
+                {formatCurrency(totalExpenses)}
+              </p>
             )}
             <p className="text-xs text-gray-500">All expenses in the period</p>
           </div>
