@@ -9,6 +9,7 @@ import { useSupabase } from '../../lib/supabase/SupabaseProvider';
 import { useAuthStore } from '../../stores/authStore';
 import { MONTHS } from '../../constants';
 import { getWeekNumberFromDate } from '../../pages/helper/getWeekNumberFromDate';
+import { FullScreenLoader } from '../common/FullScreenLoader';
 
 import { useCreateBudgetWithRecurrence } from '../../hooks/useCreateWeeklyBudget';
 
@@ -27,7 +28,7 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
   const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const { mutate: createBudgetWithRecurrence } = useCreateBudgetWithRecurrence();
+  const { mutate: createBudgetWithRecurrence, isPending } = useCreateBudgetWithRecurrence();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -136,6 +137,8 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
           // Ou você pode fazer throw itemError; se quiser parar no primeiro erro
         }
       }
+
+      /*
      
       // Add new transactions from spreadsheet
       await bulkAddTransactions(mappedTransactions.map(transaction => ({
@@ -150,6 +153,9 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
 
       setSuccess(true);
       setIsProcessing(false);
+
+      */
+     
       // Atualiza perfil, mas apenas fecha o modal após 2 segundos
       if (user) {
         try {
@@ -260,6 +266,10 @@ export default function SpreadsheetUploader({ onClose }: SpreadsheetUploaderProp
               Your transactions have been imported successfully. Redirecting...
             </p>
           </div>
+        )}
+
+        {isPending && (
+          <FullScreenLoader />
         )}
 
         {error && (
