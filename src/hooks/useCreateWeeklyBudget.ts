@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
@@ -11,11 +12,14 @@ import {
   createBudgetWithRecurrence,
 } from "../services/budgetService";
 
+let activeRequests = 0;
+
 export function useCreateBudgetWithRecurrence() {
   const queryClient = useQueryClient();
+  const [customIsPending, setCustomIsPending] = useState(false);
 
-  return useMutation({
-    mutationFn: ({
+  const mutation = useMutation({
+    mutationFn: async ({
       budgetData,
       transactionsData,
       recurrence = "None"
@@ -24,15 +28,26 @@ export function useCreateBudgetWithRecurrence() {
       transactionsData: Omit<Transaction, "id" | "created_at" | "weekly_budget_id">[];
       recurrence?:  "None" | "Weekly" | "Monthly" | "Annually";
       occurrences?: number;
-    }) =>
-      createBudgetWithRecurrence(
-        budgetData,
-        transactionsData,
-        recurrence
-      ),
+    }) => {
+      activeRequests++;
+      setCustomIsPending(true);
+      
+      try {
+        return await createBudgetWithRecurrence(
+          budgetData,
+          transactionsData,
+          recurrence
+        );
+      } finally {
+        activeRequests--; 
+      }
+    },
 
     onSuccess: () => {
-      toast.success("Budget entries completed successfully");
+      if (activeRequests === 0) {
+        setCustomIsPending(false);
+        toast.success("Budget entries completed successfully");
+      }
       queryClient.invalidateQueries({ queryKey: ["weekly_budget_entries"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
@@ -41,6 +56,11 @@ export function useCreateBudgetWithRecurrence() {
       toast.error(error.message);
     },
   });
+
+  return {
+    ...mutation,
+    isPending: customIsPending,
+  }
 }
 
 // Exemplo: criação
